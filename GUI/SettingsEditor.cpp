@@ -4,7 +4,7 @@ void SettingsEditor::showError(const char* msg, const char* src){
 	std::string a(msg);
 	std::string b(src);
 	std::string c = "Error:\n" + a + "\n\nIn the function:\n" + b;
-	wxMessageBox(c.c_str(), "ERROR", wxICON_EXCLAMATION | wxOK);
+	wxMessageBox(c, "ERROR", wxICON_EXCLAMATION | wxOK);
 }
 
 SettingsEditor::SettingsEditor( wxWindow* parent ):SettingsEditorFrame( parent ){
@@ -33,7 +33,7 @@ void SettingsEditor::OnIniLoad( wxCommandEvent& event ){
 
 
 	mIni = new GrassIni2();
-	if ( !mIni->load(mIniLoc->GetPath().c_str()) ){
+	if ( !mIni->load(mIniLoc->GetPath().ToStdString()) ){
 		showError("Couldn't load INI file", "SettingsEditor::OnIniLoad");
 		return;
 	}
@@ -78,7 +78,7 @@ void SettingsEditor::OnIniSave( wxCommandEvent& event ){
 
 	saveCurrentSettings(mLastSelection);
 
-	if ( !mIni->save(mIniLoc->GetPath().c_str()) ){
+	if ( !mIni->save(mIniLoc->GetPath().ToStdString()) ){
 		showError("Couldn't gain access to the ini file. Please check it isn't being used by another application", "SettingsEditor::OnIniSave");
 	}
 }
@@ -108,9 +108,9 @@ void SettingsEditor::saveCurrentSettings(const std::string& cat){
 			mMeshList->GetItem(info2);
 			mMeshList->GetItem(info3);
 
-			mIni->setValue(lastSel, "sMesh"+toString<long>(item), info1.GetText().c_str());
-			mIni->setValue(lastSel, "sChance"+toString<long>(item), info2.GetText().c_str());
-			mIni->setValue(lastSel, "sID"+toString<long>(item), info3.GetText().c_str());
+			mIni->setValue(lastSel, "sMesh"+toString<long>(item), info1.GetText().ToStdString());
+			mIni->setValue(lastSel, "sChance"+toString<long>(item), info2.GetText().ToStdString());
+			mIni->setValue(lastSel, "sID"+toString<long>(item), info3.GetText().ToStdString());
 		}
 
 		item = -1;
@@ -127,8 +127,8 @@ void SettingsEditor::saveCurrentSettings(const std::string& cat){
 			mNotAllowed->GetItem(info1);
 			mNotAllowed->GetItem(info2);
 
-			mIni->setValue(lastSel, "sBan"+toString<long>(item), info1.GetText().c_str());
-			mIni->setValue(lastSel, "iBanOff"+toString<long>(item), info2.GetText().c_str());
+			mIni->setValue(lastSel, "sBan"+toString<long>(item), info1.GetText().ToStdString());
+			mIni->setValue(lastSel, "iBanOff"+toString<long>(item), info2.GetText().ToStdString());
 		}
 
 
@@ -137,24 +137,24 @@ void SettingsEditor::saveCurrentSettings(const std::string& cat){
 		mIni->setValue(lastSel, "bRandClump", toString<bool>(mClumpGrass->GetValue()));
 
 		if ( mEnableMinHeight->GetValue())
-			mIni->setValue(lastSel, "fMinHeight",  mMinHeight->GetValue().c_str());
+			mIni->setValue(lastSel, "fMinHeight",  mMinHeight->GetValue().ToStdString());
 		if ( mEnableMaxHeight->GetValue())
-			mIni->setValue(lastSel, "fMaxHeight",  mMaxHeight->GetValue().c_str());
+			mIni->setValue(lastSel, "fMaxHeight",  mMaxHeight->GetValue().ToStdString());
 
-		mIni->setValue(lastSel, "sRecType", mObjType->GetStringSelection().c_str());
-		mIni->setValue(lastSel, "sScript", mScript->GetValue().c_str());
-		mIni->setValue(lastSel, "sName", mName->GetValue().c_str());
-		mIni->setValue(lastSel, "iWeight", mWeight->GetValue().c_str());
+		mIni->setValue(lastSel, "sRecType", mObjType->GetStringSelection().ToStdString());
+		mIni->setValue(lastSel, "sScript", mScript->GetValue().ToStdString());
+		mIni->setValue(lastSel, "sName", mName->GetValue().ToStdString());
+		mIni->setValue(lastSel, "iWeight", mWeight->GetValue().ToStdString());
 
 		mIni->setValue(lastSel, "bSclRand", toString<bool>(mRandomScale->GetValue()));
 		mIni->setValue(lastSel, "fSclMin", toString<float>(mSclMin->GetValue()/(float)100));
 		mIni->setValue(lastSel, "fSclMax", toString<float>(mSclMax->GetValue()/(float)100));
 
 		mIni->setValue(lastSel, "bPosRand", toString<bool>(mRandomPos->GetValue()));
-		mIni->setValue(lastSel, "fPosMin", mPosMin->GetValue().c_str());
-		mIni->setValue(lastSel, "fPosMax", mPosMax->GetValue().c_str());
+		mIni->setValue(lastSel, "fPosMin", mPosMin->GetValue().ToStdString());
+		mIni->setValue(lastSel, "fPosMax", mPosMax->GetValue().ToStdString());
 
-		mIni->setValue(lastSel, "iGap", mGap->GetValue().c_str());
+		mIni->setValue(lastSel, "iGap", mGap->GetValue().ToStdString());
 	}
 }
 
@@ -174,7 +174,7 @@ void SettingsEditor::OnTextureChange( wxListEvent& event ){
 	mTextureList->GetItem(info1);
 	mTextureList->GetItem(info2);
 
-	std::string cat = info1.GetText();
+	std::string cat = info1.GetText().ToStdString();
 	if ( info2.GetText().length())  cat += ":" + info2.GetText();
 	mLastSelection = cat;
 
@@ -265,7 +265,7 @@ void SettingsEditor::OnTextureAdd( wxCommandEvent& event ){
 	mTextureList->SetItem(0,1, mExtraData->GetValue());
 
 	//FIX THIS TO POINT TO THE PROPER TEX
-	std::string newTexture = mNewTex->GetValue();
+	std::string newTexture = mNewTex->GetValue().ToStdString();
 	if ( mExtraData->GetValue().length() )
 		newTexture += ":" + mExtraData->GetValue();
 

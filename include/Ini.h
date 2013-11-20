@@ -27,7 +27,10 @@ public:
 	}
 
 	std::string getValue(const std::string& cat, const std::string& key){
-		if ( !valueExists(cat, key) ) throw std::exception (std::string("Value doesn't exist\n" + cat + " - " + key).c_str());
+		if ( !valueExists(cat, key) ){
+            std::string msg = "Value doesn't exist\n" + cat + " - " + key;
+            throw msg;
+        }
 		return mValues[cat][key];
 	}
 	void setValue(const std::string& cat, const std::string& key, const std::string& val){
@@ -123,11 +126,11 @@ public:
 	}
 
 	bool randomScaleSettings(const std::string& cat, float& min, float& max){
-		if ( !catExists(cat) ) throw std::exception("The category doesn't exist");
+		if ( !catExists(cat) ) throw std::string("The category doesn't exist");
 
-		if ( !valueExists(cat, "fSclMin")) throw std::exception("The value \"fSclMin\" doesn't exist");
-		if ( !valueExists(cat, "fSclMax")) throw std::exception("The value \"fSclMax\" doesn't exist");
-		if ( !valueExists(cat, "bSclRand")) throw std::exception("The value \"bSclRand\" doesn't exist");
+		if ( !valueExists(cat, "fSclMin")) throw std::string("The value \"fSclMin\" doesn't exist");
+		if ( !valueExists(cat, "fSclMax")) throw std::string("The value \"fSclMax\" doesn't exist");
+		if ( !valueExists(cat, "bSclRand")) throw std::string("The value \"bSclRand\" doesn't exist");
 
 
 		min = fromString<float>(getValue(cat, "fSclMin"));
@@ -135,11 +138,11 @@ public:
 		return fromString<bool>(getValue(cat, "bSclRand"));
 	}
 	bool randomPosSettings(const std::string& cat, float& min, float& max){
-		if ( !catExists(cat) ) throw std::exception("The category doesn't exist");
+		if ( !catExists(cat) ) throw std::string("The category doesn't exist");
 
-		if ( !valueExists(cat, "fPosMin")) throw std::exception("The value \"fPosMin\" doesn't exist");
-		if ( !valueExists(cat, "fPosMax")) throw std::exception("The value \"fPosMax\" doesn't exist");
-		if ( !valueExists(cat, "bPosRand")) throw std::exception("The value \"bPosRand\" doesn't exist");
+		if ( !valueExists(cat, "fPosMin")) throw std::string("The value \"fPosMin\" doesn't exist");
+		if ( !valueExists(cat, "fPosMax")) throw std::string("The value \"fPosMax\" doesn't exist");
+		if ( !valueExists(cat, "bPosRand")) throw std::string("The value \"bPosRand\" doesn't exist");
 
 		min = fromString<float>(getValue(cat, "fPosMin"));
 		max = fromString<float>(getValue(cat, "fPosMax"));

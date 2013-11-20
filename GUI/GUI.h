@@ -56,13 +56,17 @@ private:
 	int getCell(float xy);
 
 	void setStatusText(std::string text){
-		mStatus->SetStatusText(text.c_str());
+		mStatus->SetStatusText(text);
 		wxWindow::Update();
 	}
 
 	std::string getRegKey(std::string pos, std::string name);
 
-	void genGrass(const std::string& out, const std::string& base, const std::string& ini, const std::vector<std::string> files, int zoffset);
+	void genGrass(const std::string& out,
+                  const std::string& base,
+                  const std::string& ini,
+                  const std::vector<std::string> files,
+                  int zoffset);
 protected:
 
 	void OnThreadEvent(wxCommandEvent& event){

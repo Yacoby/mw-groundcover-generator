@@ -25,6 +25,7 @@ http://www.gnu.org/licenses/gpl.txt
 _LICENCE_BLOCK_*/
 #ifndef _ESSTATIC_H_
 #define _ESSTATIC_H_
+#include <cstring>
 
 #include "ESStandardObject.h"
 

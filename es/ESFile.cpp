@@ -76,8 +76,7 @@ void ESFile::loadStartup(const std::string& pFile){
 	mIfs = new std::ifstream(pFile.c_str(),  std::ios::in | std::ios::binary);
 
 	if ( !mIfs->is_open() ){
-		std::exception("Cannot open file");
-		return;
+		throw std::string("Cannot open file");
 	}
 
 	mIfs->seekg (0, std::ios::end);

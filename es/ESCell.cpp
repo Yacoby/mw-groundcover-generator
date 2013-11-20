@@ -23,6 +23,7 @@ http://www.gnu.org/licenses/gpl.txt
 
 ------------------------------------------------------------------
 _LICENCE_BLOCK_*/
+#include <cstring>
 #include "ESCell.h"
 
 using namespace ES3;

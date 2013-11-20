@@ -8,11 +8,11 @@ class GenThread : public wxThread{
 	std::vector<std::string> mFiles;
 	GUI* mGUI;
 
-	std::string getMesh(std::list<GrassIni2::GrassMesh>& meshList, const std::string& cat){
+	std::string getMesh(const std::list<GrassIni2::GrassMesh>& meshList, const std::string& cat){
 		std::string grassID = "UNKNOWN_GRASS";
 		float meshRand = getRand(0, 100);
 		float meshChance = 1;
-		for ( std::list<GrassIni2::GrassMesh>::iterator iter = meshList.begin(); iter != meshList.end(); ++iter ){
+		for ( std::list<GrassIni2::GrassMesh>::const_iterator iter = meshList.begin(); iter != meshList.end(); ++iter ){
 
 			meshChance += iter->chance;
 			if ( meshChance > meshRand ){
@@ -353,8 +353,11 @@ protected:
 	};
 public:
 
-	GenThread(GUI* gui, const std::string& out, const std::string &idBase, 
-			const std::string &iniLoc, std::vector<std::string> files, int offset) 
-			: mGUI(gui), mOut(out), mIdBase(idBase), mIniLoc(iniLoc), mFiles(files), mOffset(offset){
+	GenThread(GUI* gui,
+            const std::string& out,
+            const std::string &idBase, 
+            const std::string &iniLoc,
+            std::vector<std::string> files,
+            int offset) : mGUI(gui), mOut(out), mIdBase(idBase), mIniLoc(iniLoc), mFiles(files), mOffset(offset){
 	}
 };

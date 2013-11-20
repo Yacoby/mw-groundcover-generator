@@ -25,7 +25,7 @@ http://www.gnu.org/licenses/gpl.txt
 _LICENCE_BLOCK_*/
 #ifndef _ESACTIVATOR_H_
 #define _ESACTIVATOR_H_
-
+#include <cstring>
 #include "ESStandardObject.h"
 #include "ESSubString.h"
 

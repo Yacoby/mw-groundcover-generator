@@ -29,6 +29,7 @@ _LICENCE_BLOCK_*/
 
 #include <map>
 #include <list>
+#include <cstring>
 #include "MapFunctions.h"
 
 #include <vector>

@@ -32,7 +32,7 @@ _LICENCE_BLOCK_*/
 #include <cassert>
 
 #include "ESRecordFactory.h"
-#include "Type.h"
+//#include "Type.h"
 
 #include "ESSubString.h"
 #include "ESSubUnknown.h"

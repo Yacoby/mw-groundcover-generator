@@ -8,8 +8,6 @@ BEGIN_EVENT_TABLE(GUI, wxFrame)
 	EVT_MENU(WORKER_EVENT, GUI::OnThreadEvent)
 END_EVENT_TABLE()
 
-
-
 GUI::GUI( wxWindow* parent ):GrassGen( parent ){
 	std::string s = getRegKey("Software\\Bethesda Softworks\\Morrowind", "Installed Path");
 	if ( s.length() > 0 ){
@@ -18,7 +16,6 @@ GUI::GUI( wxWindow* parent ):GrassGen( parent ){
 		mMorrowindLoc->SetPath(s);
 	}
 	mModList->Append("Morrowind.esm");
-
 }
 
 void GUI::OnEditorPress(wxCommandEvent& event ){
@@ -33,12 +30,13 @@ void GUI::OnImportPress( wxCommandEvent& event ){
 	mModList->Clear();
 
 	Ini ini;
-	if ( !ini.load(std::string(mMorrowindLoc->GetPath().c_str()) + "\\Morrowind.ini") ) return;
+	if ( !ini.load(std::string(mMorrowindLoc->GetPath().mb_str()) + "\\Morrowind.ini") ) return;
 	if ( !ini.catExists("Game Files")) return;
 
 	int c = 0;
 	while ( ini.valueExists("Game Files", "GameFile"+toString(c)) ){
-		mModList->Append(ini.getValue("Game Files", "GameFile"+toString(c)) );
+        const std::string game_file = ini.getValue("Game Files", "GameFile"+toString(c));
+		mModList->Append(game_file);
 		c++;
 	}
 
@@ -46,7 +44,7 @@ void GUI::OnImportPress( wxCommandEvent& event ){
 }
 
 void GUI::OnAddPress( wxCommandEvent& event ){
-	wxString s = wxFileSelector(wxFileSelectorPromptStr);
+    std::string s = std::string(wxFileSelector(wxFileSelectorPromptStr).mb_str());
 
 	size_t l = s.find_last_of("\\");
 	if ( l == -1 ) s.find_last_of("/");
@@ -65,13 +63,15 @@ void GUI::OnGenPress( wxCommandEvent& event ){
 
 	mGenerate->Enable(false);
 
-	std::string basePath = mMorrowindLoc->GetPath().c_str();
-	std::string outPath = basePath + "\\Data Files\\" + mOutputFile->GetValue().c_str();
+	std::string basePath = std::string(mMorrowindLoc->GetPath().mb_str());
+	std::string outPath = basePath + "\\Data Files\\" + std::string(mOutputFile->GetValue().mb_str());
 
 	std::vector<FileTime> files;
 	for ( unsigned int x = 0; x < mModList->GetCount(); x++){
 		FileTime ft;
-		ft.file = mMorrowindLoc->GetPath().c_str() + std::string("\\Data Files\\") + std::string(mModList->GetString(x));
+		ft.file = std::string(mMorrowindLoc->GetPath().mb_str())
+                + std::string("\\Data Files\\") 
+                + std::string(mModList->GetString(x).mb_str());
 		ft.time = fs::last_write_time(ft.file);
 		files.push_back(ft);
 	}
@@ -81,12 +81,22 @@ void GUI::OnGenPress( wxCommandEvent& event ){
 	for (unsigned int i = 0; i < files.size(); i++ )
 		vals.push_back(files[i].file);
 
+    int zOffset = fromString<int>(std::string(mZOffset->GetValue().mb_str()));
 	if ( mDoThread->GetValue() ){
-		GenThread* t = new GenThread(this, outPath, mID->GetValue().c_str(), mIniLoc->GetPath().c_str(), vals, fromString<int>(mZOffset->GetValue().c_str()));
+		GenThread* t = new GenThread(this,
+                                     outPath,
+                                     std::string(mID->GetValue().mb_str()),
+                                     std::string(mIniLoc->GetPath().mb_str()),
+                                     vals,
+                                     zOffset);
 		t->Create();
 		t->Run();
 	}else{
-		genGrass(outPath, mID->GetValue().c_str(), mIniLoc->GetPath().c_str(), vals, fromString<int>(mZOffset->GetValue().c_str()));
+		genGrass(outPath,
+                 std::string(mID->GetValue().mb_str()),
+                 std::string(mIniLoc->GetPath().mb_str()),
+                 vals,
+                 zOffset);
 	}
 }
 
@@ -101,6 +111,7 @@ int GUI::getCell(float xy){
 }
 
 std::string GUI::getRegKey(std::string pos, std::string name){
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 	HKEY hKey;
 	TCHAR szProductType[1024];
 	DWORD dwBufLen=1024*sizeof(TCHAR);
@@ -111,6 +122,9 @@ std::string GUI::getRegKey(std::string pos, std::string name){
 	RegCloseKey( hKey );
 	if (( lRet != ERROR_SUCCESS )	||(dwBufLen > 1024*sizeof(TCHAR)) )	return "";
 	return szProductType;
+#else
+    return "";
+#endif
 }
 
 
