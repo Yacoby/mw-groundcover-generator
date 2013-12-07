@@ -296,8 +296,9 @@ protected:
 								ES3::Vector3 rot = land2->getAngleAt(posx, posy);
 
 
-								if ( true ) //option rot. Now true by default
+								if ( fromString<bool>(ini.getValue(iniCat, "bAlignObjectNormalToGround")) ){
 									rot.z = getRand(0, 2*PI);
+								}
 
 
 								if ( ini.valueExists(iniCat, "fMinHeight"))
@@ -308,7 +309,6 @@ protected:
 									if ( posZ >= fromString<float>(ini.getValue(iniCat, "fMaxHeight"))) 
 										continue;
 								
-
 								//get the scale of tthe object
 								float scale = 1;//config.scale;
 								if ( fromString<bool>(ini.getValue(iniCat, "bSclRand")) ) //option rot

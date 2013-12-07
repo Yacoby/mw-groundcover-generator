@@ -1,7 +1,7 @@
 long gNumRecords = 0;
 long gNumRecordPos = -1;
 #define PI 3.14159265
-const float FROM_DEG = 180/PI;
+const double FROM_DEG = 180/PI;
 
 #include <wx/wxprec.h>
 #include <wx/wx.h>
