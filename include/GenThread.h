@@ -293,13 +293,11 @@ protected:
 
 								float posZ = land2->getHeightAt(posx, posy) + mOffset;
 
-								ES3::Vector3 rot = land2->getAngleAt(posx, posy);
-
-
+                                ES3::Vector3 rot;
 								if ( fromString<bool>(ini.getValue(iniCat, "bAlignObjectNormalToGround")) ){
-									rot.z = getRand(0, 2*PI);
-								}
-
+                                    rot = land2->getAngleAt(posx, posy);
+                                }
+                                rot.z = getRand(0, 2*PI);
 
 								if ( ini.valueExists(iniCat, "fMinHeight"))
 									if ( posZ <= fromString<float>(ini.getValue(iniCat, "fMinHeight"))) 
