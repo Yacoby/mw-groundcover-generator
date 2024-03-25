@@ -16,6 +16,19 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxBoxSizer* bSizer1;
 	bSizer1 = new wxBoxSizer( wxVERTICAL );
 
+	wxFlexGridSizer* fgSizer3;
+	fgSizer3 = new wxFlexGridSizer( 6, 1, 0, 0 );
+	fgSizer3->AddGrowableCol( 0 );
+	fgSizer3->AddGrowableRow( 3 );
+	fgSizer3->SetFlexibleDirection( wxBOTH );
+	fgSizer3->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	wxBoxSizer* bSizer2;
+	bSizer2 = new wxBoxSizer( wxHORIZONTAL );
+
+
+	fgSizer3->Add( bSizer2, 0, wxEXPAND, 5 );
+
 	wxBoxSizer* bSizer7;
 	bSizer7 = new wxBoxSizer( wxVERTICAL );
 
@@ -26,14 +39,15 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizer7->Add( m_staticText3, 0, wxALL, 5 );
 
 
-	bSizer1->Add( bSizer7, 0, wxEXPAND, 5 );
+	fgSizer3->Add( bSizer7, 0, wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer10;
 	bSizer10 = new wxBoxSizer( wxVERTICAL );
 
 	wxFlexGridSizer* fgSizer1;
 	fgSizer1 = new wxFlexGridSizer( 3, 2, 0, 0 );
-	fgSizer1->SetFlexibleDirection( wxBOTH );
+	fgSizer1->AddGrowableCol( 1 );
+	fgSizer1->SetFlexibleDirection( wxHORIZONTAL );
 	fgSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
 	m_staticText5 = new wxStaticText( this, wxID_ANY, wxT("Settings Location   "), wxDefaultPosition, wxDefaultSize, 0 );
@@ -41,14 +55,14 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	fgSizer1->Add( m_staticText5, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
 	mIniLoc = new wxFilePickerCtrl( this, wxID_ANY, wxT("Grass.ini"), wxT("Select a file"), wxT("*.ini"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
-	fgSizer1->Add( mIniLoc, 0, wxALL, 5 );
+	fgSizer1->Add( mIniLoc, 0, wxALL|wxEXPAND, 5 );
 
 	m_staticText1 = new wxStaticText( this, wxID_ANY, wxT("Morrowind Location"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText1->Wrap( -1 );
 	fgSizer1->Add( m_staticText1, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
 	mMorrowindLoc = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	fgSizer1->Add( mMorrowindLoc, 0, wxALL, 5 );
+	fgSizer1->Add( mMorrowindLoc, 0, wxALL|wxEXPAND, 5 );
 
 	m_staticText6 = new wxStaticText( this, wxID_ANY, wxT("Output File"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText6->Wrap( -1 );
@@ -67,13 +81,7 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizer10->Add( fgSizer1, 1, wxEXPAND, 5 );
 
 
-	bSizer1->Add( bSizer10, 0, wxEXPAND, 5 );
-
-	wxBoxSizer* bSizer2;
-	bSizer2 = new wxBoxSizer( wxHORIZONTAL );
-
-
-	bSizer1->Add( bSizer2, 0, wxEXPAND, 5 );
+	fgSizer3->Add( bSizer10, 0, wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer4;
 	bSizer4 = new wxBoxSizer( wxVERTICAL );
@@ -82,11 +90,15 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_staticText2->Wrap( -1 );
 	bSizer4->Add( m_staticText2, 0, wxALL, 5 );
 
-	wxBoxSizer* bSizer5;
-	bSizer5 = new wxBoxSizer( wxHORIZONTAL );
+	wxFlexGridSizer* fgSizer4;
+	fgSizer4 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer4->AddGrowableCol( 0 );
+	fgSizer4->AddGrowableRow( 0 );
+	fgSizer4->SetFlexibleDirection( wxBOTH );
+	fgSizer4->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
 	mModList = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxSize( -1,200 ), 0, NULL, 0 );
-	bSizer5->Add( mModList, 0, wxALL, 5 );
+	fgSizer4->Add( mModList, 0, wxALL|wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer6;
 	bSizer6 = new wxBoxSizer( wxVERTICAL );
@@ -101,13 +113,13 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizer6->Add( mRemove, 0, wxALL, 5 );
 
 
-	bSizer5->Add( bSizer6, 1, wxEXPAND, 5 );
+	fgSizer4->Add( bSizer6, 1, wxEXPAND, 5 );
 
 
-	bSizer4->Add( bSizer5, 1, wxEXPAND, 5 );
+	bSizer4->Add( fgSizer4, 1, wxEXPAND, 5 );
 
 
-	bSizer1->Add( bSizer4, 0, wxEXPAND, 5 );
+	fgSizer3->Add( bSizer4, 0, wxEXPAND, 5 );
 
 	wxFlexGridSizer* fgSizer5;
 	fgSizer5 = new wxFlexGridSizer( 2, 2, 0, 0 );
@@ -129,7 +141,7 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	fgSizer5->Add( mZOffset, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 
-	bSizer1->Add( fgSizer5, 1, wxEXPAND, 5 );
+	fgSizer3->Add( fgSizer5, 1, wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer3;
 	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
@@ -137,11 +149,20 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	mGenerate = new wxButton( this, wxID_ANY, wxT("Generate"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer3->Add( mGenerate, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
+	wxBoxSizer* bSizer101;
+	bSizer101 = new wxBoxSizer( wxVERTICAL );
+
 	mProgBar = new wxGauge( this, wxID_ANY, 100, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL|wxGA_SMOOTH );
-	bSizer3->Add( mProgBar, 0, wxALL, 5 );
+	bSizer101->Add( mProgBar, 1, wxALL|wxEXPAND, 5 );
 
 
-	bSizer1->Add( bSizer3, 0, wxEXPAND, 5 );
+	bSizer3->Add( bSizer101, 1, wxEXPAND, 5 );
+
+
+	fgSizer3->Add( bSizer3, 0, wxEXPAND, 5 );
+
+
+	bSizer1->Add( fgSizer3, 1, wxALL|wxEXPAND, 5 );
 
 
 	this->SetSizer( bSizer1 );

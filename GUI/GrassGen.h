@@ -9,13 +9,13 @@
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
+#include <wx/sizer.h>
+#include <wx/gdicmn.h>
 #include <wx/string.h>
 #include <wx/stattext.h>
-#include <wx/gdicmn.h>
 #include <wx/font.h>
 #include <wx/colour.h>
 #include <wx/settings.h>
-#include <wx/sizer.h>
 #include <wx/filepicker.h>
 #include <wx/textctrl.h>
 #include <wx/listbox.h>
@@ -68,7 +68,7 @@ class GrassGen : public wxFrame
 
 	public:
 
-		GrassGen( wxWindow* parent, wxWindowID id = WINDOW_ID, const wxString& title = wxT("Morrowind Mesh Generator"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 343,548 ), long style = wxCAPTION|wxCLOSE_BOX|wxMINIMIZE_BOX|wxSYSTEM_MENU|wxCLIP_CHILDREN|wxTAB_TRAVERSAL );
+		GrassGen( wxWindow* parent, wxWindowID id = WINDOW_ID, const wxString& title = wxT("Morrowind Mesh Generator"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 371,582 ), long style = wxCAPTION|wxCLOSE_BOX|wxMAXIMIZE_BOX|wxMINIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLIP_CHILDREN|wxTAB_TRAVERSAL );
 
 		~GrassGen();
 
