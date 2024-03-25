@@ -1,6 +1,7 @@
 #include "GUI.h"
 #pragma once
 
+namespace fs = boost::filesystem;
 
 class GenThread : public wxThread{
 	std::string mOut, mIdBase, mIniLoc;
@@ -77,15 +78,12 @@ protected:
 
 		ES3::ESFileContainerRef fc = new ES3::ESFileContainer();
 		for ( std::vector<std::string>::iterator iter = mFiles.begin(); iter != mFiles.end(); ++iter){
+            std::string fileName = fs::path(*iter).filename().string();
 
-			size_t l = (*iter).find_last_of("\\");
-			if ( l == -1 ) (*iter).find_last_of("/");
-			if ( l == -1 ) l = -1;
-
-			sendMessage(0, "Loading " + (*iter).substr(l+1,(*iter).length()));
+			sendMessage(0, "Loading: " + fileName);
 
 			if (!fc->loadDataFile(*iter)){ 
-				sendMessage(-1, "Failed to load " + (*iter).substr(l+1,(*iter).length()));
+				sendMessage(-1, "Failed to load: " + fileName);
 				return 0;
 			}
 
@@ -94,7 +92,10 @@ protected:
 		//setStatusText("Writing STAT records");
 
 		std::ofstream ofs(mOut.c_str(), std::ios::out | std::ios::binary );
-		if ( !ofs.is_open() ) return 0;
+		if ( !ofs.is_open() ) {
+            sendMessage(-1, "Failed to open output file: " + mOut);
+            return 0;
+        }
 		fileWriteEspHdr(ofs);
 
 		{
