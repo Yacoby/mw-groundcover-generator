@@ -1,10 +1,9 @@
 long gNumRecords = 0;
 long gNumRecordPos = -1;
-#define PI 3.14159265
-const double FROM_DEG = 180/PI;
 
 #include <wx/wxprec.h>
 #include <wx/wx.h>
+#include <wx/msgdlg.h>
 #include "GUI.h"
 
 class MWGrassApp : public wxApp{
@@ -14,6 +13,15 @@ public:
 		ui->Show();
 		return true;
 	}
+
+    virtual bool OnExceptionInMainLoop() {
+        try {
+            throw;
+        } catch (std::exception& e) {
+            wxMessageBox(e.what(), wxT("Something went wrong"), wxICON_ERROR);
+        }
+        return false;
+    }
 };
 
 IMPLEMENT_APP(MWGrassApp)
