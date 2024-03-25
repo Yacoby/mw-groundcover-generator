@@ -68,14 +68,8 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_staticText6->Wrap( -1 );
 	fgSizer1->Add( m_staticText6, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
-	wxBoxSizer* bSizer24;
-	bSizer24 = new wxBoxSizer( wxHORIZONTAL );
-
 	mOutputFile = new wxTextCtrl( this, wxID_ANY, wxT("Grass.esp"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer24->Add( mOutputFile, 0, wxALL, 5 );
-
-
-	fgSizer1->Add( bSizer24, 1, wxEXPAND, 5 );
+	fgSizer1->Add( mOutputFile, 0, wxALL|wxEXPAND, 5 );
 
 
 	bSizer10->Add( fgSizer1, 1, wxEXPAND, 5 );
@@ -86,7 +80,7 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxBoxSizer* bSizer4;
 	bSizer4 = new wxBoxSizer( wxVERTICAL );
 
-	m_staticText2 = new wxStaticText( this, wxID_ANY, wxT("Data files to search"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText2 = new wxStaticText( this, wxID_ANY, wxT("Data files to search (order does not matter)"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText2->Wrap( -1 );
 	bSizer4->Add( m_staticText2, 0, wxALL, 5 );
 
@@ -103,14 +97,14 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxBoxSizer* bSizer6;
 	bSizer6 = new wxBoxSizer( wxVERTICAL );
 
-	mImport = new wxButton( this, wxID_ANY, wxT("Import from Ini"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer6->Add( mImport, 0, wxALL, 5 );
+	mImport = new wxButton( this, wxID_ANY, wxT("Import from Morrowind.ini"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer6->Add( mImport, 0, wxALIGN_CENTER|wxALL, 5 );
 
 	mAdd = new wxButton( this, wxID_ANY, wxT("Add"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer6->Add( mAdd, 0, wxALL, 5 );
+	bSizer6->Add( mAdd, 0, wxALIGN_CENTER|wxALL, 5 );
 
-	mRemove = new wxButton( this, wxID_ANY, wxT("Remove"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer6->Add( mRemove, 0, wxALL, 5 );
+	mRemove = new wxButton( this, wxID_ANY, wxT("Remove selected"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer6->Add( mRemove, 0, wxALIGN_CENTER|wxALL, 5 );
 
 
 	fgSizer4->Add( bSizer6, 1, wxEXPAND, 5 );
