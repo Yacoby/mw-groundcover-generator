@@ -1,6 +1,8 @@
 #ifndef __INI_H_
 #define __INI_H_
 
+#include <boost/algorithm/string.hpp>
+
 class Ini{
 
 	std::string mCurBlok;
@@ -63,13 +65,14 @@ public:
 		std::string line, key, val;
 		while ( !ifs.eof() ){
 			std::getline(ifs, line);
+            boost::trim(line);
+            boost::trim_right_if(line, boost::is_any_of("\r\n\0"));
 
-			if ( line.find(";") != -1 ) continue; //comment
+            if ( line.find(";") != -1 ) continue; //comment
 
 
-			if ( line.find("[") == 0 ){
-				mCurBlok = line.substr(1, line.length());
-				mCurBlok = mCurBlok.substr(0, line.length()-2);
+			if ( line.find("[") == 0 && line.rfind("]") != -1 ){
+				mCurBlok = line.substr(1, line.rfind("]") - 1);
 				continue;
 			}
 
