@@ -1,7 +1,9 @@
 ﻿#ifndef __GUI__
 #define __GUI__
 
-#define WORKER_EVENT 50002
+#define WORKER_UPDATE 50003
+#define WORKER_SUCCESS 50004
+#define WORKER_FAILURE 50005
 
 /**
 @file
@@ -69,8 +71,25 @@ protected:
 		else
 			mProgBar->SetValue(  event.GetInt() );
 		mStatus->SetStatusText( event.GetString() );
-		
 	}
+
+    void OnThreadStatusUpdate(wxCommandEvent& event){
+        mProgBar->SetValue(event.GetInt());
+        mStatus->SetStatusText( event.GetString() );
+    }
+
+    void OnThreadSuccess(wxCommandEvent& event){
+        mProgBar->SetValue(100);
+        mStatus->SetStatusText("Success" );
+        mGenerate->Enable(true);
+    }
+
+    void OnThreadFailure(wxCommandEvent& event){
+        mGenerate->Enable(true);
+        mProgBar->SetValue(0);
+        mStatus->SetStatusText("Failed" );
+        wxMessageBox(event.GetString(), wxT("Something went wrong"), wxICON_ERROR);
+    }
 
 	// Handlers for GrassGen events.
 	void OnImportPress( wxCommandEvent& event );

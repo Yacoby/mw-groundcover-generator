@@ -36,24 +36,37 @@ class GenThread : public wxThread{
 		return cell;
 	}
 
-	void sendMessage(int a, char* c){
-		wxCommandEvent evt( wxEVT_COMMAND_MENU_SELECTED, WORKER_EVENT );
-		evt.SetInt(a);
-		evt.SetString(c);
-		wxPostEvent( mGUI, evt );
-	}
-	void sendMessage(int a, std::string c){
-		wxCommandEvent evt( wxEVT_COMMAND_MENU_SELECTED, WORKER_EVENT );
-		evt.SetInt(a);
-		evt.SetString(c);
-		wxPostEvent( mGUI, evt );
-	}
+    void sendStatusUpdate(int progressPercent, std::string message){
+        wxCommandEvent evt( wxEVT_COMMAND_MENU_SELECTED, WORKER_UPDATE );
+        evt.SetInt(progressPercent);
+        evt.SetString(message);
+        wxPostEvent( mGUI, evt );
+    }
+
+    void sendSuccess(){
+        wxCommandEvent evt( wxEVT_COMMAND_MENU_SELECTED, WORKER_SUCCESS );
+        wxPostEvent( mGUI, evt );
+    }
+
+    void sendFailure(std::string message){
+        wxCommandEvent evt( wxEVT_COMMAND_MENU_SELECTED, WORKER_FAILURE );
+        evt.SetString(message);
+        wxPostEvent( mGUI, evt );
+    }
 
 protected:
-	ExitCode Entry(){
+	ExitCode Entry() {
+        try {
+            return Generate();
+        } catch (std::exception& e) {
+            sendFailure(e.what());
+        }
+        return 0;
+    }
 
+    ExitCode Generate() {
 		if ( mFiles.size() == 0 ){
-			sendMessage(-1, "No files to process");
+			sendFailure("No files to process");
 			return 0;
 		}
 
@@ -61,13 +74,12 @@ protected:
 		gNumRecordPos = -1;
 
 
-		sendMessage(0, "Loading Ini");
-
+		sendStatusUpdate(0, "Loading configuration (ini) file");
 
 		//load the ini
 		GrassIni2 ini;
 		if ( !ini.load(mIniLoc) ){
-			sendMessage(-1, "Failed to load ini file");
+			sendFailure("Failed to load ini file");
 			return 0;
 		}
 
@@ -80,24 +92,25 @@ protected:
 		for ( std::vector<std::string>::iterator iter = mFiles.begin(); iter != mFiles.end(); ++iter){
             std::string fileName = fs::path(*iter).filename().string();
 
-			sendMessage(0, "Loading: " + fileName);
+			sendStatusUpdate(0, "Loading: " + fileName);
 
 			if (!fc->loadDataFile(*iter)){ 
-				sendMessage(-1, "Failed to load: " + fileName);
+				sendFailure("Failed to load data file: " + fileName);
 				return 0;
 			}
-
 		}
+        sendStatusUpdate(0, "Loaded all files");
 
-		//setStatusText("Writing STAT records");
+        //setStatusText("Writing STAT records");
 
 		std::ofstream ofs(mOut.c_str(), std::ios::out | std::ios::binary );
 		if ( !ofs.is_open() ) {
-            sendMessage(-1, "Failed to open output file: " + mOut);
+            sendFailure("Failed to open output file: " + mOut);
             return 0;
         }
-		fileWriteEspHdr(ofs);
 
+        sendStatusUpdate(0, "Writing grass STAT objects to output file");
+        fileWriteEspHdr(ofs);
 		{
 			std::list<std::string> texLst = ini.getTextureList();
 			for ( std::list<std::string>::iterator iter1 = texLst.begin(); iter1 != texLst.end(); ++iter1 ){
@@ -121,7 +134,7 @@ protected:
 
 
 				if ( TestDestroy() ){
-					sendMessage(-1, "Generation Failed. Forced Exit");
+					sendFailure( "Generation Failed. Forced Exit");
 					return 0;
 				}
 				
@@ -129,7 +142,7 @@ protected:
 				ES3::ESLandRef land = fc->getLand(cx,cy);
 				if ( !land ) continue;
 
-				sendMessage( (cx+itrSize)/float(itrSize*2)*100, "Cell: " + toString(cx) + ", " + toString(cy) );
+				sendStatusUpdate( (cx+itrSize)/float(itrSize*2)*100, "Cell: " + toString(cx) + ", " + toString(cy) );
 
 				ES3::ESCellRef cell = fc->getFirstCell(cx,cy);
 
@@ -342,9 +355,7 @@ protected:
 
 		ofs.close();
 
-
-		sendMessage( 100, "" );
-		sendMessage( -1,"Finished Generating Grass");
+		sendSuccess();
 
 		return 0;
 

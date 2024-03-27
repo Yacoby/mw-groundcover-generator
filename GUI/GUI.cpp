@@ -7,7 +7,9 @@ namespace fs = boost::filesystem;
 
 
 BEGIN_EVENT_TABLE(GUI, wxFrame)
-	EVT_MENU(WORKER_EVENT, GUI::OnThreadEvent)
+    EVT_MENU(WORKER_UPDATE, GUI::OnThreadStatusUpdate)
+    EVT_MENU(WORKER_SUCCESS, GUI::OnThreadSuccess)
+    EVT_MENU(WORKER_FAILURE, GUI::OnThreadFailure)
 END_EVENT_TABLE()
 
 GUI::GUI( wxWindow* parent ):GrassGen( parent ){
