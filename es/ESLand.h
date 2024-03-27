@@ -1,33 +1,7 @@
-/*_LICENCE_BLOCK_
-------------------------------------------------------------------
-This source file is part of Morrowind Remake
-
-Copyright (c) 2007 Jacob Essex
-Also see acknowledgements in the readme
-
-Morrowind Remake is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Morrowind Remake is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place - Suite 330, Boston, MA 02111-1307, USA, or go to
-http://www.gnu.org/licenses/gpl.txt
-
-------------------------------------------------------------------
-_LICENCE_BLOCK_*/
 #ifndef _ESLAND_H_
 #define _ESLAND_H_
 
 #include "ESRecord.h"
-#include "ESRecordSectionLoader.h"
 #include <math.h>
 
 #define PI 3.14159265
@@ -120,7 +94,7 @@ typedef std::vector< std::vector<Vector3> > LandNormalMap;
 *	Holds a LAND record.
 */
 
-class ESLand : public ESRecordSectionLoader{
+class ESLand : public ESRecord {
 
 
 	HeightMap mHeightmap;
@@ -221,284 +195,6 @@ public:
 
 	}
 
-	void setLandHeight(int h){
-		for ( int x = 0 ; x < 65; x++ ){
-			for ( int y = 0; y < 65; y++ )	mHeightData.at(x).at(y) = h;
-		}
-	}
-
-	bool loadSection(float amount){
-
-
-		if ( mIsSectionLoaded ) return true;
-		//hackyfix
-		doThreadLoad();
-		mIsSectionLoaded = true;
-		return true;
-
-		if ( mVHGTOffset < 0 ) return true;
-
-		if ( !mIsSectionLoading )
-			loadSectionStart();
-
-#ifdef _DEBUG
-		if ( amount < 0 )
-			return false;
-#endif
-		
-
-		long amountToLoad = (long) (( mDataEnd - mDataStart ) * (float)( amount / 100 ));
-		if ( amountToLoad < 1 )
-			amountToLoad = 1;
-
-		long readTo = mDataReadTo + amountToLoad;
-		if ( readTo > mDataEnd )
-			readTo = mDataEnd;
-
-		if ( amount >= 100 )
-			readTo = mDataEnd;
-
-		mAmountLoaded += amount;
-
-//		long junk;
-
-		//while ( mDataStream->tellg() < mDataEnd ){
-		//	if ( mLoadingState.LoadingState == SectionState::L_NOT ){
-		//		char dataType[5];
-		//		mDataStream->read(dataType, 4);
-		//		dataType[4] = '\0';
-
-		//		if ( strcmp(dataType, "VNML") == 0){
-		//			mDataStream->read ((char *)&junk, sizeof(long));
-
-		//			mLandNormal.resize(65);
-		//			mLoadingState.LoadingState = SectionState::L_VNML;
-		//		}else if (strcmp(dataType, "VHGT") == 0){
-		//			mDataStream->read ((char *)&junk, sizeof(long));
-
-		//			mDataStream->read ((char *)&mHeigthOffset, sizeof(float));
-
-		//			mHeightData.resize(65);
-		//			for ( int i = 0 ; i < 65; i++ )
-		//				mHeightData.at(i).resize(65);
-
-		//			mLoadingState.LoadingState = SectionState::L_VHGT;
-		//		}else if ( strcmp(dataType, "VTEX") == 0 ){
-		//			mDataStream->read ((char *)&junk, sizeof(long));
-
-
-		//			mLandTextures.resize(16);
-		//			for ( int x = 0; x < 16; x++ )
-		//				mLandTextures.at(x).resize(16);
-
-		//			mLoadingState.LoadingState = SectionState::L_VTEX;
-		//		}
-
-
-		//	switch(mLoadingState.LoadingState ){
-		//		case SectionState::L_VNML: //at min, reads 65*3 bytes
-		//			for ( mLoadingState.VNML_x; mLoadingState.VNML_x < 65; mLoadingState.VNML_x++ ){
-		//				mLandNormal.at(mLoadingState.VNML_x).resize(65);
-		//				for ( mLoadingState.VNML_y; mLoadingState.VNML_y < 65; mLoadingState.VNML_y++ ){
-		//					mDataStream->read ((char *)
-		//						&mHeightmap.get(mLoadingState.VNML_x, mLoadingState.VNML_y).normal.x, 
-		//						1);
-		//					mDataStream->read ((char *)
-		//						&mHeightmap.get(mLoadingState.VNML_x, mLoadingState.VNML_y).normal.y, 
-		//						1);
-		//					
-		//					mDataStream->read ((char *)
-		//						&mHeightmap.get(mLoadingState.VNML_x, mLoadingState.VNML_y).normal.z, 
-		//						1);
-
-		//					mHeightmap.get(mLoadingState.VNML_x, mLoadingState.VNML_y).normal.isValid(true);
-		//					//mDataStream->read ((char *)&mLandNormal.at(mLoadingState.VNML_x).at(mLoadingState.VNML_y).x, 1);
-		//					//mDataStream->read ((char *)&mLandNormal.at(mLoadingState.VNML_x).at(mLoadingState.VNML_y).y, 1);
-		//					//mDataStream->read ((char *)&mLandNormal.at(mLoadingState.VNML_x).at(mLoadingState.VNML_y).z, 1);
-		//				}
-		//				continue;
-		//			}
-		//			mLoadingState.LoadingState = SectionState::L_NOT;
-		//			break;
-		//		case SectionState::L_VHGT:
-		//			{
-		//				float offset = mHeigthOffset;
-
-		//				for(mLoadingState.VHGT_y; mLoadingState.VHGT_y < 65; mLoadingState.VHGT_y++) {
-		//					char x;
-		//					mDataStream->get(x);	
-		//					offset += x;
-		//					mHeightData.at(0).at(mLoadingState.VHGT_y) =+ (int) offset;
-
-		//					float pos = offset;
-
-		//					for(mLoadingState.VHGT_x; mLoadingState.VHGT_x < 65; mLoadingState.VHGT_x++) {
-
-		//						char c;
-		//						int tmp = 0; //UNUSED?
-		//						mDataStream->get(c);						
-		//						pos += c;
-
-		//						//mHeightData.at(mLoadingState.VHGT_x).at(mLoadingState.VHGT_y) = (int) pos;
-		//						mHeightmap.get(mLoadingState.VHGT_x, mLoadingState.VHGT_y).height.height = (int) pos;
-		//						mHeightmap.get(mLoadingState.VHGT_x, mLoadingState.VHGT_y).height.isValid(true);
-
-		//					}
-		//					continue;
-		//				}
-		//				mLoadingState.LoadingState = SectionState::L_NOT;
-		//			}
-		//			break;
-		//		case SectionState::L_VTEX:
-		//			for(mLoadingState.VTEX_y1;mLoadingState.VTEX_y1<4;mLoadingState.VTEX_y1++) {
-		//				for(mLoadingState.VTEX_x1;mLoadingState.VTEX_x1<4;mLoadingState.VTEX_x1++) {
-		//					for(mLoadingState.VTEX_y2;mLoadingState.VTEX_y2<4;mLoadingState.VTEX_y2++) {
-		//						for(mLoadingState.VTEX_x2;mLoadingState.VTEX_x2<4;mLoadingState.VTEX_x2++) {
-		//							mDataStream->read ((char *)&mLandTextures
-		//								[mLoadingState.VTEX_x1*4+mLoadingState.VTEX_y2]
-		//								[mLoadingState.VTEX_y1*4+mLoadingState.VTEX_y2],
-		//									sizeof(short));
-		//						}
-		//					}
-		//				}
-		//			}
-		//			break;
-		//	}
-
-
-
-		//	continue;
-		//	}
-
-
-
-		//}//while( mDataStream->tellg() < mDataEnd )
-
-
-
-		//reed to the hght data we are currently reading
-		mDataStream->seekg(mDataReadTo);
-
-		if ( mReadingState == READING_NOTHING ){
-			mDataStream->seekg(mVHGTOffset);
-			mReadingState = READING_VHGT;
-		}else
-			mDataStream->seekg(mDataReadTo);
-
-		while( mDataStream->tellg() < mDataEnd ){
-			if(mReadingState == READING_VHGT){
-
-				if ( mHeigthOffset == 0 )
-					mDataStream->read ((char *)&mHeigthOffset, sizeof(float));
-
-				float offset = mHeigthOffset;
-
-				if ( mHeightData.size() < 65 ){
-					mHeightData.resize(65);
-					for ( int i = 0 ; i < 65; i++ )	mHeightData.at(i).resize(65);
-				}
-
-				for(mVHGTy; mVHGTy < 65; mVHGTy++) {
-					char x;
-					mDataStream->get(x);	
-					offset += x;
-					mHeightData.at(0).at(mVHGTy) =+ (int) offset;
-
-					float pos = offset;
-
-					for(mVHGTx/* = 1*/; mVHGTx< 65; mVHGTx++) {
-
-						char c;
-						int tmp = 0;
-						mDataStream->get(c);						
-						pos += c;
-
-						mHeightData.at(mVHGTx).at(mVHGTy) = (int) pos;
-						readNML(mVHGTx, mVHGTy);
-
-						if ( mDataStream->tellg() > readTo - (64 * 64 * 3) ) goto exitAllLoops; //go to end of while loop
-
-					}
-					mVHGTx = 1;
-				}
-
-
-
-				short junk2 = 0;
-				mDataStream->read ((char *)&junk2, sizeof(short));
-
-				char unk;
-				mDataStream->read ((char*)&unk, 1);
-
-				//finsihed reading vhgt data
-				mReadingState = READING_VTEX;
-
-			}else if(mReadingState == READING_VTEX){
-
-				if ( mLandTextures.size() < 16 ){
-					mLandTextures.resize(16);
-					for ( int x = 0; x < 16; x++ )	mLandTextures.at(x).resize(16);
-				}
-
-				for(mVTEXy1; mVTEXy1 < 4; mVTEXy1 ++) {
-					for( mVTEXx1;mVTEXx1<4;mVTEXx1++ ) {
-						for(mVTEXy2;mVTEXy2<4;mVTEXy2++) {
-							for(mVTEXx2;mVTEXx2<4;mVTEXx2++) {
-								mDataStream->read ((char *)&mLandTextures[mVTEXx1*4+mVTEXx2][mVTEXy1*4+mVTEXy2], sizeof(short));
-							}
-							mVTEXx2 = 0;
-						}
-						mVTEXy2 = 0;
-						if ( mDataStream->tellg() > readTo - (64 * 64 * 3) ) goto exitAllLoops; //go to end of while loop
-					}
-					mVTEXx1=0;
-				}
-
-				mReadingState = READING_DONE;
-				goto exitAllLoops; //go to end of while loop
-
-			}
-
-			
-
-		}
-
-exitAllLoops: //the exit point for the reading loops
-
-
-		if ( ((long) mDataStream->tellg()) == mDataEnd || mReadingState == READING_DONE ) 
-			return loadSectionEnd();
-
-
-		return false;
-		
-
-	}
-
-	void readNML(int x, int y){
-		long curPos = mDataStream->tellg();
-
-		long datPos = 0;
-		for ( int j = 0; j < x; j++ ){ //got to be a faster way. Can't be bothered thinking
-			for ( int k = 0; k < y; k++){
-				datPos += 3;
-			}
-		}
-		datPos += mVNMLOffset;
-
-
-		mDataStream->seekg(datPos);
-
-		//read data
-		mDataStream->read ((char *)&mLandNormal.at(x).at(y).x, 1);
-		mDataStream->read ((char *)&mLandNormal.at(x).at(y).y, 1);
-		mDataStream->read ((char *)&mLandNormal.at(x).at(y).z, 1);
-
-
-
-		mDataStream->seekg(curPos);
-	}
-
 	/**
 	*	@return a 65x65 array of normals, for each vertex of the land.
 	*/
@@ -508,105 +204,91 @@ exitAllLoops: //the exit point for the reading loops
 
 	std::vector< std::vector<short> > getLandTextures(){return mLandTextures;}
 
-	bool doThreadLoad(){
-		//go to the place in the file
-		std::ifstream ifs(mFileName.c_str(), std::ios::in | std::ios::binary);
-		ifs.seekg(mLandStartOffset);
+    long loadVnmlRecord(ifstream &ifs) {
+        long junk;
+        ifs.read ((char *)&junk, sizeof(long));
 
-				long junk;
+        mLandNormal.resize(65);
+        for ( unsigned x = 0; x < 65; x++ ){
+            mLandNormal.at(x).resize(65);
+            for ( unsigned y = 0; y < 65; y++ ){
+                //ifs.read ((char *)&mLandNormal[x][y], sizeof(LandNormalMap));
+                ifs.read ((char *)&mLandNormal.at(x).at(y).x, 1);
+                ifs.read ((char *)&mLandNormal.at(x).at(y).y, 1);
+                ifs.read ((char *)&mLandNormal.at(x).at(y).z, 1);
+            }
+        }
+        return junk;
+    }
 
-		while ( ifs.tellg() < mLandEndOffset ){
-			char dataType[5];
-			ifs.read(dataType, 4);
+    long loadVtexRecord(ifstream &ifs) {
+        long junk;
+        ifs.read ((char *)&junk, sizeof(long));
 
-			//string must be null terminated.
-			dataType[4] = '\0';
-			//cell data
-			if ( strcmp(dataType, "VNML") == 0){
-					ifs.read ((char *)&junk, sizeof(long));
+        if (mLandSquare.cellX == -7 && mLandSquare.cellY == 4 )
+            int zz = 1;
 
-					mLandNormal.resize(65);
-					for ( unsigned x = 0; x < 65; x++ ){
-						mLandNormal.at(x).resize(65);
-						for ( unsigned y = 0; y < 65; y++ ){
-							//ifs.read ((char *)&mLandNormal[x][y], sizeof(LandNormalMap));	
-							ifs.read ((char *)&mLandNormal.at(x).at(y).x, 1);
-							ifs.read ((char *)&mLandNormal.at(x).at(y).y, 1);
-							ifs.read ((char *)&mLandNormal.at(x).at(y).z, 1);
-						}
-					}
+        mLandTextures.resize(16);
+        for ( int x = 0; x < 16; x++ ) mLandTextures.at(x).resize(16);
 
-					//height data
-			}else if ( strcmp(dataType, "VHGT") == 0){
-				ifs.read ((char *)&junk, sizeof(long));
-				ifs.read ((char *)&mHeigthOffset, sizeof(float));
+        for(int y1=0;y1<4;y1++) {
+            for(int x1=0;x1<4;x1++) {
+                for(int y2=0;y2<4;y2++) {
+                    for(int x2=0;x2<4;x2++) {
+                        ifs.read ((char *)&mLandTextures[x1 * 4 + x2][y1 * 4 + y2], sizeof(short));
+                    }
+                }
+            }
+        }
+        return junk;
+    }
 
-				float offset = mHeigthOffset;
+    long loadVhgtRecord(ifstream &ifs) {
+        long junk;
+        ifs.read ((char *)&junk, sizeof(long));
+        ifs.read ((char *)&mHeigthOffset, sizeof(float));
 
-				//mHeightData.resize(65);
-				for ( int i = 0 ; i < 65; i++ ){
-					mHeightData.at(i).resize(65);
-					for ( int j=0;j<65;j++){
-						mHeightData[i][j]=0;
-					}
-				}
+        float offset = mHeigthOffset;
 
-				for(int y = 0; y < 65; y++) {
-					char x;
-					ifs.get(x);	
-					offset += x;
-					mHeightData.at(0).at(y) =+ (int) offset;
+        //mHeightData.resize(65);
+        for ( int i = 0 ; i < 65; i++ ){
+            mHeightData.at(i).resize(65);
+            for ( int j=0;j<65;j++){
+                mHeightData[i][j]=0;
+            }
+        }
 
-					float pos = offset;
+        for(int y = 0; y < 65; y++) {
+            char x;
+            ifs.get(x);
+            offset += x;
+            mHeightData.at(0).at(y) =+ (int) offset;
 
-					for(int x = 1; x< 65; x++) {
+            float pos = offset;
 
-						char c;
-						int tmp = 0;
-						ifs.get(c);						
-						pos += c;
+            for(int x = 1; x< 65; x++) {
 
-						mHeightData.at(x).at(y) = (int) pos;
+                char c;
+                int tmp = 0;
+                ifs.get(c);
+                pos += c;
 
-					}
-				}
+                mHeightData.at(x).at(y) = (int) pos;
 
-				
-				char unk;
-				ifs.read ((char*)&unk, 1);
+            }
+        }
 
 
-				short junk2 = 0;
-				ifs.read ((char *)&junk2, sizeof(short));
-			}else if ( strcmp(dataType, "VTEX") == 0 ){
-				ifs.read ((char *)&junk, sizeof(long));
+        char unk;
+        ifs.read ((char*)&unk, 1);
 
-				if ( mLandSquare.cellX == -7 && mLandSquare.cellY == 4 )
-					int zz = 1;
 
-				mLandTextures.resize(16);
-				for ( int x = 0; x < 16; x++ ) mLandTextures.at(x).resize(16);
+        short junk2 = 0;
+        ifs.read ((char *)&junk2, sizeof(short));
+        return junk;
+    }
 
-				for(int y1=0;y1<4;y1++) {
-					for(int x1=0;x1<4;x1++) {
-						for(int y2=0;y2<4;y2++) {
-							for(int x2=0;x2<4;x2++) {
-								ifs.read ((char *)&mLandTextures[x1*4+x2][y1*4+y2], sizeof(short));
-							}
-						}
-					}
-				}
-
-			}else{
-				handelUnknownRecord(ifs);
-			}
-		}
-	
-		ifs.close();
-		return true;
-	}
-
-	float _temp(float x, int y){
+    float _temp(float x, int y){
 		while ( x > y) x -= y;
 		while ( x < -y) x += y;
 		return x;
@@ -618,11 +300,6 @@ exitAllLoops: //the exit point for the reading loops
 			z++;
 		}
 		return z;
-	}
-	float _temp3(float x){
-		while ( x > 64 )
-			x-=64;
-		return x;
 	}
 
 	float getHeightAt(float x, float y){
@@ -792,7 +469,6 @@ exitAllLoops: //the exit point for the reading loops
 //		long junk;
 		long readTo = recordSize + ifs.tellg();
 		mLandEndOffset = readTo;
-		mDataEnd = mLandEndOffset;
 		//mLandStartOffset = ifs.tellg();
 
 		while ( ifs.tellg() < readTo ){
@@ -805,128 +481,27 @@ exitAllLoops: //the exit point for the reading loops
 			if ( strcmp(dataType, "INTV") == 0){
 				ifs.read ((char *)&subRecSize, sizeof(long));
 				ifs.read((char*)&mLandSquare, sizeof(LandSquare));
-				mLandStartOffset = ifs.tellg();
-				mDataStart = ifs.tellg();
-				continue;
 			}else if ( strcmp(dataType, "VNML") == 0){
 				ifs.read ((char *)&subRecSize, sizeof(long));
-				mVNMLOffset = ifs.tellg();
-				ifs.seekg(mVNMLOffset + subRecSize);
-			}else if ( strcmp(dataType, "VHGT") == 0){
+                long recordStart = ifs.tellg();
+                loadVnmlRecord(ifs);
+                assert(ifs.tellg() == recordStart + subRecSize);
+            }else if ( strcmp(dataType, "VHGT") == 0){
 				ifs.read ((char *)&subRecSize, sizeof(long));
-				mVHGTOffset = ifs.tellg();
-				ifs.seekg(mVHGTOffset + subRecSize);
+                long recordStart = ifs.tellg();
+                loadVhgtRecord(ifs);
+                assert(ifs.tellg() == recordStart + subRecSize);
 			}else if ( strcmp(dataType, "VTEX") == 0){
 				ifs.read ((char *)&subRecSize, sizeof(long));
-				mVTEXOffset = ifs.tellg();
-				ifs.seekg(mVTEXOffset + subRecSize);
+                long recordStart = ifs.tellg();
+                loadVtexRecord(ifs);
+                assert(ifs.tellg() == recordStart + subRecSize);
 			}else{
 				handelUnknownRecord(ifs);
 			}
 		}
 		ifs.seekg(readTo);
 	}
-
-/*
-	void read(std::ifstream &ifs, long recordSize){
-		long readTo = recordSize + ifs.tellg();
-
-		long junk;
-
-		while ( ifs.tellg() < readTo ){
-			char dataType[5];
-			ifs.read(dataType, 4);
-
-			//string must be null terminated.
-			dataType[4] = '\0';
-
-			//cell data
-			if ( strcmp(dataType, "INTV") == 0){
-					ifs.read ((char *)&junk, sizeof(long));
-					ifs.read((char*)&mLandSquare, sizeof(LandSquare));
-
-
-					//normals
-			}else if ( strcmp(dataType, "VNML") == 0){
-					ifs.read ((char *)&junk, sizeof(long));
-
-					mLandNormal.resize(65);
-					for ( unsigned x = 0; x < 65; x++ ){
-						mLandNormal.at(x).resize(65);
-						for ( unsigned y = 0; y < 65; y++ ){
-							//ifs.read ((char *)&mLandNormal[x][y], sizeof(LandNormal));	
-							ifs.read ((char *)&mLandNormal.at(x).at(y).x, 1);
-							ifs.read ((char *)&mLandNormal.at(x).at(y).y, 1);
-							ifs.read ((char *)&mLandNormal.at(x).at(y).z, 1);
-						}
-					}
-
-					//height data
-			}else if ( strcmp(dataType, "VHGT") == 0){
-				ifs.read ((char *)&junk, sizeof(long));
-
-				char unk;
-				ifs.read ((char*)&unk, 1);
-/*
-				ifs.read ((char *)&mHeigthOffset, sizeof(float));
-
-				char unk;
-				ifs.read ((char*)&unk, 1);
-
-				mHeightData.resize(65);
-				for ( unsigned x = 0; x < 65; x++ ){
-
-					mHeightData.at(x).resize(65);
-					for ( unsigned y = 0; y < 65; y++ ){
-						ifs.read ((char *)&mHeightData.at(x).at(y), 1);				
-					}
-				}
-*/
-/*
-				ifs.read ((char *)&mHeigthOffset, sizeof(float));
-
-				mHeightData.resize(65);
-				for ( int i = 0 ; i < 65; i++ )
-					mHeightData.at(i).resize(65);
-
-
-
-				for(int y = 0; y < 65; y++) {
-					//offset+=br.ReadSByte();
-					//land.Heights[0, y]=offset;
-					ifs.read ((char *)&mHeightData.at(0).at(y), 1);	
-					mHeightData.at(0).at(y) =+ mHeigthOffset;
-
-
-					//int pos=offset;
-					int pos = mHeigthOffset;
-
-					for(int x = 1; x< 65; x++) {
-
-						//pos+=br.ReadSByte();
-						//land.Heights[x, y]=pos;				
-						char tmp;
-						ifs.read ((char *)&tmp, 1);	
-						pos += tmp;
-
-						mHeightData.at(x).at(y) = tmp;
-
-
-
-						//if(pos>VeryHigh) VeryHigh=pos;
-						//if(pos<VeryLow) VeryLow=pos;
-					}
-				}
-
-
-				short junk2 = 0;
-				ifs.read ((char *)&junk2, sizeof(short));
-			}else{
-				handelUnknownRecord(ifs);
-			}
-		}
-	}
-	*/
 };
 
 }//nspace

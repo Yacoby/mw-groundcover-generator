@@ -83,11 +83,6 @@ protected:
 			return 0;
 		}
 
-		//setup the records we want to load.
-		REGISTER_RECORD(ESCell, "CELL");
-		REGISTER_RECORD(ESLand, "LAND");
-		REGISTER_RECORD(ESLTex, "LTEX");
-
 		ES3::ESFileContainerRef fc = new ES3::ESFileContainer();
 		for ( std::vector<std::string>::iterator iter = mFiles.begin(); iter != mFiles.end(); ++iter){
             std::string fileName = fs::path(*iter).filename().string();
