@@ -21,7 +21,6 @@ public:
 	///reads the string from the given file, and saves the data.
 	void read(std::ifstream &ifs);
 	void write(std::ofstream &ofs);
-	inline long writeSize(){return (long) mSubStr.length() + 4; }
 };
 }
 #endif

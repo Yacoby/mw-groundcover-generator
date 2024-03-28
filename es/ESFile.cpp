@@ -2,26 +2,13 @@
 
 using namespace ES3;
 
-
-ESFile::ESFile(){
-	_ref_count = 0;
-}
-
-ESFile::~ESFile(){
-
-}
-
-void ESFile::loadStartup(std::ifstream* mIfs){
-	mIfs->seekg (0, std::ios::end);
-	mFileSize = mIfs->tellg();
-	mIfs->seekg (0, std::ios::beg);
-
-	int sig; //TES3
+void ESFile::readHeader(std::ifstream* mIfs){
+	char sig[4]; //TES3
 	mIfs->read ((char *)&sig, 4);
 
 	////header size
-	long hdrSize;
-	mIfs->read ((char *)&hdrSize, sizeof(int));
+	uint32_t hdrSize;
+	mIfs->read ((char *)&hdrSize, sizeof(uint32_t));
 
 	mIfs->seekg((long)mIfs->tellg() + 8);
 
@@ -34,74 +21,55 @@ bool ESFile::loadFile(const std::string& pFile){
     if ( !ifStream.is_open() ){
         throw std::runtime_error("Cannot open file: " + pFile);
     }
+    readHeader(&ifStream);
 
-    std::ifstream* mIfs = &ifStream;
-    loadStartup(&ifStream);
-
-	long stopReadingAt = mFileSize;
-
-
-	while ( mIfs->tellg() < mFileSize  && (long) mIfs->tellg() != -1  ){
-
-		if (  mIfs->tellg() > stopReadingAt ){
-			break;
-		}
-
+	while (ifStream.tellg() != -1){
 		//get the record type
 		char tType[5];
-		mIfs->get(tType, 5);
+		ifStream.get(tType, 5);
 
 		if ( strcmp(tType, "DDCE") == 0 ){
-			mIfs->seekg((long)mIfs->tellg() - 3);
+			ifStream.seekg((long)ifStream.tellg() - 3);
 			continue;
 		}
 
-
-		//record block size block size
-		long recordSize;
-		mIfs->read ((char *)&recordSize, 4);
+		//record block size
+		uint32_t recordSize;
+        ifStream.read ((char *)&recordSize, sizeof(uint32_t));
 
 		//hdr1
-		long hdr1;
-		mIfs->read ((char *)&hdr1, 4);
+        uint32_t hdr1;
+		ifStream.read ((char *)&hdr1, sizeof(uint32_t));
 
 		//flags
-		long flags;
-		mIfs->read ((char *)&flags, 4);
+        uint32_t flags;
+		ifStream.read ((char *)&flags, sizeof(uint32_t));
 
-		long recordEndPos = recordSize + mIfs->tellg();
+		long recordEndPos = recordSize + ifStream.tellg();
 
         if ( strcmp(tType, "LAND") == 0 ){
-            ESLandRef land = new ESLand();
-            land->read(*mIfs, recordSize);
+            ESLandRef land = ESLandRef(new ESLand());
+            land->read(ifStream, recordSize);
 
             mpLand[land->getLandPos().cellX][land->getLandPos().cellY] = land;
-        }
-        if ( strcmp(tType, "CELL") == 0 ){
-            ESCellRef cell = new ESCell();
-            cell->read(*mIfs, recordSize);
+        } else if ( strcmp(tType, "CELL") == 0 ){
+            ESCellRef cell = ESCellRef(new ESCell());
+            cell->read(ifStream, recordSize);
 
-            if ( cell->getCellData()->isInterior() == false )
+            if ( cell->getCellData()->isInterior() == false ) {
                 mpExteriorCell[cell->getCellData()->gridX()][cell->getCellData()->gridY()] = cell;
-            else
-                mpInteriorCell[cell->getCellName()] = cell;
-        }
-
-        if ( strcmp(tType, "LTEX") == 0 ){
-            ESLTexRef tex = new ESLTex();
-            tex->read(*mIfs, recordSize);
+            }
+        } else if ( strcmp(tType, "LTEX") == 0 ){
+            ESLTexRef tex = ESLTexRef(new ESLTex());
+            tex->read(ifStream, recordSize);
             mLandTex[tex->getIndex()] = tex;
             mLandTexVec.push_back(tex);
         }
 
-
-		//make sure we are in the right place
-		long nowPos = mIfs->tellg();
-		mIfs->seekg(recordEndPos);
+		// Advance to read the next record (as in some cases we don't read anything)
+		ifStream.seekg(recordEndPos);
 
 	} //while
 
-
-	assert( (long)mIfs->tellg() >= mFileSize );
     return true;
 }

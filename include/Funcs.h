@@ -61,7 +61,7 @@ public:
 		len = 0;
 		writeToBuffer((char*)&len, 1);
 	}
-	void writeData(const long d){
+	void writeData(const uint32_t d){
 		long len = 4;
 		writeToBuffer((char*)&len, 4);
 		writeToBuffer((char*)&d, 4);
@@ -73,15 +73,15 @@ public:
 	}
 
 	void writeRaw(const std::string& d){writeToBuffer(d.c_str(), (int)d.length()-1);}
-	void writeRaw(const long d){writeToBuffer((char*)&d, 4);}
+	void writeRaw(const uint32_t d){writeToBuffer((char*)&d, 4);}
 	void writeRaw(const float d){writeToBuffer((char*)&d, 4);}
 
 };
 
 void fileWriteBuff(Buff* buff, std::ofstream& ofs);
-void buffWriteCellStart(Buff* buff, const std::string& name, long flags, long x, long y, const std::string& rgn, long col);
+void buffWriteCellStart(Buff* buff, const std::string& name, uint32_t flags, uint32_t x, uint32_t y, const std::string& rgn, uint32_t col);
 void fileWriteStatData(std::ofstream& ofs,const std::string& type, const std::string& id, const std::string& mesh, const std::string& name, const std::string& script);
-void buffWriteObjData(Buff* buff, long frmr, const std::string& id, float scale, float px, float py, float pz, float rx, float ry, float rz  );
+void buffWriteObjData(Buff* buff, uint32_t frmr, const std::string& id, float scale, float px, float py, float pz, float rx, float ry, float rz  );
 void fileWriteEspHdr(std::ofstream& ofs);
 void fileWriteCellHdr(Buff* buff, std::ofstream& ofs);
 

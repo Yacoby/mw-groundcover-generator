@@ -1,10 +1,10 @@
-long gNumRecords = 0;
-long gNumRecordPos = -1;
-
 #include <wx/wxprec.h>
 #include <wx/wx.h>
 #include <wx/msgdlg.h>
 #include "GUI.h"
+
+uint32_t gNumRecords = 0;
+long gNumRecordPos = -1;
 
 class MWGrassApp : public wxApp{
 public:

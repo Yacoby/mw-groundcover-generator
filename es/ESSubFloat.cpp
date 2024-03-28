@@ -1,3 +1,4 @@
+#include <cassert>
 #include "ESSubFloat.h"
 
 using namespace ES3;
@@ -7,19 +8,20 @@ float ESSubFloat::get(){
 }
 
 void ESSubFloat::set(float f){
-	mRecordSize = 4;
+	mRecordSize = sizeof(float);
 	mFloat = f;
 }
 
 void ESSubFloat::read(std::ifstream &ifs){
 
 	//read the size of the string
-	ifs.read ((char *)&mRecordSize, sizeof(long));
+	ifs.read ((char *)&mRecordSize, sizeof(uint32_t));
+    assert(mRecordSize==sizeof(float));
 	ifs.read((char*)&mFloat, mRecordSize);
 }
 
 void ESSubFloat::write(std::ofstream &ofs){
-	long len = 4;
-	ofs.write((char*)&len, 4);
-	ofs.write((char*)&mFloat, 4);
+    uint32_t len = sizeof(float);
+    ofs.write((char*)&len, sizeof(uint32_t));
+	ofs.write((char*)&mFloat, sizeof(float));
 }

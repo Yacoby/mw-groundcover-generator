@@ -19,7 +19,7 @@
 
 #include "ESBase.h"
 
-extern long gNumRecords;
+extern uint32_t gNumRecords;
 extern long gNumRecordPos;
 
 #endif

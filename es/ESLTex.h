@@ -4,7 +4,7 @@
 namespace ES3{
 
 class ESLTex;
-typedef ESRef<ESLTex> ESLTexRef;
+typedef std::shared_ptr<ESLTex> ESLTexRef;
 
 /**
 * Used for holding land texture details
@@ -29,7 +29,7 @@ public:
 	/**
 	*	@return the index of the ltex. This is refered to by the landrecord. How the frek it knows between mods IDK.
 	*/
-	long getIndex(){ return mIndex.get(); }
+    uint32_t getIndex(){ return mIndex.get(); }
 
 	/**
 	*	@return the path to the texture

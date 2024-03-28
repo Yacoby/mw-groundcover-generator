@@ -19,9 +19,9 @@ namespace ES3{
 */
 class ESSubCellData : public ESSubRecord{
 protected:
-	long mFlags;
-	long mGridX;
-	long mGridY;
+    uint32_t mFlags;
+    int32_t mGridX;
+    int32_t mGridY;
 public:
 
 	inline long getFlags(){return mFlags; }
@@ -33,12 +33,12 @@ public:
 	inline bool actLikeExterior(){ return ((mFlags & 0x80) != 0); }
 
 	///returns the gridx of the cell
-	inline long gridX(){ return mGridX; }
-	inline void setGridX(long c){ mGridX = c; }
+	inline int32_t gridX(){ return mGridX; }
+	inline void setGridX(int32_t c){ mGridX = c; }
 
 	///returns the gridy of the cell
-	inline long gridY(){ return mGridY; }
-	inline void setGridY(long c){ mGridY = c; }
+	inline int32_t gridY(){ return mGridY; }
+	inline void setGridY(int32_t c){ mGridY = c; }
 
 
 	void read(std::ifstream &ifs){

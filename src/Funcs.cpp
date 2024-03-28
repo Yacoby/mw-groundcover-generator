@@ -22,7 +22,7 @@ void fileWriteBuff(Buff* buff, std::ofstream& ofs){
 * @param col map colour of the cell
 */
 
-void buffWriteCellStart(Buff* buff, const std::string& name, long flags, long x, long y, const std::string& rgn, long col){
+void buffWriteCellStart(Buff* buff, const std::string& name, uint32_t flags, uint32_t x, uint32_t y, const std::string& rgn, uint32_t col){
 	//NAME = Cell ID string.
 	buff->writeType("NAME");
 	buff->writeData(name);
@@ -38,7 +38,7 @@ void buffWriteCellStart(Buff* buff, const std::string& name, long flags, long x,
 	long GridY
 	*/
 	buff->writeType("DATA");
-	buff->writeRaw((long)12);
+	buff->writeRaw((uint32_t)12);
 	buff->writeRaw(flags);	buff->writeRaw(x);	buff->writeRaw(y);
 	//buff->writeData(flags);	buff->writeData(x);	buff->writeData(y);
 
@@ -106,7 +106,7 @@ void fileWriteStatData(std::ofstream& ofs,const std::string& type, const std::st
 /*
 
 */
-void buffWriteObjData(Buff* buff, long frmr, const std::string& id, float scale, float px, float py, float pz, float rx, float ry, float rz  ){
+void buffWriteObjData(Buff* buff, uint32_t frmr, const std::string& id, float scale, float px, float py, float pz, float rx, float ry, float rz  ){
 	/*
 	FRMR = Object Index (starts at 1) (4 bytes, long)
 	This is used to uniquely identify objects in the cell.  For new files the
@@ -136,7 +136,7 @@ void buffWriteObjData(Buff* buff, long frmr, const std::string& id, float scale,
 	float ZRotate
 	*/
 	buff->writeType("DATA");
-	buff->writeRaw((long)24);
+	buff->writeRaw((uint32_t)24);
 	buff->writeRaw(px);	buff->writeRaw(py);	buff->writeRaw(pz);
 	buff->writeRaw(rx);	buff->writeRaw(ry);	buff->writeRaw(rz);
 }
@@ -163,18 +163,18 @@ that it refers to.
 
 void fileWriteEspHdr(std::ofstream& ofs){
 	const float ver = 1.2;
-	long unk = 0;
+    uint32_t unk = 0;
 	char tes3[] = "TES3";
 
 	//buld header
 	Buff b(340);
 	b.writeType("HEDR");
-	b.writeRaw((long)300);
-	b.writeRaw((long)ver);
-	b.writeRaw((long)0);
+	b.writeRaw((uint32_t)300);
+	b.writeRaw((uint32_t)ver);
+	b.writeRaw((uint32_t)0);
 
 	for ( int i = 0; i < 32 + 256; i+=4)
-		b.writeRaw((long)0);
+		b.writeRaw((uint32_t)0);
 
 
 	gNumRecordPos = b.getSize();
@@ -203,14 +203,14 @@ void fileWriteEspHdr(std::ofstream& ofs){
 * @brief writes the 16 bytes of header for the cell rec
 */
 void fileWriteCellHdr(Buff* buff, std::ofstream& ofs){
-	int size = buff->getSize();
+	uint32_t size = buff->getSize();
 
 	ofs.write((char*)"CELL", 4);
 	ofs.write((char*)&size, 4);
 
-	size = 0; //set junk
-	ofs.write((char*)&size, 4); //junk
-	ofs.write((char*)&size, 4); //junk
+    uint32_t junk = 0; //set junk
+	ofs.write((char*)&junk, 4); //junk
+	ofs.write((char*)&junk, 4); //junk
 
 }
 

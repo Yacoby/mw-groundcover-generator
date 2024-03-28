@@ -9,63 +9,13 @@
 
 namespace ES3{
 
-#define ES3_CELL_SIZE 65
-
-	/**
-	* @brief represnets the xyz of a normal
-	*/
-	class Normal{
-	public:
-		Normal() : mIsValid(false){};
-		float x, y, z;
-		inline bool isValid(){return mIsValid;}
-		inline void isValid(bool f){ mIsValid = f; }
-	private:
-		bool mIsValid;
-
-	};
-
-	/**
-	* @brief holds a float that defines the 
-	*/
-	class Height{
-	public:
-		Height() : mIsValid(false){};
-		int height;
-		inline bool isValid(){return mIsValid;}
-		inline void isValid(bool f){ mIsValid = f; }
-	private:
-		bool mIsValid;
-	};
-
-	struct ES3LandPoint{
-		Height height;
-		Normal normal;
-	};
-
-	class HeightMap{
-
-		ES3LandPoint mHeightMap[ES3_CELL_SIZE][ES3_CELL_SIZE];
-
-	public:
-		inline ES3LandPoint& get(int x, int y){
-#ifdef _DEBUG
-			if ( x >= ES3_CELL_SIZE || y >= ES3_CELL_SIZE ){throw std::exception("Cells do not have > 64 verts");}
-#endif
-			return mHeightMap[x][y];
-		}
-
-	};
-
-
 /**
 * Used for holding the position in the cell grid of a land record
 */
 struct LandSquare{
-	long cellX;
-	long cellY;
+    uint32_t cellX;
+    uint32_t cellY;
 };
-
 
 
 /**
@@ -84,11 +34,7 @@ struct Vector3{
 };
 
 class ESLand;
-typedef ESRef<ESLand> ESLandRef;
-
-typedef std::vector< std::vector<Vector3> > LandHeightMap;
-typedef std::vector< std::vector<Vector3> > LandNormalMap;
-
+typedef std::shared_ptr<ESLand> ESLandRef;
 
 /**
 *	Holds a LAND record.
@@ -97,15 +43,7 @@ typedef std::vector< std::vector<Vector3> > LandNormalMap;
 class ESLand : public ESRecord {
 
 
-	HeightMap mHeightmap;
-
-	std::vector< std::vector<short> > mLandTextures;
-
-	/**
-	* List of the normals
-	*/
-	LandNormalMap mLandNormal;
-
+	std::vector< std::vector<uint16_t> > mLandTextures;
 	/**
 	* height data
 	* The height data is not absolute values but uses differences between adjacent pixels.
@@ -115,42 +53,9 @@ class ESLand : public ESRecord {
 	std::vector< std::vector<int> > mHeightData;
 
 	/**
-	* The height offset. This moves the land up or down by x amount
-	*/
-	float mHeigthOffset;
-
-	long mVTEXOffset, mVHGTOffset, mVNMLOffset;
-
-	/**
 	* The data on where in the world the cell is
 	*/
 	LandSquare mLandSquare;
-
-	long mLandStartOffset;
-	long mLandEndOffset;
-
-	struct SectionState{
-		enum {L_NOT, L_VNML, L_VHGT, L_VTEX};
-		int VNML_x;
-		int VNML_y;
-
-		int VHGT_x;
-		int VHGT_y;
-
-		int VTEX_x1;
-		int VTEX_y1;
-		int VTEX_x2;
-		int VTEX_y2;
-
-		int LoadingState;
-	};
-
-	SectionState mLoadingState;
-
-	int mVHGTx, mVHGTy;
-	int mVTEXy1, mVTEXx1, mVTEXy2, mVTEXx2;
-	int mReadingState;
-	enum { READING_NOTHING, READING_VHGT, READING_VTEX, READING_DONE };
 
 public:
 
@@ -161,72 +66,16 @@ public:
 			for ( int i = 0 ; i < 65; i++ )		mHeightData.at(i).resize(65, -256);
 		}
 
-		if ( mLandNormal.size() < 65 ){
-			mLandNormal.resize(65);
-			for ( unsigned x = 0; x < 65; x++ ) mLandNormal.at(x).resize(65, Vector3());
-		}
-
 		if ( mLandTextures.size() < 16 ){
 			mLandTextures.resize(16);
 			for ( int x = 0; x < 16; x++ ){	mLandTextures.at(x).resize(16, 0); mLandTextures.at(x).at(0) = 0; }
 		}
-
-			mHeigthOffset = 0;
-
-		mVHGTx = 1;
-		mVHGTy = 0;
-		mVTEXy1 = 0;
-		mVTEXx1 = 0;
-		mVTEXy2 = 0;
-		mVTEXx2  = 0;
-
-		mReadingState = READING_NOTHING;
-
-
-		mLoadingState.VNML_x = 0;
-		mLoadingState.VNML_y = 0;
-		mLoadingState.VHGT_x = 1;
-		mLoadingState.VHGT_y = 0;
-		mLoadingState.VTEX_x1 = 0;
-		mLoadingState.VTEX_x2 = 0;
-		mLoadingState.VTEX_y1 = 0;
-		mLoadingState.VTEX_y2 = 0;
-		mLoadingState.LoadingState = SectionState::L_NOT;
-
 	}
 
-	/**
-	*	@return a 65x65 array of normals, for each vertex of the land.
-	*/
-	LandNormalMap getNormals(){ return mLandNormal; }
-	std::vector< std::vector<int> > getHeights(){ return mHeightData; }
 
+	std::vector< std::vector<uint16_t> > getLandTextures(){return mLandTextures;}
 
-	std::vector< std::vector<short> > getLandTextures(){return mLandTextures;}
-
-    long loadVnmlRecord(ifstream &ifs) {
-        long junk;
-        ifs.read ((char *)&junk, sizeof(long));
-
-        mLandNormal.resize(65);
-        for ( unsigned x = 0; x < 65; x++ ){
-            mLandNormal.at(x).resize(65);
-            for ( unsigned y = 0; y < 65; y++ ){
-                //ifs.read ((char *)&mLandNormal[x][y], sizeof(LandNormalMap));
-                ifs.read ((char *)&mLandNormal.at(x).at(y).x, 1);
-                ifs.read ((char *)&mLandNormal.at(x).at(y).y, 1);
-                ifs.read ((char *)&mLandNormal.at(x).at(y).z, 1);
-            }
-        }
-        return junk;
-    }
-
-    long loadVtexRecord(ifstream &ifs) {
-        long junk;
-        ifs.read ((char *)&junk, sizeof(long));
-
-        if (mLandSquare.cellX == -7 && mLandSquare.cellY == 4 )
-            int zz = 1;
+    void loadVtexRecord(std::ifstream &ifs) {
 
         mLandTextures.resize(16);
         for ( int x = 0; x < 16; x++ ) mLandTextures.at(x).resize(16);
@@ -235,20 +84,16 @@ public:
             for(int x1=0;x1<4;x1++) {
                 for(int y2=0;y2<4;y2++) {
                     for(int x2=0;x2<4;x2++) {
-                        ifs.read ((char *)&mLandTextures[x1 * 4 + x2][y1 * 4 + y2], sizeof(short));
+                        ifs.read ((char *)&mLandTextures[x1 * 4 + x2][y1 * 4 + y2], sizeof(uint16_t));
                     }
                 }
             }
         }
-        return junk;
     }
 
-    long loadVhgtRecord(ifstream &ifs) {
-        long junk;
-        ifs.read ((char *)&junk, sizeof(long));
-        ifs.read ((char *)&mHeigthOffset, sizeof(float));
-
-        float offset = mHeigthOffset;
+    void loadVhgtRecord(std::ifstream &ifs) {
+        float offset;
+        ifs.read ((char *)&offset, sizeof(float));
 
         //mHeightData.resize(65);
         for ( int i = 0 ; i < 65; i++ ){
@@ -278,14 +123,12 @@ public:
             }
         }
 
-
         char unk;
         ifs.read ((char*)&unk, 1);
 
 
-        short junk2 = 0;
-        ifs.read ((char *)&junk2, sizeof(short));
-        return junk;
+        uint16_t junk2 = 0;
+        ifs.read ((char *)&junk2, sizeof(uint16_t));
     }
 
     float _temp(float x, int y){
@@ -466,10 +309,7 @@ public:
 	LandSquare getLandPos(){ return mLandSquare; }
 
 	void read(std::ifstream &ifs, long recordSize){
-//		long junk;
 		long readTo = recordSize + ifs.tellg();
-		mLandEndOffset = readTo;
-		//mLandStartOffset = ifs.tellg();
 
 		while ( ifs.tellg() < readTo ){
 			char dataType[5];
@@ -477,22 +317,20 @@ public:
 
 			//string must be null terminated.
 			dataType[4] = '\0';
-			long subRecSize;
+			uint32_t subRecSize;
 			if ( strcmp(dataType, "INTV") == 0){
-				ifs.read ((char *)&subRecSize, sizeof(long));
-				ifs.read((char*)&mLandSquare, sizeof(LandSquare));
-			}else if ( strcmp(dataType, "VNML") == 0){
-				ifs.read ((char *)&subRecSize, sizeof(long));
+				ifs.read ((char *)&subRecSize, sizeof(uint32_t));
                 long recordStart = ifs.tellg();
-                loadVnmlRecord(ifs);
+                assert(sizeof(LandSquare)==8);
+                ifs.read((char*)&mLandSquare, sizeof(LandSquare));
                 assert(ifs.tellg() == recordStart + subRecSize);
             }else if ( strcmp(dataType, "VHGT") == 0){
-				ifs.read ((char *)&subRecSize, sizeof(long));
+				ifs.read ((char *)&subRecSize, sizeof(uint32_t));
                 long recordStart = ifs.tellg();
                 loadVhgtRecord(ifs);
                 assert(ifs.tellg() == recordStart + subRecSize);
-			}else if ( strcmp(dataType, "VTEX") == 0){
-				ifs.read ((char *)&subRecSize, sizeof(long));
+            }else if ( strcmp(dataType, "VTEX") == 0){
+				ifs.read ((char *)&subRecSize, sizeof(uint32_t));
                 long recordStart = ifs.tellg();
                 loadVtexRecord(ifs);
                 assert(ifs.tellg() == recordStart + subRecSize);

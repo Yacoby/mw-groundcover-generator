@@ -9,20 +9,13 @@
 #include "ESSubString.h"
 #include "ESSubUnknown.h"
 
-#include "ESRef.h"
-
 namespace ES3{
 
-
-class ESRecord;
-typedef ESRef<ESRecord> ESRecordRef;
 
 /**
 * Contains the data about a base record
 */
 class ESRecord{
-private:
-	mutable unsigned int _ref_count;
 protected:
 	/**
 	* Used by inherited classes to deal with unknown records
@@ -33,27 +26,7 @@ protected:
 		unk.read(ifs);
 	}
 
-	//the class type
-	const char* pType;
-
 public:
-
-	void ref_addESRef() const{
-		++_ref_count;
-	}
-
-	 void ref_subtractESRef() const{
-		_ref_count--;
-		if ( _ref_count < 1 ) {
-			delete this;
-		}
-	}
-
-	ESRecord(){
-		_ref_count = 0;
-	}
-	~ESRecord(){}
-
 
 	/**
 	* Read the subrecord
@@ -64,11 +37,6 @@ public:
 
 
 };
-
-
-template <class T> ESRef<T> DynamicCast( ESRecord* object ) {
-		return dynamic_cast<T*>(object);
-}
 
 }//namespace
 

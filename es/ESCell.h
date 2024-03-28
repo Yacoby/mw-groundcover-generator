@@ -13,7 +13,7 @@ namespace ES3{
 
 
 class ESCell;
-typedef ESRef<ESCell> ESCellRef;
+typedef std::shared_ptr<ESCell> ESCellRef;
 
 /**
 * Contains all data releating to a cell...

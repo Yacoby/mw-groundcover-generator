@@ -6,9 +6,9 @@ namespace ES3{
 * Contains the data for the cell ambi
 */
 struct ESSubAmbiData{
-	long mAmbiCol;
-	long mSunCol;
-	long mFogCol;
+    uint32_t mAmbiCol;
+    uint32_t mSunCol;
+    uint32_t mFogCol;
 	float mFogDen;
 };
 

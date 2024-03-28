@@ -14,7 +14,7 @@ namespace ES3{
 
 
 class ESFileContainer;
-typedef ESRef<ESFileContainer> ESFileContainerRef;
+typedef std::shared_ptr<ESFileContainer> ESFileContainerRef;
 
 
 /**
@@ -22,21 +22,7 @@ typedef ESRef<ESFileContainer> ESFileContainerRef;
 * It is advisable to always use this for mutliple files.
 */
 class ESFileContainer{
-private:
-		mutable unsigned int _ref_count;
 protected:
-
-	/**
-	* List of all the records that have IDs, excluding cells. 
-	* As esm/ps should be loaded in load order, this includes the data overwriting "feature"
-	*/
-	std::map<std::string, ESRecordRef> mRecord;
-
-	/**
-	* Contains a list of land data. As land is only for exterior cells, it is easyer to access like this;
-	* \todo Could do with a marco for constructing it?
-	*/
-	STD_MAP2d(int, ESLandRef) mLand;
 
 	/**
 	* Contains a list of the files. This is needed as some records canot be overwriten. (Cells for example),
@@ -44,36 +30,11 @@ protected:
 	*/
 	std::vector<ESFileRef> mFile;
 public:
-
-
-	void ref_addESRef() const{
-		++_ref_count;
-	}
-
-	 void ref_subtractESRef() const{
-		_ref_count--;
-		if ( _ref_count < 1 ) {
-			delete this;
-		}
-	}
-	
-	/**
-	* Registers all the record types
-	*/
-	ESFileContainer(){
-		_ref_count = 0;
-	}
-
-	/**
-	* Destructor. ...
-	*/
-	~ESFileContainer(){	}
-
 	bool loadDataFile(const std::string& file){
 		static std::map<std::string, ESFileRef> files;
 
 		if ( files.find(file) == files.end() )
-			files[file] = new ESFile;
+			files[file] = ESFileRef(new ESFile());
 
 		{
 			if ( files[file]->loadFile(file) ){

@@ -7,14 +7,14 @@ std::string ESSubString::get(){
 }
 
 void ESSubString::set(const std::string &s){
-	mRecordSize = (long) s.length();
+	mRecordSize = (uint32_t) s.length();
 	mSubStr = s;
 }
 
 void ESSubString::read(std::ifstream &ifs){
 
 	//read the size of the string
-	ifs.read ((char *)&mRecordSize, sizeof(long));
+	ifs.read ((char *)&mRecordSize, sizeof(uint32_t));
 
 	char* tSubStr;
 	tSubStr = new char[mRecordSize + 4];
@@ -26,7 +26,7 @@ void ESSubString::read(std::ifstream &ifs){
 }
 
 void ESSubString::write(std::ofstream &ofs){
-	long len = (long) mSubStr.length();
+    uint32_t len = (uint32_t) mSubStr.length();
 	ofs.write((char*)&len, 4);
 	ofs.write(mSubStr.c_str(), (std::streamsize)mSubStr.length());
 }

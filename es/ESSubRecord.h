@@ -8,7 +8,7 @@ class ESSubRecord{
 private:
 	mutable unsigned int _ref_count;
 protected:
-	long mRecordSize;	//Size of the record when output
+    uint32_t mRecordSize;	//Size of the record when output
 
 	std::string	mData;			//The record data for an unknown type
 

@@ -11,14 +11,14 @@ namespace ES3{
 class ESSubLong : public ESSubRecord{
 private:
 	///contains the value of the float
-	long mLong; 
+    uint32_t mLong;
 public:
 
 	///gets the float stored in the subclass
-	long get();
+    uint32_t get();
 
 	///sets the float stored in the subclass
-	void set(long l);
+	void set(uint32_t l);
 
 	///reads the string from the given file, and saves the data.
 	void read(std::ifstream &ifs);

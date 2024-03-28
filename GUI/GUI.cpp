@@ -130,15 +130,6 @@ void GUI::OnGenPress( wxCommandEvent& event ){
     mGenerate->Enable(false);
 }
 
-int GUI::getCell(float xy){
-	int cell = 0;
-	for ( xy; xy > 8192; cell++ )
-		xy -=8192;
-	for ( xy; xy < 0; cell-- )
-		xy +=8192;
-	return cell;
-}
-
 std::string GUI::getRegKey(wchar_t* pos, wchar_t* name){
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__))
 	DWORD type = REG_SZ;

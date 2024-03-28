@@ -4,7 +4,7 @@
 namespace ES3{
 
 	class ESHeader;
-	typedef ESRef<ESHeader> ESHeaderRef;
+	typedef std::shared_ptr<ESHeader> ESHeaderRef;
 
 	class ESHeader : public ESRecord{
 	private:
@@ -35,8 +35,8 @@ namespace ES3{
 					mVersion.read(ifs);
 					//ifs.seekg((long)ifs.tellg() + 4);
 
-					long g;
-					ifs.read((char*)&g, sizeof(long));
+                    uint32_t g;
+					ifs.read((char*)&g, sizeof(uint32_t));
 
 					mComp.read(ifs);
 					mDisc.read(ifs);

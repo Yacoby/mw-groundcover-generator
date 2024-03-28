@@ -26,16 +26,6 @@ private:
 	};
 	static bool timeSort(FileTime i,FileTime j) { return (i.time<j.time); }
 
-	void clearModList();
-	std::list<std::string> getActiveFiles();
-
-	int getCell(float xy);
-
-	void setStatusText(std::string text){
-		mStatus->SetStatusText(text);
-		wxWindow::Update();
-	}
-
 	std::string getRegKey(wchar_t* pos, wchar_t* name);
 
 protected:

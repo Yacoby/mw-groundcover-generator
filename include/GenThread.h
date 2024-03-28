@@ -83,7 +83,7 @@ protected:
 			return 0;
 		}
 
-		ES3::ESFileContainerRef fc = new ES3::ESFileContainer();
+		ES3::ESFileContainerRef fc = ES3::ESFileContainerRef(new ES3::ESFileContainer());
 		for ( std::vector<std::string>::iterator iter = mFiles.begin(); iter != mFiles.end(); ++iter){
             std::string fileName = fs::path(*iter).filename().string();
 
@@ -142,7 +142,7 @@ protected:
 				ES3::ESCellRef cell = fc->getFirstCell(cx,cy);
 
 				ES3::ESFileRef file = fc->getLandFile(cx, cy);
-				std::vector< std::vector< short > > landTex = land->getLandTextures();
+				std::vector< std::vector< uint16_t > > landTex = land->getLandTextures();
 				int frmr = 0;
 
 				if ( cell )
@@ -277,7 +277,7 @@ protected:
 											if ( squy < 0 )
 												squy = 16 + squy;
 
-											std::vector< std::vector< short > > landTex2 = land2->getLandTextures();
+											std::vector< std::vector< uint16_t > > landTex2 = land2->getLandTextures();
 											ES3::ESFileRef file2 = fc->getLandFile(cellx,celly);
 
 											if ( landTex2[squx][squy] == 0 )
