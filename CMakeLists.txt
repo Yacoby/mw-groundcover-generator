@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(MW_MESH_GEN)
 
+set(Boost_USE_STATIC_LIBS ON)
+set(wxWidgets_USE_STATIC ON)
+
 find_package(wxWidgets COMPONENTS core base REQUIRED)
 include("${wxWidgets_USE_FILE}")
 
@@ -15,6 +18,7 @@ include_directories(${MW_MESH_GEN_SOURCE_DIR}/include)
 FILE(GLOB es_sources ${MW_MESH_GEN_SOURCE_DIR}/es/*.cpp)
 
 IF (WIN32)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
     add_executable(MWMeshGen WIN32 src/main.cpp src/Funcs.cpp GUI/GUI.cpp GUI/GrassGen.cpp ${es_sources})
 ELSE()
     add_executable(MWMeshGen src/main.cpp src/Funcs.cpp GUI/GUI.cpp GUI/GrassGen.cpp ${es_sources})

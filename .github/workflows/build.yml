@@ -1,0 +1,56 @@
+name: build
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install mac dependencies
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: |
+          brew install wxwidgets boost
+      - name: Build windows dependencies
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: johnwason/vcpkg-action@v6
+        id: vcpkg
+        with:
+          pkgs: wxwidgets boost-filesystem boost-algorithm
+          triplet: x64-windows-static
+          token: ${{ github.token }}
+          github-binarycache: true
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} ..
+          cmake --build . --config Release
+      - name: Make release directory, copy common artifacts
+        run: |
+          mkdir release
+          cp README.md release/README.md.txt
+          cp LICENCE.txt release/LICENCE.txt
+
+          mkdir release/examples
+          cp package/grass_cell_ref.ini release/examples/grass_cell_ref.ini
+          cp package/grass_general_info.ini release/examples/grass_general_info.ini
+      - name: Copy windows artifacts to the release directory
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          cp build/Release/MWMeshGen.exe release/MWMeshGen.exe
+      - name: Copy macos artifacts to the release directory
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: |
+          cp build/MWMeshGen release/MWMeshGen
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}
+          path: release/
+          if-no-files-found: error
