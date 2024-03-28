@@ -93,6 +93,15 @@ public:
 		}
 		return NULL;
 	}
+
+    std::set<std::pair<int32_t, int32_t >> getExteriorCellCoordinates() {
+        std::set<std::pair<int32_t, int32_t > > result;
+        for ( unsigned i = 0; i < mFile.size(); i++ ) {
+            const auto coordinates = mFile[i]->getExteriorCellCoordinates();
+            result.insert(coordinates.begin(), coordinates.end());
+        }
+        return result;
+    }
 };
 
 }//namespace

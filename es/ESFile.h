@@ -81,6 +81,16 @@ public:
 	std::string getLTexPath(int index){
 		return mLandTex[index]->getPath();
 	}
+
+    std::set<std::pair<int32_t, int32_t >> getExteriorCellCoordinates() {
+        std::set<std::pair<int32_t, int32_t > > result;
+        for (const auto &xCordAndCells: mpLand) {
+            for (const auto &yCordAndCell : xCordAndCells.second) {
+                result.insert(std::pair(xCordAndCells.first,yCordAndCell.first));
+            }
+        }
+        return result;
+    }
 };
 
 }//namespace
