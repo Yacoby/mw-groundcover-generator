@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(MW_MESH_GEN)
 
 find_package(wxWidgets COMPONENTS core base REQUIRED)
@@ -16,4 +16,5 @@ FILE(GLOB es_sources ${MW_MESH_GEN_SOURCE_DIR}/es/*.cpp)
 
 add_executable(MWMeshGen src/main.cpp src/Funcs.cpp GUI/GUI.cpp GUI/GrassGen.cpp ${es_sources})
 
+target_compile_features(MWMeshGen PRIVATE cxx_std_17)
 target_link_libraries(MWMeshGen ${wxWidgets_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
