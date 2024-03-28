@@ -29,7 +29,7 @@ void GUI::OnImportPress(wxCommandEvent &event) {
         return;
     }
 
-    std::string iniPath = fs::absolute(fs::path(mMorrowindLoc->GetPath().mb_str()) / "Morrowind.ini").string();
+    std::string iniPath = fs::absolute(fs::path(mMorrowindLoc->GetPath().utf8_string()) / "Morrowind.ini").string();
 
     Ini ini;
     if (!ini.load(iniPath)) {
@@ -53,10 +53,10 @@ void GUI::OnImportPress(wxCommandEvent &event) {
 }
 
 void GUI::OnAddPress(wxCommandEvent &event) {
-    std::string s = std::string(wxFileSelector(
+    std::string s = wxFileSelector(
             wxFileSelectorPromptStr,
             mMorrowindLoc->GetPath()
-    ).mb_str());
+    ).utf8_string();
     fs::path path = fs::path(s);
     if (!fs::exists(path) || !fs::is_regular_file(path)) {
         return;
@@ -77,14 +77,14 @@ void GUI::OnRemovePress(wxCommandEvent &event) {
 }
 
 void GUI::OnGenPress(wxCommandEvent &event) {
-    fs::path basePath = fs::absolute(fs::path(mMorrowindLoc->GetPath().mb_str()));
+    fs::path basePath = fs::absolute(fs::path(mMorrowindLoc->GetPath().utf8_string()));
 
     std::vector<FileTime> files;
     for (unsigned int x = 0; x < mModList->GetCount(); x++) {
-        std::string fileName = std::string(mModList->GetString(x).mb_str());
+        std::string fileName = mModList->GetString(x).utf8_string();
 
         FileTime ft;
-        ft.file = basePath / fs::path("Data Files") / fs::path(mModList->GetString(x).mb_str());
+        ft.file = basePath / fs::path("Data Files") / fs::path(mModList->GetString(x).utf8_string());
 
         if (!fs::exists(ft.file)) {
             wxMessageBox("Could not find input file \"" + fileName + "\", expected to find it at " + ft.file.string(),
@@ -107,24 +107,24 @@ void GUI::OnGenPress(wxCommandEvent &event) {
         return;
     }
 
-    fs::path iniPath = fs::absolute(fs::path(mIniLoc->GetPath().mb_str()));
+    fs::path iniPath = fs::absolute(fs::path(mIniLoc->GetPath().utf8_string()));
     if (!fs::exists(iniPath)) {
         wxMessageBox("Settings (ini) path " + iniPath.string() + " doesn't exist", wxT("Something went wrong"),
                      wxICON_ERROR);
         return;
     }
 
-    fs::path outPath = fs::absolute(basePath / fs::path("Data Files") / fs::path(mOutputFile->GetValue().mb_str()));
+    fs::path outPath = fs::absolute(basePath / fs::path("Data Files") / fs::path(mOutputFile->GetValue().utf8_string()));
     if (!fs::exists(outPath.parent_path())) {
         wxMessageBox("Output path directory " + outPath.parent_path().string() +
                      " doesn't exist. Did you set the Morrowind location", wxT("Something went wrong"), wxICON_ERROR);
         return;
     }
 
-    int zOffset = fromString<int>(std::string(mZOffset->GetValue().mb_str()));
+    int zOffset = fromString<int>(mZOffset->GetValue().utf8_string());
     GenThread *t = new GenThread(this,
                                  outPath.string(),
-                                 std::string(mID->GetValue().mb_str()),
+                                 mID->GetValue().utf8_string(),
                                  iniPath.string(),
                                  vals,
                                  zOffset);
@@ -136,7 +136,7 @@ void GUI::OnGenPress(wxCommandEvent &event) {
     mGenerate->Enable(false);
 }
 
-std::string GUI::getRegKey(wchar_t *pos, wchar_t *name) {
+std::string GUI::getRegKey(const wchar_t* pos, const wchar_t* name) {
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__))
     DWORD type = REG_SZ;
     HKEY hKey;

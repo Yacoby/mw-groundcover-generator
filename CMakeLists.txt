@@ -14,7 +14,12 @@ include_directories(${MW_MESH_GEN_SOURCE_DIR}/include)
 
 FILE(GLOB es_sources ${MW_MESH_GEN_SOURCE_DIR}/es/*.cpp)
 
-add_executable(MWMeshGen src/main.cpp src/Funcs.cpp GUI/GUI.cpp GUI/GrassGen.cpp ${es_sources})
+IF (WIN32)
+    add_executable(MWMeshGen WIN32 src/main.cpp src/Funcs.cpp GUI/GUI.cpp GUI/GrassGen.cpp ${es_sources})
+ELSE()
+    add_executable(MWMeshGen src/main.cpp src/Funcs.cpp GUI/GUI.cpp GUI/GrassGen.cpp ${es_sources})
+ENDIF()
+
 
 target_compile_features(MWMeshGen PRIVATE cxx_std_17)
 target_link_libraries(MWMeshGen ${wxWidgets_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})

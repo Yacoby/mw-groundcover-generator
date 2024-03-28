@@ -45,7 +45,7 @@ bool ESFile::loadFile(const std::string &pFile) {
         uint32_t flags;
         ifStream.read((char *) &flags, sizeof(uint32_t));
 
-        long recordEndPos = recordSize + ifStream.tellg();
+        std::streampos recordEndPos = recordSize + ifStream.tellg();
 
         if (strcmp(tType, "LAND") == 0) {
             ESLandRef land = ESLandRef(new ESLand());

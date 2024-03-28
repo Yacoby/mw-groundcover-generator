@@ -314,7 +314,7 @@ namespace ES3 {
         LandSquare getLandPos() { return mLandSquare; }
 
         void read(std::ifstream &ifs, long recordSize) {
-            long readTo = recordSize + ifs.tellg();
+            std::streampos readTo = recordSize + ifs.tellg();
 
             while (ifs.tellg() < readTo) {
                 char dataType[5];
@@ -325,21 +325,20 @@ namespace ES3 {
                 uint32_t subRecSize;
                 if (strcmp(dataType, "INTV") == 0) {
                     ifs.read((char *) &subRecSize, sizeof(uint32_t));
-                    long recordStart = ifs.tellg();
+                    std::streampos recordStart = ifs.tellg();
                     assert(sizeof(LandSquare) == 8);
                     ifs.read((char *) &mLandSquare, sizeof(LandSquare));
-                    assert(ifs.tellg() == recordStart + subRecSize);
-                    ifs.seekg(recordStart + subRecSize);
+                    assert(ifs.tellg() == recordStart + std::streampos(subRecSize));
                 } else if (strcmp(dataType, "VHGT") == 0) {
                     ifs.read((char *) &subRecSize, sizeof(uint32_t));
-                    long recordStart = ifs.tellg();
+                    std::streampos recordStart = ifs.tellg();
                     loadVhgtRecord(ifs);
-                    assert(ifs.tellg() == recordStart + subRecSize);
+                    assert(ifs.tellg() == recordStart + std::streampos(subRecSize));
                 } else if (strcmp(dataType, "VTEX") == 0) {
                     ifs.read((char *) &subRecSize, sizeof(uint32_t));
                     long recordStart = ifs.tellg();
                     loadVtexRecord(ifs);
-                    assert(ifs.tellg() == recordStart + subRecSize);
+                    assert(ifs.tellg() == recordStart + std::streampos(subRecSize));
                 } else {
                     handleUnknownRecord(ifs);
                 }

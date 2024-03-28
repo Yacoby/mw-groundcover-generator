@@ -119,7 +119,7 @@ protected:
 
         Buff buff(0);
         const auto cells = fc->getExteriorCellCoordinates();
-        uint cellsProcessed = 0;
+        int cellsProcessed = 0;
         for (const auto &cellCoord: cells) {
             auto cx = cellCoord.first;
             auto cy = cellCoord.second;
