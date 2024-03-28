@@ -54,7 +54,7 @@ namespace ES3 {
                 } else if (strcmp(dataType, "DATA") == 0) {
                     mPath.read(ifs);
                 } else {
-                    handelUnknownRecord(ifs);
+                    handleUnknownRecord(ifs);
                 }
             }
         }

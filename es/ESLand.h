@@ -341,7 +341,7 @@ namespace ES3 {
                     loadVtexRecord(ifs);
                     assert(ifs.tellg() == recordStart + subRecSize);
                 } else {
-                    handelUnknownRecord(ifs);
+                    handleUnknownRecord(ifs);
                 }
             }
             ifs.seekg(readTo);

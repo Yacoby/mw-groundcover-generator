@@ -9,7 +9,6 @@ namespace ES3 {
 */
     class ESSubUnknown : public ESSubRecord {
     public:
-        ///reads the data from the given file, and saves the data.
         void read(std::ifstream &ifs);
     };
 }

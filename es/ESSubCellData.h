@@ -54,14 +54,6 @@ namespace ES3 {
             ifs.read((char *) &mGridX, 4);
             ifs.read((char *) &mGridY, 4);
         }
-
-        void write(std::ofstream &ofs) {
-            long size = 12;
-            ofs.write((char *) &size, 4);
-            ofs.write((char *) &mFlags, 4);
-            ofs.write((char *) &mGridX, 4);
-            ofs.write((char *) &mGridY, 4);
-        }
     };
 
 }

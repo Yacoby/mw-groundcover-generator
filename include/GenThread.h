@@ -29,17 +29,6 @@ class GenThread : public wxThread {
         return grassID;
     }
 
-    int getCell(float xy) {
-        int cell = 0;
-        for (xy; xy > 8192; cell++) {
-            xy -= 8192;
-        }
-        for (xy; xy < 0; cell--) {
-            xy += 8192;
-        }
-        return cell;
-    }
-
     void sendStatusUpdate(int progressPercent, std::string message) {
         wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, WORKER_UPDATE);
         evt.SetInt(progressPercent);

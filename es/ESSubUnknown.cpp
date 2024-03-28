@@ -4,11 +4,9 @@
 using namespace ES3;
 
 void ESSubUnknown::read(std::ifstream &ifs) {
-
-    //read the size of the string
-    ifs.read((char *) &mRecordSize, sizeof(uint32_t));
+    uint32_t recordSize;
+    ifs.read((char *) &recordSize, sizeof(uint32_t));
     long recordStart = ifs.tellg();
-
-    ifs.seekg(mRecordSize, std::ios_base::cur);
-    assert(ifs.tellg() == recordStart + mRecordSize);
+    ifs.seekg(recordSize, std::ios_base::cur);
+    assert(ifs.tellg() == recordStart + recordSize);
 }

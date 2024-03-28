@@ -52,19 +52,6 @@ namespace ES3 {
             return true;
         }
 
-        /**
-        *	@return this should give the path to the ltex with da given index.
-        *	\todo check this works. may not
-        */
-        std::string getLTexPath(int index) {
-            for (unsigned i = 0; i < mFile.size(); i++) {
-                if (mFile[i]->getLTexExists(index)) {
-                    return mFile[i]->getLTexPath(index);
-                }
-            }
-            return "";
-        }
-
         ESCellRef getFirstCell(int x, int y) {
             for (unsigned i = 0; i < mFile.size(); i++) {
                 if (mFile[i]->cellExists(x, y)) {

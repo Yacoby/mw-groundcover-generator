@@ -6,27 +6,14 @@ std::string ESSubString::get() {
     return mSubStr;
 }
 
-void ESSubString::set(const std::string &s) {
-    mRecordSize = (uint32_t) s.length();
-    mSubStr = s;
-}
-
 void ESSubString::read(std::ifstream &ifs) {
-
-    //read the size of the string
-    ifs.read((char *) &mRecordSize, sizeof(uint32_t));
+    uint32_t recordSize;
+    ifs.read((char *) &recordSize, sizeof(uint32_t));
 
     char *tSubStr;
-    tSubStr = new char[mRecordSize + 4];
-    ifs.read(tSubStr, mRecordSize);
-    tSubStr[mRecordSize] = '\0';
+    tSubStr = new char[recordSize + 4];
+    ifs.read(tSubStr, recordSize);
+    tSubStr[recordSize] = '\0';
     mSubStr = tSubStr;
     delete[] tSubStr;
-
-}
-
-void ESSubString::write(std::ofstream &ofs) {
-    uint32_t len = (uint32_t) mSubStr.length();
-    ofs.write((char *) &len, 4);
-    ofs.write(mSubStr.c_str(), (std::streamsize) mSubStr.length());
 }

@@ -7,7 +7,6 @@
 #include "ESSubFloat.h"
 #include "ESSubLong.h"
 #include "ESSubCellData.h"
-#include "ESSubAmbi.h"
 
 namespace ES3 {
 
@@ -31,21 +30,7 @@ namespace ES3 {
 
         ///Region
         ESSubString mRegn;
-
-        ///Water height
-        ESSubFloat mWaterHeight;
-
-        ///Light data
-        ESSubAmbi mAmbiData;
     public:
-
-
-        ESCell() {
-        }
-
-        ~ESCell() {
-        }
-
 
         std::string getRegn() { return mRegn.get(); }
 
@@ -57,30 +42,6 @@ namespace ES3 {
         ESSubCellData *getCellData() {
             return &mCellData;
         }
-
-        void setCellData(ESSubCellData &cellData) {
-            mCellData = cellData;
-        }
-
-        /**
-        * @return the water height of the cell
-        */
-        float getWaterHeight() { return mWaterHeight.get(); }
-
-        /**
-        * @param f the float to set the water heigth to
-        */
-        void setWaterHeight(float f) { mWaterHeight.set(f); }
-
-        /**
-        *	@return the lighting (ambinat) data for the current cell
-        */
-        ESSubAmbi *getAmbiData() { return &mAmbiData; }
-
-        /**
-        * @param &a the ambi data to set for the current cell
-        */
-        void setAmbiData(ESSubAmbi &a) { mAmbiData = a; }
 
         /**
         * Returns the name of the cell. If the cell is an exterior, it doesn't have a name (0 length string is returned

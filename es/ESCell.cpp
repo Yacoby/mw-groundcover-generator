@@ -22,14 +22,10 @@ void ESCell::read(std::ifstream &ifs, long recordSize) {
             mCellData.read(ifs);
         } else if (strcmp(dataType, "RGNN") == 0) {
             mRegn.read(ifs);
-        } else if (strcmp(dataType, "WHGT") == 0) {
-            mWaterHeight.read(ifs);
-        } else if (strcmp(dataType, "AMBI") == 0) {
-            mAmbiData.read(ifs);
         } else if (strcmp(dataType, "NAM0") == 0) {
             mColour.read(ifs);
         } else {
-            handelUnknownRecord(ifs);
+            handleUnknownRecord(ifs);
         }
 
     }

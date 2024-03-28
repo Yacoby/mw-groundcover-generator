@@ -44,7 +44,7 @@ namespace ES3 {
                     ifs.seekg((long) ifs.tellg() + 4);
 
                 } else {
-                    handelUnknownRecord(ifs);
+                    handleUnknownRecord(ifs);
                 }
             }
             ifs.seekg(readTo);

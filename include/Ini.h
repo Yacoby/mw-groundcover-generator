@@ -10,16 +10,8 @@ protected:
     typedef std::map<std::string, std::map<std::string, std::string> > IniValues;
     typedef std::map<std::string, std::map<std::string, std::string> >::iterator IniValuesItr;
     IniValues mValues;
-
-    virtual void afterLoad() {}
-
 public:
     Ini() : mCurBlok("unknown") {}
-
-    void deleteCat(const std::string &cat) {
-        mValues.erase(cat);
-    }
-
 
     bool catExists(const std::string &cat) {
         return mValues.find(cat) != mValues.end() ? true : false;
@@ -38,28 +30,6 @@ public:
         }
         return mValues[cat][key];
     }
-
-    void setValue(const std::string &cat, const std::string &key, const std::string &val) {
-        mValues[cat][key] = val;
-    }
-
-    bool save(const std::string &f) {
-        std::ofstream ofs(f.c_str());
-        if (!ofs.is_open()) return false;
-
-        for (IniValuesItr iter1 = mValues.begin(); iter1 != mValues.end(); ++iter1) {
-            ofs << "[" << iter1->first << "]\n";
-
-            for (std::map<std::string, std::string>::iterator iter2 = iter1->second.begin();
-                 iter2 != iter1->second.end();
-                 ++iter2) {
-                ofs << iter2->first << "=" << iter2->second << "\n";
-            }
-        }
-        ofs.close();
-        return true;
-    }
-
 
     bool load(const std::string &f) {
         std::ifstream ifs(f.c_str());
