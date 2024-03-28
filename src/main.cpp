@@ -6,18 +6,18 @@
 uint32_t gNumRecords = 0;
 long gNumRecordPos = -1;
 
-class MWGrassApp : public wxApp{
+class MWGrassApp : public wxApp {
 public:
-	virtual bool OnInit(){
-		GUI* ui = new GUI(0);
-		ui->Show();
-		return true;
-	}
+    virtual bool OnInit() {
+        GUI *ui = new GUI(0);
+        ui->Show();
+        return true;
+    }
 
     virtual bool OnExceptionInMainLoop() {
         try {
             throw;
-        } catch (std::exception& e) {
+        } catch (std::exception &e) {
             wxMessageBox(e.what(), wxT("Something went wrong"), wxICON_ERROR);
         }
         return false;

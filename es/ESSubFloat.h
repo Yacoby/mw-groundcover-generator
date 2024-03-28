@@ -3,27 +3,28 @@
 
 #include "ESSubRecord.h"
 
-namespace ES3{
+namespace ES3 {
 
 /**
 * Basicly encapsulates a float
 */
-class ESSubFloat : public ESSubRecord{
-private:
-	///contains the value of the float
-	float mFloat; 
-public:
+    class ESSubFloat : public ESSubRecord {
+    private:
+        ///contains the value of the float
+        float mFloat;
+    public:
 
-	///gets the float stored in the subclass
-	float get();
+        ///gets the float stored in the subclass
+        float get();
 
-	///sets the float stored in the subclass
-	void set(float f);
+        ///sets the float stored in the subclass
+        void set(float f);
 
-	///reads the string from the given file, and saves the data.
-	void read(std::ifstream &ifs);
-	void write(std::ofstream &ofs);
-};
+        ///reads the string from the given file, and saves the data.
+        void read(std::ifstream &ifs);
+
+        void write(std::ofstream &ofs);
+    };
 
 }
 

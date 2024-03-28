@@ -9,89 +9,91 @@
 #include "ESSubCellData.h"
 #include "ESSubAmbi.h"
 
-namespace ES3{
+namespace ES3 {
 
 
-class ESCell;
-typedef std::shared_ptr<ESCell> ESCellRef;
+    class ESCell;
+
+    typedef std::shared_ptr<ESCell> ESCellRef;
 
 /**
 * Contains all data releating to a cell...
 */
-class ESCell : public ESRecord {
-private:
+    class ESCell : public ESRecord {
+    private:
 
-	ESSubLong mColour;
+        ESSubLong mColour;
 
-	ESSubString mCellName;
+        ESSubString mCellName;
 
-	///Contains data about the cell, e.g. region, gridx, gridy ...
-	ESSubCellData mCellData;
+        ///Contains data about the cell, e.g. region, gridx, gridy ...
+        ESSubCellData mCellData;
 
-	///Region
-	ESSubString mRegn;
+        ///Region
+        ESSubString mRegn;
 
-	///Water height
-	ESSubFloat mWaterHeight;
+        ///Water height
+        ESSubFloat mWaterHeight;
 
-	///Light data
-	ESSubAmbi mAmbiData;
-public:
-
-
-	ESCell(){
-	}
-
-	~ESCell(){
-	}
+        ///Light data
+        ESSubAmbi mAmbiData;
+    public:
 
 
-	std::string getRegn(){ return mRegn.get();}
-	long getNAM0(){return mColour.get();}
+        ESCell() {
+        }
 
-	/**
-	* @return data relating to the cell. This includes grid data, interior, exterior etc
-	*/
-	ESSubCellData* getCellData(){ 
-		return &mCellData;
-	}
+        ~ESCell() {
+        }
 
-	void setCellData(ESSubCellData &cellData){
-		mCellData = cellData	;
-	}
 
-	/**
-	* @return the water height of the cell
-	*/
-	float getWaterHeight(){ return mWaterHeight.get(); }
+        std::string getRegn() { return mRegn.get(); }
 
-	/**
-	* @param f the float to set the water heigth to
-	*/
-	void setWaterHeight(float f){ mWaterHeight.set(f); }
+        long getNAM0() { return mColour.get(); }
 
-	/**
-	*	@return the lighting (ambinat) data for the current cell
-	*/
-	ESSubAmbi* getAmbiData(){ return &mAmbiData; }
+        /**
+        * @return data relating to the cell. This includes grid data, interior, exterior etc
+        */
+        ESSubCellData *getCellData() {
+            return &mCellData;
+        }
 
-	/**
-	* @param &a the ambi data to set for the current cell
-	*/
-	void setAmbiData(ESSubAmbi &a){ mAmbiData = a; }
+        void setCellData(ESSubCellData &cellData) {
+            mCellData = cellData;
+        }
 
-	/**
-	* Returns the name of the cell. If the cell is an exterior, it doesn't have a name (0 length string is returned
-	*/
-	std::string getCellName(){
-		return mCellName.get();
-	}
+        /**
+        * @return the water height of the cell
+        */
+        float getWaterHeight() { return mWaterHeight.get(); }
 
-	/**
-	* Reads all the cell data excluding the FRMR records
-	*/
-	void read(std::ifstream &ifs, long recordSize);
-};
+        /**
+        * @param f the float to set the water heigth to
+        */
+        void setWaterHeight(float f) { mWaterHeight.set(f); }
+
+        /**
+        *	@return the lighting (ambinat) data for the current cell
+        */
+        ESSubAmbi *getAmbiData() { return &mAmbiData; }
+
+        /**
+        * @param &a the ambi data to set for the current cell
+        */
+        void setAmbiData(ESSubAmbi &a) { mAmbiData = a; }
+
+        /**
+        * Returns the name of the cell. If the cell is an exterior, it doesn't have a name (0 length string is returned
+        */
+        std::string getCellName() {
+            return mCellName.get();
+        }
+
+        /**
+        * Reads all the cell data excluding the FRMR records
+        */
+        void read(std::ifstream &ifs, long recordSize);
+    };
 
 }//namepsace
 

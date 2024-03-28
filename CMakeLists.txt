@@ -1,16 +1,16 @@
-cmake_minimum_required (VERSION 3.5)
-project (MW_MESH_GEN)
+cmake_minimum_required(VERSION 3.5)
+project(MW_MESH_GEN)
 
 find_package(wxWidgets COMPONENTS core base REQUIRED)
-include( "${wxWidgets_USE_FILE}" )
+include("${wxWidgets_USE_FILE}")
 
-find_package( Boost REQUIRED COMPONENTS system filesystem)
-include_directories( ${Boost_INCLUDE_DIRS} )
+find_package(Boost REQUIRED COMPONENTS system filesystem)
+include_directories(${Boost_INCLUDE_DIRS})
 
-include_directories (${MW_MESH_GEN_SOURCE_DIR}/src)
-include_directories (${MW_MESH_GEN_SOURCE_DIR}/GUI)
-include_directories (${MW_MESH_GEN_SOURCE_DIR}/es)
-include_directories (${MW_MESH_GEN_SOURCE_DIR}/include)
+include_directories(${MW_MESH_GEN_SOURCE_DIR}/src)
+include_directories(${MW_MESH_GEN_SOURCE_DIR}/GUI)
+include_directories(${MW_MESH_GEN_SOURCE_DIR}/es)
+include_directories(${MW_MESH_GEN_SOURCE_DIR}/include)
 
 FILE(GLOB es_sources ${MW_MESH_GEN_SOURCE_DIR}/es/*.cpp)
 

@@ -1,16 +1,16 @@
 #include "ESSubRecord.h"
 
-namespace ES3{
+namespace ES3 {
 
 /**
 * Contains the data for the cell ambi
 */
-struct ESSubAmbiData{
-    uint32_t mAmbiCol;
-    uint32_t mSunCol;
-    uint32_t mFogCol;
-	float mFogDen;
-};
+    struct ESSubAmbiData {
+        uint32_t mAmbiCol;
+        uint32_t mSunCol;
+        uint32_t mFogCol;
+        float mFogDen;
+    };
 
 /**
 *		Cell Lighting data
@@ -20,13 +20,13 @@ struct ESSubAmbiData{
 *			long FogColor
 *			float FogDensity	
 */
-class ESSubAmbi : public ESSubRecord{
+    class ESSubAmbi : public ESSubRecord {
 
-public:
-	ESSubAmbiData* getData(){ return (ESSubAmbiData*)mData.c_str() ; }
+    public:
+        ESSubAmbiData *getData() { return (ESSubAmbiData *) mData.c_str(); }
 
-	long getAmbientColor(){ return getData()->mAmbiCol; }
+        long getAmbientColor() { return getData()->mAmbiCol; }
 
-};
+    };
 
 }

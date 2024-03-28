@@ -3,78 +3,84 @@
 
 #include "includes.h"
 
-template<typename T> std::string toString(T s){
-	std::ostringstream oss;
-	oss << s;
-	return oss.str();
+template<typename T>
+std::string toString(T s) {
+    std::ostringstream oss;
+    oss << s;
+    return oss.str();
 }
 
-template<typename T> T fromString( const std::string& s){
-	std::istringstream is(s);
-	T t;
-	is >> t;
-	return t;
+template<typename T>
+T fromString(const std::string &s) {
+    std::istringstream is(s);
+    T t;
+    is >> t;
+    return t;
 }
 
 
-class Buff{
-	std::vector<char> mBuffer;
+class Buff {
+    std::vector<char> mBuffer;
 
-	void writeToBuffer(const char* data, int bytes){
+    void writeToBuffer(const char *data, int bytes) {
 #ifdef _DEBUG
-		int c = 0;
+        int c = 0;
 #endif
-		for ( int i = 0; i < bytes; i++ ){
-			mBuffer.push_back(data[i]);
+        for (int i = 0; i < bytes; i++) {
+            mBuffer.push_back(data[i]);
 #ifdef _DEBUG
-			c++;
+            c++;
 #endif
-		}
+        }
 #ifdef _DEBUG
-		assert(c == bytes);
+        assert(c == bytes);
 #endif
-	}
+    }
 
 public:
-	Buff(int size){}
+    Buff(int size) {}
 
-	char getByte(int index){
+    char getByte(int index) {
 #ifdef _DEBUG
-		return mBuffer.at(index);
+        return mBuffer.at(index);
 #else
-		return mBuffer[index];
+        return mBuffer[index];
 #endif
-	}
+    }
 
-	void clear(){mBuffer.clear();}
+    void clear() { mBuffer.clear(); }
 
-	int getSize(){return (int)mBuffer.size();}
+    int getSize() { return (int) mBuffer.size(); }
 
 
-	void writeType(const char* d){writeToBuffer(d, 4);}
+    void writeType(const char *d) { writeToBuffer(d, 4); }
 
-	void writeData(const std::string& d){
-		long len = (long)d.length()+1; //+1 for thew nill
-		writeToBuffer((char*)&len, 4);
-		writeToBuffer(d.c_str(), (int)d.length());
+    void writeData(const std::string &d) {
+        long len = (long) d.length() + 1; //+1 for thew nill
+        writeToBuffer((char *) &len, 4);
+        writeToBuffer(d.c_str(), (int) d.length());
 
-		len = 0;
-		writeToBuffer((char*)&len, 1);
-	}
-	void writeData(const uint32_t d){
-		long len = 4;
-		writeToBuffer((char*)&len, 4);
-		writeToBuffer((char*)&d, 4);
-	}
-	void writeData(const float d){
-		long len = 4;
-		writeToBuffer((char*)&len, 4);
-		writeToBuffer((char*)&d, 4);
-	}
+        len = 0;
+        writeToBuffer((char *) &len, 1);
+    }
 
-	void writeRaw(const std::string& d){writeToBuffer(d.c_str(), (int)d.length()-1);}
-	void writeRaw(const uint32_t d){writeToBuffer((char*)&d, 4);}
-	void writeRaw(const float d){writeToBuffer((char*)&d, 4);}
+    void writeData(const uint32_t d) {
+        long len = 4;
+        writeToBuffer((char *) &len, 4);
+        writeToBuffer((char *) &d, 4);
+    }
+
+    void writeData(const float d) {
+        long len = 4;
+        writeToBuffer((char *) &len, 4);
+        writeToBuffer((char *) &d, 4);
+    }
+
+    void writeRaw(const std::string &d) { writeToBuffer(d.c_str(), (int) d.length() - 1); }
+
+    void writeRaw(const uint32_t d) { writeToBuffer((char *) &d, 4); }
+
+    void writeRaw(const float d) { writeToBuffer((char *) &d, 4); }
 
 };
 

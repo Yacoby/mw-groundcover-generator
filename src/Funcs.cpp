@@ -7,10 +7,11 @@ long gNumRecordPos = 0;*/
 /**
 * @brief writes the cell data, copying it directly from the buffer
 */
-void fileWriteBuff(Buff* buff, std::ofstream& ofs){
-	int size = buff->getSize();
-	for ( int i = 0; i < size; i++ )
-		ofs.put(buff->getByte(i));
+void fileWriteBuff(Buff *buff, std::ofstream &ofs) {
+    int size = buff->getSize();
+    for (int i = 0; i < size; i++) {
+        ofs.put(buff->getByte(i));
+    }
 }
 
 
@@ -22,38 +23,42 @@ void fileWriteBuff(Buff* buff, std::ofstream& ofs){
 * @param col map colour of the cell
 */
 
-void buffWriteCellStart(Buff* buff, const std::string& name, uint32_t flags, uint32_t x, uint32_t y, const std::string& rgn, uint32_t col){
-	//NAME = Cell ID string.
-	buff->writeType("NAME");
-	buff->writeData(name);
+void
+buffWriteCellStart(Buff *buff, const std::string &name, uint32_t flags, uint32_t x, uint32_t y, const std::string &rgn,
+                   uint32_t col) {
+    //NAME = Cell ID string.
+    buff->writeType("NAME");
+    buff->writeData(name);
 
-	/*
-	DATA = Cell Data
-	long Flags
-	0x01 = Interior?
-	0x02 = Has Water
-	0x04 = Illegal to Sleep here
-	0x80 = Behave like exterior (Tribunal)
-	long GridX
-	long GridY
-	*/
-	buff->writeType("DATA");
-	buff->writeRaw((uint32_t)12);
-	buff->writeRaw(flags);	buff->writeRaw(x);	buff->writeRaw(y);
-	//buff->writeData(flags);	buff->writeData(x);	buff->writeData(y);
+    /*
+    DATA = Cell Data
+    long Flags
+    0x01 = Interior?
+    0x02 = Has Water
+    0x04 = Illegal to Sleep here
+    0x80 = Behave like exterior (Tribunal)
+    long GridX
+    long GridY
+    */
+    buff->writeType("DATA");
+    buff->writeRaw((uint32_t) 12);
+    buff->writeRaw(flags);
+    buff->writeRaw(x);
+    buff->writeRaw(y);
+    //buff->writeData(flags);	buff->writeData(x);	buff->writeData(y);
 
 
-	if ( rgn.length() > 0 ){
-		////RGNN = Region name string
-		buff->writeType("RGNN");
-		buff->writeData(rgn);
-	}
+    if (rgn.length() > 0) {
+        ////RGNN = Region name string
+        buff->writeType("RGNN");
+        buff->writeData(rgn);
+    }
 
-	if ( col != 0 ){
-		////NAM5 = Map Color (4 bytes, long, COLORREF)
-		buff->writeType("NAM5");
-		buff->writeData(col);
-	}
+    if (col != 0) {
+        ////NAM5 = Map Color (4 bytes, long, COLORREF)
+        buff->writeType("NAM5");
+        buff->writeData(col);
+    }
 }
 
 /*
@@ -74,31 +79,32 @@ is no sub-record count, just use the record Size value to determine
 when to stop reading a record.
 */
 
-void fileWriteStatData(std::ofstream& ofs,const std::string& type, const std::string& id, const std::string& mesh, const std::string& name, const std::string& script){
-	Buff buff(0);
+void fileWriteStatData(std::ofstream &ofs, const std::string &type, const std::string &id, const std::string &mesh,
+                       const std::string &name, const std::string &script) {
+    Buff buff(0);
 
-	buff.writeType("NAME");
-	buff.writeData(id);
-	buff.writeType("MODL");
-	buff.writeData(mesh);
+    buff.writeType("NAME");
+    buff.writeData(id);
+    buff.writeType("MODL");
+    buff.writeData(mesh);
 
-	if ( type != "STAT" ){
-		buff.writeType("FNAM");
-		buff.writeData(name);
-		buff.writeType("SCPT");
-		buff.writeData(script);
-	}
+    if (type != "STAT") {
+        buff.writeType("FNAM");
+        buff.writeData(name);
+        buff.writeType("SCPT");
+        buff.writeData(script);
+    }
 
-	long len  = buff.getSize();
-	ofs.write(type.c_str(), 4);
-	ofs.write((char*)&len, 4);
-	len = 0;
-	ofs.write((char*)&len, 4);
-	ofs.write((char*)&len, 4);
+    long len = buff.getSize();
+    ofs.write(type.c_str(), 4);
+    ofs.write((char *) &len, 4);
+    len = 0;
+    ofs.write((char *) &len, 4);
+    ofs.write((char *) &len, 4);
 
-	fileWriteBuff(&buff, ofs);
+    fileWriteBuff(&buff, ofs);
 
-	gNumRecords++;
+    gNumRecords++;
 
 
 }
@@ -106,39 +112,45 @@ void fileWriteStatData(std::ofstream& ofs,const std::string& type, const std::st
 /*
 
 */
-void buffWriteObjData(Buff* buff, uint32_t frmr, const std::string& id, float scale, float px, float py, float pz, float rx, float ry, float rz  ){
-	/*
-	FRMR = Object Index (starts at 1) (4 bytes, long)
-	This is used to uniquely identify objects in the cell.  For new files the
-	index starts at 1 and is incremented for each new object added.  For modified
-	objects the index is kept the same.	
-	*/
-	buff->writeType("FRMR");
-	buff->writeData(frmr);
+void
+buffWriteObjData(Buff *buff, uint32_t frmr, const std::string &id, float scale, float px, float py, float pz, float rx,
+                 float ry, float rz) {
+    /*
+    FRMR = Object Index (starts at 1) (4 bytes, long)
+    This is used to uniquely identify objects in the cell.  For new files the
+    index starts at 1 and is incremented for each new object added.  For modified
+    objects the index is kept the same.
+    */
+    buff->writeType("FRMR");
+    buff->writeData(frmr);
 
-	//NAME = Object ID string
-	buff->writeType("NAME");
-	buff->writeData(id);
+    //NAME = Object ID string
+    buff->writeType("NAME");
+    buff->writeData(id);
 
-	if ( scale != 1 ){
-		//XSCL = Scale (4 bytes, float) Static
-		buff->writeType("XSCL");
-		buff->writeData(scale);
-	}
+    if (scale != 1) {
+        //XSCL = Scale (4 bytes, float) Static
+        buff->writeType("XSCL");
+        buff->writeData(scale);
+    }
 
-	/*
-	DATA = Ref Position Data (24 bytes)
-	float XPos
-	float YPos
-	float ZPos
-	float XRotate
-	float YRotate
-	float ZRotate
-	*/
-	buff->writeType("DATA");
-	buff->writeRaw((uint32_t)24);
-	buff->writeRaw(px);	buff->writeRaw(py);	buff->writeRaw(pz);
-	buff->writeRaw(rx);	buff->writeRaw(ry);	buff->writeRaw(rz);
+    /*
+    DATA = Ref Position Data (24 bytes)
+    float XPos
+    float YPos
+    float ZPos
+    float XRotate
+    float YRotate
+    float ZRotate
+    */
+    buff->writeType("DATA");
+    buff->writeRaw((uint32_t) 24);
+    buff->writeRaw(px);
+    buff->writeRaw(py);
+    buff->writeRaw(pz);
+    buff->writeRaw(rx);
+    buff->writeRaw(ry);
+    buff->writeRaw(rz);
 }
 
 /*
@@ -161,69 +173,70 @@ The MAST and DATA records are always found together, the DATA following the MAST
 that it refers to.
 */
 
-void fileWriteEspHdr(std::ofstream& ofs){
-	const float ver = 1.2;
+void fileWriteEspHdr(std::ofstream &ofs) {
+    const float ver = 1.2;
     uint32_t unk = 0;
-	char tes3[] = "TES3";
+    char tes3[] = "TES3";
 
-	//buld header
-	Buff b(340);
-	b.writeType("HEDR");
-	b.writeRaw((uint32_t)300);
-	b.writeRaw((uint32_t)ver);
-	b.writeRaw((uint32_t)0);
+    //buld header
+    Buff b(340);
+    b.writeType("HEDR");
+    b.writeRaw((uint32_t) 300);
+    b.writeRaw((uint32_t) ver);
+    b.writeRaw((uint32_t) 0);
 
-	for ( int i = 0; i < 32 + 256; i+=4)
-		b.writeRaw((uint32_t)0);
-
-
-	gNumRecordPos = b.getSize();
-	b.writeRaw(gNumRecords);
-
-	//header finished
+    for (int i = 0; i < 32 + 256; i += 4) {
+        b.writeRaw((uint32_t) 0);
+    }
 
 
+    gNumRecordPos = b.getSize();
+    b.writeRaw(gNumRecords);
 
-	unk = b.getSize();
-	ofs.write(tes3, 4);
-	ofs.write((char*)&unk, 4);
-	unk=0;
-	ofs.write((char*)&unk, 4);
-	ofs.write((char*)&unk, 4);
+    //header finished
 
-	gNumRecordPos+= 4 + 4 + 4 + 4;
 
-	for ( int i = 0; i < b.getSize(); i++ ){
-		char c = b.getByte(i);
-		ofs.write((char*)&c, 1);
-	}
+
+    unk = b.getSize();
+    ofs.write(tes3, 4);
+    ofs.write((char *) &unk, 4);
+    unk = 0;
+    ofs.write((char *) &unk, 4);
+    ofs.write((char *) &unk, 4);
+
+    gNumRecordPos += 4 + 4 + 4 + 4;
+
+    for (int i = 0; i < b.getSize(); i++) {
+        char c = b.getByte(i);
+        ofs.write((char *) &c, 1);
+    }
 }
 
 /**
 * @brief writes the 16 bytes of header for the cell rec
 */
-void fileWriteCellHdr(Buff* buff, std::ofstream& ofs){
-	uint32_t size = buff->getSize();
+void fileWriteCellHdr(Buff *buff, std::ofstream &ofs) {
+    uint32_t size = buff->getSize();
 
-	ofs.write((char*)"CELL", 4);
-	ofs.write((char*)&size, 4);
+    ofs.write((char *) "CELL", 4);
+    ofs.write((char *) &size, 4);
 
     uint32_t junk = 0; //set junk
-	ofs.write((char*)&junk, 4); //junk
-	ofs.write((char*)&junk, 4); //junk
+    ofs.write((char *) &junk, 4); //junk
+    ofs.write((char *) &junk, 4); //junk
 
 }
-
-
-
 
 
 /**
 * @breif gets a random number between two values, and then reseeds with the result
 */
-float getRand(float min, float max){
-	//make sure we have done the seed
-	static bool hasSeed = false;
-	if ( !hasSeed ){ srand((int)time(0)); hasSeed = true; }
-	return ((max - min) * rand()/(float)RAND_MAX + min);
+float getRand(float min, float max) {
+    //make sure we have done the seed
+    static bool hasSeed = false;
+    if (!hasSeed) {
+        srand((int) time(0));
+        hasSeed = true;
+    }
+    return ((max - min) * rand() / (float) RAND_MAX + min);
 }
