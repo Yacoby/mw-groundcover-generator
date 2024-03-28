@@ -39,11 +39,14 @@ public:
         std::string line, key, val;
         while (!ifs.eof()) {
             std::getline(ifs, line);
+
+            int commentIdx = line.find(";");
+            if (commentIdx != -1) {
+                line = line.substr(0, commentIdx);
+            }
+
             boost::trim(line);
             boost::trim_right_if(line, boost::is_any_of("\r\n\0"));
-
-            if (line.find(";") != -1) continue; //comment
-
 
             if (line.find("[") == 0 && line.rfind("]") != -1) {
                 mCurBlok = line.substr(1, line.rfind("]") - 1);

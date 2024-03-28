@@ -1,84 +1,64 @@
-This is an old project and so the code is pretty terrible
+This is a project mostly written in a hurry in 2009, with a few patches over the years. It is unsupported.
 
-MW Mesh Generator 0.1.6
-====================================================================
-
-### License and copyright
-
-Copyright (c) 2009 Jacob Essex
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-
+### MW Mesh Generator 0.1.7
 
 ### Introduction
 
-This program allows you to place meshes over the Morrowind landscape
-with spesific meshes being placed on spesific ground textures.
+This program automatically places meshes over the Morrowind landscape
+with specific meshes being placed on specific ground textures.
 
+The motivation for this was to enable grass mods in Morrowind
 
-### Known issues
+### Installation
 
-The settings editor is untested
-
-Very little error checking is done. An invalid ini will screw things up
-
-I am fairly sure generating your own containers will not work, even
-though it is allowed on the settings editor
-
-Cells with coordinates of 512 or greater won't work (or for that matter
--512 or lower)
-
-### Installation instructions
-
-Extract the files to any location.
+- [Download the binary from Nexus Mods](https://www.nexusmods.com/morrowind/mods/23065)
+- Extract the files to any location.
 
 ### Using the software
 
-If you need to edit any of the settings, either edit
-them directly in the ini, or with the settings editor included.
+#### General settings
 
-The example inis included(grass\_cell\_ref.ini, grass\_general\_info.ini) contain
-general information on the format of the ini
+- Settings Location - The configuration file with details of what grass to generate
+- Morrowind Location - This should be the location of your Morrowind folder (the folder with Morrowind.exe in)
+- Output file - What the new esp will be called (saved to the "Data Files" folder)
 
-Run the exe.
+- ID Append - The unique ID appended to the front of all created objects
+- Z offset - Increase or decrease the height of all placed objects by a fixed amount
 
-Settings Location - The grass ini file included with the mod
-Morrowind Location - This should be the location of your Morrowind dir.
-Output file - What the new esp will be called (saved to your data files)
+#### Data files
 
+This program supports multiple data files. You can load them
+directly from your Morrowind.ini or add files manually. The files you
+add manually *must* exist in the "Data Files" folder your Morrowind directory.
 
-Press "Import from INI", or add mods manualy.
+The order the files show in this tool doesn't matter. As part of the generation, the files will be loaded in the same
+order as Morrowind will load them.
 
-ID Append - The unquie ID appended to the front of all objects
-Z offset - Increase or decrease the height of the meshes
-Thread - Leave as it is unless the grass isn't generating.
-			If you untick this, the user interface will freeze 
-			while generating grass
+#### Configuration
 
+The grass is generated according to a configuration file (an ini file). Included are some documented examples to explain
+this format
 
+- grass\_cell\_ref.ini
+- grass\_general\_info.ini
 
-Generate - The button to press to start
+#### Known issues
 
-### Contributors 
+- Setting `sRecType` to anything but `STAT` is unsupported
+
+### Building from source
+
+This requires [Boost](https://www.boost.org/) and [wxWidgets](https://www.wxwidgets.org/). The UI is built using wxFormBuilder.
+
+#### Mac
+
+```shell
+brew install boost wxwidgets
+cmake .
+make
+```
+
+### Thanks
 
 * Vality7 - Huge amount of feedback/testing
 * PirateLord - Feedback/Ideas
