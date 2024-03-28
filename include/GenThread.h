@@ -363,6 +363,6 @@ public:
             const std::string &idBase, 
             const std::string &iniLoc,
             std::vector<std::string> files,
-            int offset) : mGUI(gui), mOut(out), mIdBase(idBase), mIniLoc(iniLoc), mFiles(files), mOffset(offset){
+            int offset) : wxThread(wxTHREAD_DETACHED), mGUI(gui), mOut(out), mIdBase(idBase), mIniLoc(iniLoc), mFiles(files), mOffset(offset){
 	}
 };

@@ -123,8 +123,11 @@ void GUI::OnGenPress( wxCommandEvent& event ){
                                  vals,
                                  zOffset);
 	t->Create();
+    if ( t->Run() != wxTHREAD_NO_ERROR ) {
+        delete t;
+        wxMessageBox("Couldn't start the background thread ", wxT("Something went wrong"), wxICON_ERROR);
+    }
     mGenerate->Enable(false);
-    t->Run();
 }
 
 int GUI::getCell(float xy){
