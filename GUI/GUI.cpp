@@ -30,8 +30,6 @@ GUI::GUI(wxWindow *parent) : GrassGen(parent) {
             }
         }
     }
-
-    mModList->Append("Morrowind.esm");
 }
 
 void GUI::OnImportPress(wxCommandEvent &event) {
