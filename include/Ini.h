@@ -2,36 +2,62 @@
 #define __INI_H_
 
 #include <boost/algorithm/string.hpp>
+#include <optional>
 
 class Ini {
 
-    std::string mCurBlok;
 protected:
     typedef std::map<std::string, std::map<std::string, std::string> > IniValues;
     typedef std::map<std::string, std::map<std::string, std::string> >::iterator IniValuesItr;
     IniValues mValues;
 public:
-    Ini() : mCurBlok("unknown") {}
 
     bool catExists(const std::string &cat) {
-        return mValues.find(cat) != mValues.end() ? true : false;
+        return mValues.find(cat) != mValues.end();
     }
 
     bool valueExists(const std::string &cat, const std::string &key) {
-        if (!catExists(cat)) return false;
-        return mValues[cat].find(key) != mValues[cat].end() ? true : false;
+        auto categoryLookup = mValues.find(cat);
+        if (categoryLookup == mValues.end()) {
+            return false;
+        }
+        return categoryLookup->second.find(key) != categoryLookup->second.end();
     }
 
-    std::string getValue(const std::string &cat, const std::string &key) {
-        if (!valueExists(cat, key)) {
+    std::optional<const std::reference_wrapper<std::string>> getOptionalValue(const std::string &cat, const std::string &key) {
+        auto categoryLookup = mValues.find(cat);
+        if (categoryLookup == mValues.end()) {
+            return std::nullopt;
+        }
+        auto keyLookup = categoryLookup->second.find(key);
+        if (keyLookup == categoryLookup->second.end()) {
+            return std::nullopt;
+        }
+        return keyLookup->second;
+    }
+
+    const std::string& getValue(const std::string &cat, const std::string &key) {
+        auto categoryLookup = mValues.find(cat);
+
+        if (categoryLookup == mValues.end()) {
+            std::string msg = "When getting ini category, the category doesn't exist\nExpecting category \"" + cat +
+                              "\" to exist. (Was looking for the key \"" + key + "\")";
+            throw std::invalid_argument(msg);
+        }
+
+        auto valueLookup = categoryLookup->second.find(key);
+        if (valueLookup == categoryLookup->second.end()) {
             std::string msg = "When getting ini value, value doesn't exist\nExpecting category \"" + cat +
                               "\" to contain key \"" + key + "\"";
             throw std::invalid_argument(msg);
         }
-        return mValues[cat][key];
+
+        return valueLookup->second;
     }
 
     bool load(const std::string &f) {
+        std::string curBlok;
+
         std::ifstream ifs(f.c_str());
         if (!ifs.is_open()) return false;
 
@@ -49,7 +75,7 @@ public:
             boost::trim_right_if(line, boost::is_any_of("\r\n\0"));
 
             if (line.find("[") == 0 && line.rfind("]") != -1) {
-                mCurBlok = line.substr(1, line.rfind("]") - 1);
+                curBlok = line.substr(1, line.rfind("]") - 1);
                 continue;
             }
 
@@ -60,7 +86,7 @@ public:
             key = line.substr(0, pos);
             val = line.substr(pos + 1, line.length() - pos + 1);
 
-            mValues[mCurBlok][key] = val;
+            mValues[curBlok][key] = val;
         }
         ifs.close();
         return true;
@@ -93,13 +119,20 @@ public:
     */
     std::list<GrassMesh> getMeshList(const std::string &cat) {
         std::list<GrassMesh> lst;
-        if (!catExists(cat)) return lst;
-        for (int c = 0; valueExists(cat, "sMesh" + toString(c)); ++c) {
+        for (int c = 0; ; ++c) {
+            const std::string &stringIdx = toString(c);
+            auto mesh = getOptionalValue(cat, "sMesh" + stringIdx);
+            if (!mesh.has_value()) {
+                break;
+            }
+
             GrassMesh g;
-            g.mesh = getValue(cat, "sMesh" + toString(c));
-            g.chance = fromString<float>(getValue(cat, "sChance" + toString(c)));
-            if (valueExists(cat, "sID" + toString(c))) {
-                g.objectID = getValue(cat, "sID" + toString(c));
+            g.mesh = mesh.value();
+            g.chance = fromString<float>(getValue(cat, "sChance" + stringIdx));
+
+            auto id = getOptionalValue(cat, "sID" + stringIdx);
+            if (id.has_value()) {
+                g.objectID = id.value();
             }
             g.id = c;
             lst.push_back(g);

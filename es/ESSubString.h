@@ -8,7 +8,7 @@ namespace ES3 {
     private:
         std::string mSubStr;
     public:
-        std::string get();
+        const std::string& get();
 
         void read(std::ifstream &ifs);
     };

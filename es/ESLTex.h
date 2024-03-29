@@ -35,7 +35,7 @@ namespace ES3 {
         /**
         *	@return the path to the texture
         */
-        std::string getPath() { return mPath.get(); }
+        const std::string& getPath() { return mPath.get(); }
 
         void read(std::ifstream &ifs, long recordSize) {
             long readTo = recordSize + ifs.tellg();

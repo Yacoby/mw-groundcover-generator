@@ -77,7 +77,7 @@ namespace ES3 {
         }
 
 
-        std::vector<std::vector<uint16_t> > getLandTextures() { return mLandTextures; }
+        const std::vector<std::vector<uint16_t> >& getLandTextures() { return mLandTextures; }
 
         void loadVtexRecord(std::ifstream &ifs) {
 
@@ -311,7 +311,7 @@ namespace ES3 {
         /**
         *	@return Details about what swuare the land is on
         */
-        LandSquare getLandPos() { return mLandSquare; }
+        const LandSquare& getLandPos() { return mLandSquare; }
 
         void read(std::ifstream &ifs, long recordSize) {
             std::streampos readTo = recordSize + ifs.tellg();

@@ -32,7 +32,7 @@ namespace ES3 {
         ESSubString mRegn;
     public:
 
-        std::string getRegn() { return mRegn.get(); }
+        const std::string& getRegn() { return mRegn.get(); }
 
         long getNAM0() { return mColour.get(); }
 
@@ -46,7 +46,7 @@ namespace ES3 {
         /**
         * Returns the name of the cell. If the cell is an exterior, it doesn't have a name (0 length string is returned
         */
-        std::string getCellName() {
+        const std::string& getCellName() {
             return mCellName.get();
         }
 

@@ -2,7 +2,7 @@
 
 using namespace ES3;
 
-std::string ESSubString::get() {
+const std::string& ESSubString::get() {
     return mSubStr;
 }
 

@@ -29,7 +29,7 @@ class GenThread : public wxThread {
         return grassID;
     }
 
-    void sendStatusUpdate(int progressPercent, std::string message) {
+    void sendStatusUpdate(int progressPercent, const std::string &message) {
         wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, WORKER_UPDATE);
         evt.SetInt(progressPercent);
         evt.SetString(message);
@@ -41,7 +41,7 @@ class GenThread : public wxThread {
         wxPostEvent(mGUI, evt);
     }
 
-    void sendFailure(std::string message) {
+    void sendFailure(const std::string &message) {
         wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, WORKER_FAILURE);
         evt.SetString(message);
         wxPostEvent(mGUI, evt);
@@ -118,7 +118,7 @@ protected:
 
 
         Buff buff(0);
-        const auto cells = fc->getExteriorCellCoordinates();
+        const auto& cells = fc->getExteriorCellCoordinates();
         int cellsProcessed = 0;
         for (const auto &cellCoord: cells) {
             auto cx = cellCoord.first;
@@ -138,7 +138,7 @@ protected:
             ES3::ESCellRef cell = fc->getFirstCell(cx, cy);
 
             ES3::ESFileRef file = fc->getLandFile(cx, cy);
-            std::vector<std::vector<uint16_t> > landTex = land->getLandTextures();
+            const std::vector<std::vector<uint16_t> > &landTex = land->getLandTextures();
             int frmr = 0;
 
             if (cell) {
@@ -186,8 +186,8 @@ protected:
 
 
                     //check if we should place hrass
-                    if (ini.valueExists(iniCat, "bPlaceGrass") &&
-                        fromString<bool>(ini.getValue(iniCat, "bPlaceGrass")) == 0) {
+                    std::optional<std::string> shouldPlaceGrass = ini.getOptionalValue(iniCat, "bPlaceGrass");
+                    if (shouldPlaceGrass.has_value() && fromString<bool>(shouldPlaceGrass.value()) == 0) {
                         continue;
                     }//skip
 
@@ -196,8 +196,9 @@ protected:
 
                     //find the grass mesh
                     std::string grassID;
+                    const std::list<GrassIni2::GrassMesh> &meshList = ini.getMeshList(iniCat);
                     if (bRandClump) {
-                        grassID = getMesh(ini.getMeshList(iniCat), iniCat);
+                        grassID = getMesh(meshList, iniCat);
                     }
 
                     int gap = fromString<float>(ini.getValue(iniCat, "iGap"));
@@ -210,19 +211,24 @@ protected:
                     }
 
                     //put multiple grass objects down
+                    bool addRandomElementToPosition = fromString<bool>(ini.getValue(iniCat, "bPosRand"));
+                    bool scaleObject = fromString<bool>(ini.getValue(iniCat, "bSclRand"));
+                    auto minHeight = ini.getOptionalValue(iniCat, "fMinHeight");
+                    auto maxHeight = ini.getOptionalValue(iniCat, "fMaxHeight");
+                    auto alignToNormal = ini.getOptionalValue(iniCat, "bAlignObjectNormalToGround");
                     for (int gx = 0; gx < 512; gx += gap) {
                         for (int gy = 0; gy < 512; gy += gap) {
 
                             if (!bRandClump) {
-                                grassID = getMesh(ini.getMeshList(iniCat), iniCat);
+                                grassID = getMesh(meshList, iniCat);
                             }
 
                             //calc the morrowind pos of the
                             float posx = tx * 512 + cx * 8192 + gx;
                             float posy = ty * 512 + cy * 8192 + gy;
 
-                            //ad a random element
-                            if (fromString<bool>(ini.getValue(iniCat, "bPosRand"))) {
+                            //add a random element
+                            if (addRandomElementToPosition) {
                                 int min = fromString<float>(ini.getValue(iniCat, "fPosMin"));
                                 int max = fromString<float>(ini.getValue(iniCat, "fPosMax"));
                                 posx += getRand(min, max);
@@ -292,7 +298,7 @@ protected:
                                             squy = 16 + squy;
                                         }
 
-                                        std::vector<std::vector<uint16_t> > landTex2 = land2->getLandTextures();
+                                        const std::vector<std::vector<uint16_t> > &landTex2 = land2->getLandTextures();
                                         ES3::ESFileRef file2 = fc->getLandFile(cellx, celly);
 
                                         if (landTex2[squx][squy] == 0) {
@@ -320,26 +326,26 @@ protected:
                             float posZ = land2->getHeightAt(posx, posy) + mOffset;
 
                             ES3::Vector3 rot;
-                            if (!ini.valueExists(iniCat, "bAlignObjectNormalToGround") || fromString<bool>(ini.getValue(iniCat, "bAlignObjectNormalToGround"))) {
+                            if (!alignToNormal.has_value() || fromString<bool>(alignToNormal.value())) {
                                 rot = land2->getAngleAt(posx, posy);
                             }
                             rot.z = getRand(0, 2 * PI);
 
-                            if (ini.valueExists(iniCat, "fMinHeight")) {
-                                if (posZ <= fromString<float>(ini.getValue(iniCat, "fMinHeight"))) {
+                            if (minHeight.has_value()) {
+                                if (posZ <= fromString<float>(minHeight.value())) {
                                     continue;
                                 }
                             }
 
-                            if (ini.valueExists(iniCat, "fMaxHeight")) {
-                                if (posZ >= fromString<float>(ini.getValue(iniCat, "fMaxHeight"))) {
+                            if (maxHeight.has_value()) {
+                                if (posZ >= fromString<float>(maxHeight.value())) {
                                     continue;
                                 }
                             }
 
                             //get the scale of tthe object
                             float scale = 1;//config.scale;
-                            if (fromString<bool>(ini.getValue(iniCat, "bSclRand"))) { //option rot
+                            if (scaleObject) { //option rot
                                 scale = getRand(fromString<float>(ini.getValue(iniCat, "fSclMin")),
                                                 fromString<float>(ini.getValue(iniCat, "fSclMax")));
                             }

@@ -84,7 +84,7 @@ namespace ES3 {
             return true;
         }
 
-        std::string getLTexPath(int index) {
+        const std::string& getLTexPath(int index) {
             return mLandTex[index]->getPath();
         }
 
