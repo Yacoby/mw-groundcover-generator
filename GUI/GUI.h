@@ -27,7 +27,7 @@ private:
 
     static bool timeSort(FileTime i, FileTime j) { return (i.time < j.time); }
 
-    std::string getRegKey(const wchar_t* pos, const wchar_t* name);
+    std::optional<std::string> getRegKey(const char* pos, const char* name);
 
 protected:
     void OnThreadStatusUpdate(wxCommandEvent &event) {

@@ -11,6 +11,7 @@
   - Ensuring all line endings are handled when reading ini files
   - Made path handling agnostic of separator
 - Automated builds using github actions
+- Use Steam and GOG registry keys to get the installation location
 
 ### Fixed
 - Ini categories using the texture path and region (e.g. `[texuture.tga:region]`) now work correctly
@@ -26,4 +27,5 @@
 
 ### Removed
 - Any testing or support for 32 bit systems
+- Windows XP is now unsupported due to the usage of [RegGetValueA](https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-reggetvaluea)
 - Settings editor - as far as I know this wasn't used and as such isn't worth maintaining

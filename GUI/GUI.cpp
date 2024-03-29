@@ -2,6 +2,7 @@
 
 #include "GUI.h"
 #include "GenThread.h"
+#include <vector>
 
 namespace fs = boost::filesystem;
 
@@ -13,13 +14,23 @@ BEGIN_EVENT_TABLE(GUI, wxFrame)
 END_EVENT_TABLE()
 
 GUI::GUI(wxWindow *parent) : GrassGen(parent) {
-    std::string s = getRegKey(L"Software\\Bethesda Softworks\\Morrowind", L"Installed Path");
-    if (s.length() > 0) {
-        if (s[s.length() - 1] == '\\') {//remove the trailing slash
-            s = s.substr(0, s.length() - 1);
+    const std::pair<const char*, const char *> registryPaths[] = {
+            std::pair(R"(Software\Bethesda Softworks\Morrowind)", "Installed Path"),
+            std::pair(R"(Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 22320)", "InstallLocation"),
+            std::pair(R"(Software\GOG.com\Games\1440163901)", "path"),
+            std::pair(R"(Software\GOG.com\Games\1435828767)", "path"),
+    };
+    for (const auto &registryPath: registryPaths) {
+        const auto standardKey = getRegKey(registryPath.first, registryPath.second);
+        if (standardKey.has_value()) {
+            const auto gamePath = fs::path(standardKey.value());
+            if (fs::exists(gamePath) && fs::is_directory(gamePath)) {
+                mMorrowindLoc->SetPath(standardKey.value());
+                break;
+            }
         }
-        mMorrowindLoc->SetPath(s);
     }
+
     mModList->Append("Morrowind.esm");
 }
 
@@ -136,19 +147,19 @@ void GUI::OnGenPress(wxCommandEvent &event) {
     mGenerate->Enable(false);
 }
 
-std::string GUI::getRegKey(const wchar_t* pos, const wchar_t* name) {
+std::optional<std::string> GUI::getRegKey(const char* pos, const char* name) {
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__))
-    DWORD type = REG_SZ;
-    HKEY hKey;
-    char value[1024];
-    DWORD valueLength = 1024;
-    RegOpenKey(HKEY_LOCAL_MACHINE,pos,&hKey);
-    int result = RegQueryValueEx( hKey, name, NULL, &type, (LPBYTE)&value, &valueLength);
+    char value[8192];
+    DWORD bufferSize = sizeof(value);
+    int result = RegGetValueA(HKEY_LOCAL_MACHINE, pos, name, RRF_RT_REG_SZ, nullptr, value, &bufferSize);
     if ( result == ERROR_SUCCESS ){
-        return  std::string(value);
+        std::string strValue = std::string(value);
+        if (!strValue.empty()) {
+            return strValue;
+        }
     }
-    return "";
+    return std::nullopt;
 #else
-    return "";
+    return std::nullopt;
 #endif
 }
