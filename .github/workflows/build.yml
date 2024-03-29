@@ -36,6 +36,7 @@ jobs:
           mkdir release
           cp README.md release/README.md.txt
           cp LICENCE.txt release/LICENCE.txt
+          cp CHANGELOG.md release/CHANGELOG.md.txt
 
           mkdir release/examples
           cp package/grass_cell_ref.ini release/examples/grass_cell_ref.ini
