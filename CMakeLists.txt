@@ -16,12 +16,14 @@ include_directories(${MW_MESH_GEN_SOURCE_DIR}/es)
 include_directories(${MW_MESH_GEN_SOURCE_DIR}/include)
 
 FILE(GLOB es_sources ${MW_MESH_GEN_SOURCE_DIR}/es/*.cpp)
+FILE(GLOB sources ${MW_MESH_GEN_SOURCE_DIR}/src/*.cpp)
+FILE(GLOB gui_sources ${MW_MESH_GEN_SOURCE_DIR}/gui/*.cpp)
 
 IF (WIN32)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-    add_executable(MWMeshGen WIN32 src/main.cpp src/Funcs.cpp GUI/GUI.cpp GUI/GrassGen.cpp ${es_sources})
+    add_executable(MWMeshGen WIN32 ${sources} ${gui_sources} ${es_sources})
 ELSE()
-    add_executable(MWMeshGen src/main.cpp src/Funcs.cpp GUI/GUI.cpp GUI/GrassGen.cpp ${es_sources})
+    add_executable(MWMeshGen ${sources} ${gui_sources} ${es_sources})
 ENDIF()
 
 

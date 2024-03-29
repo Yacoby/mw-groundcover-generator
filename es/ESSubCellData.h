@@ -46,14 +46,7 @@ namespace ES3 {
         inline void setGridY(int32_t c) { mGridY = c; }
 
 
-        void read(std::ifstream &ifs) {
-            //we know the size...
-            ifs.seekg((long) ifs.tellg() + 4);
-
-            ifs.read((char *) &mFlags, 4);
-            ifs.read((char *) &mGridX, 4);
-            ifs.read((char *) &mGridY, 4);
-        }
+        void read(std::ifstream &ifs);
     };
 
 }

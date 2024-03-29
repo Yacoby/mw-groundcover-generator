@@ -21,10 +21,7 @@ namespace ES3 {
         * Used by inherited classes to deal with unknown records
         * @param &ifs ifstream positioned before the unknown record
         */
-        void handleUnknownRecord(std::ifstream &ifs) {
-            ESSubUnknown unk;
-            unk.read(ifs);
-        }
+        void handleUnknownRecord(std::ifstream &ifs);
 
     public:
 
