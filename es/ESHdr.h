@@ -13,13 +13,7 @@ namespace ES3 {
         ESSubString mComp;
         ESSubString mDisc;
     public:
-
-
         void read(std::ifstream &ifs, long recordSize);
-
-        void write(std::string &ofs) {
-
-        }
     };
 
 

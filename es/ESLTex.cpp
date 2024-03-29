@@ -3,7 +3,7 @@
 using namespace ES3;
 
 void ESLTex::read(std::ifstream &ifs, long recordSize) {
-    long readTo = recordSize + ifs.tellg();
+    std::streampos readTo = recordSize + ifs.tellg();
 
     while (ifs.tellg() < readTo) {
         char dataType[5];

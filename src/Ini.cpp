@@ -59,22 +59,22 @@ bool Ini::load(const std::string &f) {
     while (!ifs.eof()) {
         std::getline(ifs, line);
 
-        int commentIdx = line.find(";");
-        if (commentIdx != -1) {
+        size_t commentIdx = line.find(";");
+        if (commentIdx != std::string::npos) {
             line = line.substr(0, commentIdx);
         }
 
         boost::trim(line);
         boost::trim_right_if(line, boost::is_any_of("\r\n\0"));
 
-        if (line.find("[") == 0 && line.rfind("]") != -1) {
+        if (line.find("[") == 0 && line.rfind("]") != std::string::npos) {
             curBlok = line.substr(1, line.rfind("]") - 1);
             continue;
         }
 
 
         size_t pos = line.find("=");
-        if (pos == -1) continue; //not a valid value
+        if (pos == std::string::npos) continue; //not a valid value
 
         key = line.substr(0, pos);
         val = line.substr(pos + 1, line.length() - pos + 1);

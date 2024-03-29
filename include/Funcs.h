@@ -38,8 +38,6 @@ class Buff {
     }
 
 public:
-    Buff(int size) {}
-
     char getByte(int index) {
 #ifdef _DEBUG
         return mBuffer.at(index);

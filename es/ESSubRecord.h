@@ -7,6 +7,7 @@
 namespace ES3 {
     class ESSubRecord {
     public:
+        virtual ~ESSubRecord() = 0;
         virtual void read(std::ifstream &ifs) = 0;
     };
 }

@@ -1,7 +1,7 @@
 #include "ESHdr.h"
 
 void ES3::ESHeader::read(std::ifstream &ifs, long recordSize) {
-    long readTo = recordSize + ifs.tellg();
+    std::streampos readTo = recordSize + ifs.tellg();
     while (ifs.tellg() < readTo) {
         char dataType[5];
         ifs.read(dataType, 4);

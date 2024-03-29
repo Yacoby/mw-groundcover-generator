@@ -57,7 +57,6 @@ void ESLand::loadVhgtRecord(std::ifstream &ifs) {
         for (int x = 1; x < 65; x++) {
 
             char c;
-            int tmp = 0;
             ifs.get(c);
             pos += c;
 
@@ -81,66 +80,6 @@ float ESLand::getHeightAt(float x, float y) {
     if (cellX < 0)cellX = 8192 + cellX;
     if (cellY < 0)cellY = 8192 + cellY;
 
-    int posX = _temp2(cellX, 128) - 1;
-    int posY = _temp2(cellY, 128) - 1;
-
-    ////gets the offset from the vert of the object
-    //float offsetX = _temp3(cellX);
-    //float offsetY = _temp3(cellY);
-
-    //float tri[3];
-
-    //float nx1,ny1,nz1;
-
-    //if ( offsetX < offsetY ){
-    //	tri[0] = mHeightData[posX-1][posY-1];
-    //	tri[1] = mHeightData[posX-1][posY];
-    //	tri[2] = mHeightData[posX][posY];
-
-    //	nx1 = (mLandNormal[posX][posY].x + mLandNormal[posX-1][posY-1].x + mLandNormal[posX-1][posY].x)/3;
-    //	ny1 = (mLandNormal[posX][posY].y + mLandNormal[posX-1][posY-1].y + mLandNormal[posX-1][posY].y)/3;
-    //	nz1 = (mLandNormal[posX][posY].z + mLandNormal[posX-1][posY-1].z + mLandNormal[posX-1][posY].z)/3;
-
-    //}else{
-    //	tri[0] = mHeightData[posX-1][posY-1];
-    //	tri[1] = mHeightData[posX][posY-1];
-    //	tri[2] = mHeightData[posX][posY];
-
-    //	nx1 = (mLandNormal[posX][posY].x + mLandNormal[posX-1][posY-1].x + mLandNormal[posX][posY-1].x)/3;
-    //	ny1 = (mLandNormal[posX][posY].y + mLandNormal[posX-1][posY-1].y + mLandNormal[posX][posY-1].y)/3;
-    //	nz1 = (mLandNormal[posX][posY].z + mLandNormal[posX-1][posY-1].z + mLandNormal[posX][posY-1].z)/3;
-
-    //}
-
-    /////*float max = tri[0];
-    ////max = std::min<float>(tri[1],max);
-    ////max = std::min<float>(tri[2],max);*/
-
-    //float z = tri[0]*8 + (nx1 * offsetX + ny1 * offsetY ) / float(offsetX + nz1);
-    //////float z = max + (nx1 * offsetX + ny1 * offsetY ) / -nz1;
-    //return z;//*8;
-
-    //Equ
-    //P.z = V0.z+ (N.x * dx + N.y * dy ) / -N.z
-
-    //float a = mHeightData[posX-1][posY-1] - mHeightData[posX-1][posY];
-    //float b = a / float(128) * offsetY;
-
-    //float c = mHeightData[posX-1][posY-1] - mHeightData[posX][posY-1];
-    //float d = c / float(128) * offsetX;
-
-    //return (b + d + mHeightData[posX-1][posY-1])*8;
-
-    /*
-     start.x = _vertex( 0, 0, 0 );
-    start.y = _vertex( 0, 0, 1 );
-    start.z = _vertex( 0, 0, 2 );
-
-    end.x = _vertex( mOptions->tileSize - 1, mOptions->tileSize - 1, 0 );
-    end.y = _vertex( mOptions->tileSize - 1, mOptions->tileSize - 1, 1 );
-    end.z = _vertex( mOptions->tileSize - 1, mOptions->tileSize - 1, 2 );
-    */
-
     Vector3 end, start;
 
     start.z = mHeightData[0][0];
@@ -150,9 +89,6 @@ float ESLand::getHeightAt(float x, float y) {
     end.y = 64 * 64;
     end.z = mHeightData[64][64];
 
-    //float x_pct = ( x - start.x ) / ( end.x - start.x );
-    //float z_pct = ( z - start.z ) / ( end.z - start.z );
-
     float x_pct = (cellX - 0) / (8192);
     float z_pct = (cellY - 0) / (8192);
 
@@ -161,8 +97,6 @@ float ESLand::getHeightAt(float x, float y) {
 
     int x_index = (int) (x_pt);
     int z_index = (int) (z_pt);
-    //int x_index = posX;
-    //int z_index = posY;
 
     // If we got to the far right / bottom edge, move one back
     if (x_index == 64) {
@@ -254,7 +188,7 @@ void ESLand::read(std::ifstream &ifs, long recordSize) {
             assert(ifs.tellg() == recordStart + std::streampos(subRecSize));
         } else if (strcmp(dataType, "VTEX") == 0) {
             ifs.read((char *) &subRecSize, sizeof(uint32_t));
-            long recordStart = ifs.tellg();
+            std::streampos recordStart = ifs.tellg();
             loadVtexRecord(ifs);
             assert(ifs.tellg() == recordStart + std::streampos(subRecSize));
         } else {

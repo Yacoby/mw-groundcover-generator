@@ -81,7 +81,7 @@ when to stop reading a record.
 
 void fileWriteStatData(std::ofstream &ofs, const std::string &type, const std::string &id, const std::string &mesh,
                        const std::string &name, const std::string &script) {
-    Buff buff(0);
+    Buff buff;
 
     buff.writeType("NAME");
     buff.writeData(id);
@@ -179,7 +179,7 @@ void fileWriteEspHdr(std::ofstream &ofs) {
     char tes3[] = "TES3";
 
     //buld header
-    Buff b(340);
+    Buff b;
     b.writeType("HEDR");
     b.writeRaw((uint32_t) 300);
     b.writeRaw((uint32_t) ver);

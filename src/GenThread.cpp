@@ -108,7 +108,7 @@ wxThread::ExitCode GenThread::Generate() {
     }
 
 
-    Buff buff(0);
+    Buff buff;
     const auto& cells = fc->getExteriorCellCoordinates();
     int cellsProcessed = 0;
     for (const auto &cellCoord: cells) {
@@ -378,6 +378,6 @@ wxThread::ExitCode GenThread::Generate() {
 }
 
 GenThread::GenThread(GUI *gui, const std::string &out, const std::string &idBase, const std::string &iniLoc,
-                     std::vector<std::string> files, int offset) : wxThread(wxTHREAD_DETACHED), mGUI(gui), mOut(out), mIdBase(idBase), mIniLoc(iniLoc),
-                                                                   mFiles(files), mOffset(offset) {
+                     std::vector<std::string> files, int offset) : wxThread(wxTHREAD_DETACHED), mOut(out), mIdBase(idBase), mIniLoc(iniLoc), mOffset(offset),
+                                                                   mFiles(files), mGUI(gui) {
 }

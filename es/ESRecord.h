@@ -24,6 +24,7 @@ namespace ES3 {
         void handleUnknownRecord(std::ifstream &ifs);
 
     public:
+        virtual ~ESRecord() = 0;
 
         /**
         * Read the subrecord

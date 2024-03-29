@@ -57,7 +57,7 @@ protected:
 
     void OnGenPress(wxCommandEvent &event);
 
-DECLARE_EVENT_TABLE();
+DECLARE_EVENT_TABLE()
 
 public:
     /** Constructor */
