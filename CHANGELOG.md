@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## 0.2 - 2024-03-29
 
 ### Added
 - Added an option "bAlignObjectNormalToGround" (default true) which when set to false ("0") doesn't align the placed object to the angle of the terrain.
