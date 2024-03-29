@@ -163,13 +163,14 @@ wxThread::ExitCode GenThread::Generate() {
                         } else if (cell->getCellName().length() > 0 && ini.catExists(tex + ":ANY_NAMED_CELL")) {
                             iniCat = tex + ":ANY_NAMED_CELL";
                             break;
-                        } else if (cell->getRegn().length() > 0 && ini.catExists(iniCat + ":" + cell->getRegn())) {
+                        } else if (cell->getRegn().length() > 0 && ini.catExists(tex + ":" + cell->getRegn())) {
                             iniCat = tex + ":" + cell->getRegn();
                             break;
                         }
                     }
                     if (ini.catExists(tex)) {
                         iniCat = tex;
+                        break;
                     }
 
                 }
