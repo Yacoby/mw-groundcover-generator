@@ -4,7 +4,7 @@
 
 std::string GenThread::getMesh(const std::list<GrassIni2::GrassMesh> &meshList, const std::string &cat) {
     std::string grassID = "UNKNOWN_GRASS";
-    float meshRand = getRand(0, 100);
+    float meshRand = getRandom(0, 100);
     float meshChance = 1;
     for (std::list<GrassIni2::GrassMesh>::const_iterator iter = meshList.begin(); iter != meshList.end(); ++iter) {
 
@@ -37,6 +37,11 @@ void GenThread::sendFailure(const std::string &message) {
     wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, WORKER_FAILURE);
     evt.SetString(message);
     wxPostEvent(mGUI, evt);
+}
+
+float GenThread::getRandom(float min, float max) {
+    std::uniform_real_distribution<float> dist(min, max);
+    return dist(randomNumberSequence);
 }
 
 wxThread::ExitCode GenThread::Entry() {
@@ -198,7 +203,7 @@ wxThread::ExitCode GenThread::Generate() {
                 //allow a max gap of more than 512
                 if (gap > 512) {
                     float zz = 512 / (float) gap;
-                    float xx = getRand(0, 100) / 100;
+                    float xx = getRandom(0, 100) / 100;
                     if (zz > xx) continue;
                 }
 
@@ -223,8 +228,8 @@ wxThread::ExitCode GenThread::Generate() {
                         if (addRandomElementToPosition) {
                             int min = fromString<float>(ini.getValue(iniCat, "fPosMin"));
                             int max = fromString<float>(ini.getValue(iniCat, "fPosMax"));
-                            posx += getRand(min, max);
-                            posy += getRand(min, max);
+                            posx += getRandom(min, max);
+                            posy += getRandom(min, max);
                         }
 
                         //get the correcrt cell, sometimes with the rand function, it goes over a cell boarder
@@ -321,7 +326,7 @@ wxThread::ExitCode GenThread::Generate() {
                         if (!alignToNormal.has_value() || fromString<bool>(alignToNormal.value())) {
                             rot = land2->getAngleAt(posx, posy);
                         }
-                        rot.z = getRand(0, 2 * PI);
+                        rot.z = getRandom(0, 2 * PI);
 
                         if (minHeight.has_value()) {
                             if (posZ <= fromString<float>(minHeight.value())) {
@@ -338,8 +343,8 @@ wxThread::ExitCode GenThread::Generate() {
                         //get the scale of tthe object
                         float scale = 1;//config.scale;
                         if (scaleObject) { //option rot
-                            scale = getRand(fromString<float>(ini.getValue(iniCat, "fSclMin")),
-                                            fromString<float>(ini.getValue(iniCat, "fSclMax")));
+                            scale = getRandom(fromString<float>(ini.getValue(iniCat, "fSclMin")),
+                                              fromString<float>(ini.getValue(iniCat, "fSclMax")));
                         }
 
 
@@ -378,6 +383,8 @@ wxThread::ExitCode GenThread::Generate() {
 }
 
 GenThread::GenThread(GUI *gui, const std::string &out, const std::string &idBase, const std::string &iniLoc,
-                     std::vector<std::string> files, int offset) : wxThread(wxTHREAD_DETACHED), mOut(out), mIdBase(idBase), mIniLoc(iniLoc), mOffset(offset),
-                                                                   mFiles(files), mGUI(gui) {
+                     std::vector<std::string> files, int offset) : wxThread(wxTHREAD_DETACHED), mOut(out),
+                                                                   mIdBase(idBase), mIniLoc(iniLoc), mOffset(offset),
+                                                                   mFiles(files), mGUI(gui),
+                                                                   randomNumberSequence(time(nullptr)) {
 }

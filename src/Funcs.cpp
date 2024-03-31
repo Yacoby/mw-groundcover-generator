@@ -226,17 +226,3 @@ void fileWriteCellHdr(Buff *buff, std::ofstream &ofs) {
     ofs.write((char *) &junk, 4); //junk
 
 }
-
-
-/**
-* @breif gets a random number between two values, and then reseeds with the result
-*/
-float getRand(float min, float max) {
-    //make sure we have done the seed
-    static bool hasSeed = false;
-    if (!hasSeed) {
-        srand((int) time(0));
-        hasSeed = true;
-    }
-    return ((max - min) * rand() / (float) RAND_MAX + min);
-}

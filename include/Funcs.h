@@ -89,6 +89,4 @@ void buffWriteObjData(Buff* buff, uint32_t frmr, const std::string& id, float sc
 void fileWriteEspHdr(std::ofstream& ofs);
 void fileWriteCellHdr(Buff* buff, std::ofstream& ofs);
 
-float getRand(float min, float max);
-
 #endif //__FUNCS_H_

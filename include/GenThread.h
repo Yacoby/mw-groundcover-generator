@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <random>
+
 namespace fs = boost::filesystem;
 
 class GenThread : public wxThread {
@@ -10,6 +12,8 @@ class GenThread : public wxThread {
     std::vector<std::string> mFiles;
     GUI *mGUI;
 
+    std::mt19937 randomNumberSequence;
+
     std::string getMesh(const std::list<GrassIni2::GrassMesh> &meshList, const std::string &cat);
 
     void sendStatusUpdate(int progressPercent, const std::string &message);
@@ -17,6 +21,8 @@ class GenThread : public wxThread {
     void sendSuccess();
 
     void sendFailure(const std::string &message);
+
+    float getRandom(float min, float max);
 
 protected:
     ExitCode Entry();
