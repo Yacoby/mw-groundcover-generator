@@ -4,8 +4,9 @@
 #include "GenThread.h"
 #include <vector>
 #include <thread>
+#include <filesystem>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 
 BEGIN_EVENT_TABLE(GUI, wxFrame)

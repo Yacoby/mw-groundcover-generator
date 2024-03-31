@@ -21,8 +21,8 @@ class GUI : public GrassGen {
 private:
 
     struct FileTime {
-        boost::filesystem::path file;
-        time_t time;
+        std::filesystem::path file;
+        std::filesystem::file_time_type time;
     };
 
     static bool timeSort(FileTime i, FileTime j) { return (i.time < j.time); }

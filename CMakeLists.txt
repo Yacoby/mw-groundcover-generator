@@ -7,7 +7,7 @@ set(wxWidgets_USE_STATIC ON)
 find_package(wxWidgets COMPONENTS core base REQUIRED)
 include("${wxWidgets_USE_FILE}")
 
-find_package(Boost REQUIRED COMPONENTS system filesystem)
+find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 include_directories(${MW_MESH_GEN_SOURCE_DIR}/src)
@@ -28,4 +28,4 @@ ENDIF()
 
 
 target_compile_features(MWMeshGen PRIVATE cxx_std_17)
-target_link_libraries(MWMeshGen ${wxWidgets_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries(MWMeshGen ${wxWidgets_LIBRARIES})

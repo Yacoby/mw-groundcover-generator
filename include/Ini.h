@@ -5,6 +5,7 @@
 #include <map>
 #include <list>
 #include <optional>
+#include <filesystem>
 
 class Ini {
 
@@ -22,7 +23,7 @@ public:
 
     const std::string& getValue(const std::string &cat, const std::string &key);
 
-    bool load(const std::string &f);
+    bool load(const std::filesystem::path &f);
 };
 
 class GrassIni2 : public Ini {

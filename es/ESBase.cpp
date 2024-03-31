@@ -2,8 +2,8 @@
 
 using namespace ES3;
 
-bool ESFileContainer::loadDataFile(const std::string &file) {
-    static std::map<std::string, ESFileRef> files;
+bool ESFileContainer::loadDataFile(const std::filesystem::path &file) {
+    static std::map<std::filesystem::path, ESFileRef> files;
 
     if (files.find(file) == files.end()) {
         files[file] = ESFileRef(new ESFile());

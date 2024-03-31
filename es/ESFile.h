@@ -7,6 +7,7 @@
 #include <set>
 #include <cstring>
 #include <vector>
+#include <filesystem>
 
 #include "MapFunctions.h"
 
@@ -46,7 +47,7 @@ namespace ES3 {
 
         void readHeader(std::ifstream *mIfs);
 
-        bool loadFile(const std::string &pFile);
+        bool loadFile(const std::filesystem::path &pFile);
 
         ESLTexRef getLTex(long id) {
             return mLandTexVec.at(id);

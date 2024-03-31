@@ -48,7 +48,7 @@ const std::string &Ini::getValue(const std::string &cat, const std::string &key)
     return valueLookup->second;
 }
 
-bool Ini::load(const std::string &f) {
+bool Ini::load(const std::filesystem::path &f) {
     std::string curBlok;
 
     std::ifstream ifs(f.c_str());

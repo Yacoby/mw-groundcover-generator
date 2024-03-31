@@ -2,11 +2,11 @@
 
 #include <random>
 #include <functional>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "Ini.h"
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 class Generator {
     std::function<void(int, const std::string&)> sendStatusUpdate;

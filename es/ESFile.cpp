@@ -18,10 +18,10 @@ void ESFile::readHeader(std::ifstream *mIfs) {
     mIfs->seekg(hdrSize + 16);
 }
 
-bool ESFile::loadFile(const std::string &pFile) {
+bool ESFile::loadFile(const std::filesystem::path &pFile) {
     std::ifstream ifStream = std::ifstream(pFile.c_str(), std::ios::in | std::ios::binary);
     if (!ifStream.is_open()) {
-        throw std::runtime_error("Cannot open file: " + pFile);
+        throw std::runtime_error("Cannot open file: " + pFile.string());
     }
     readHeader(&ifStream);
 

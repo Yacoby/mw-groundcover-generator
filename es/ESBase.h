@@ -32,7 +32,7 @@ namespace ES3 {
         */
         std::vector<ESFileRef> mFile;
     public:
-        bool loadDataFile(const std::string &file);
+        bool loadDataFile(const std::filesystem::path &file);
 
         ESCellRef getFirstCell(int x, int y);
 
