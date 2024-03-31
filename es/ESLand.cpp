@@ -1,5 +1,8 @@
 #include "ESLand.h"
 
+#include <cassert>
+#include <cstring>
+
 using namespace ES3;
 
 ESLand::ESLand() {

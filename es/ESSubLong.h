@@ -1,6 +1,8 @@
 #ifndef _ESSUBLONG_H_
 #define _ESSUBLONG_H_
 
+#include <fstream>
+
 #include "ESSubRecord.h"
 
 namespace ES3 {

@@ -1,5 +1,7 @@
 #include "ESHdr.h"
 
+#include <cstring>
+
 void ES3::ESHeader::read(std::ifstream &ifs, long recordSize) {
     std::streampos readTo = recordSize + ifs.tellg();
     while (ifs.tellg() < readTo) {

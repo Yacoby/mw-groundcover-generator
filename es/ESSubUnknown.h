@@ -1,6 +1,8 @@
 #ifndef _ESSUBUNKNOWN_H_
 #define _ESSUBUNKNOWN_H_
 
+#include <fstream>
+
 #include "ESSubRecord.h"
 
 namespace ES3 {

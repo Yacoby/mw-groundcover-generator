@@ -1,5 +1,6 @@
-#include <cassert>
 #include "ESSubFloat.h"
+
+#include <cassert>
 
 using namespace ES3;
 

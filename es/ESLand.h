@@ -1,8 +1,12 @@
 #ifndef _ESLAND_H_
 #define _ESLAND_H_
 
+#include <cmath>
+#include <memory>
+#include <vector>
+#include <fstream>
+
 #include "ESRecord.h"
-#include <math.h>
 
 #define PI 3.14159265
 

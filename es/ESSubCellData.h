@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <fstream>
+
 #include "ESSubRecord.h"
 
 namespace ES3 {

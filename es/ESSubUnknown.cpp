@@ -1,5 +1,6 @@
-#include <cassert>
 #include "ESSubUnknown.h"
+
+#include <cassert>
 
 using namespace ES3;
 

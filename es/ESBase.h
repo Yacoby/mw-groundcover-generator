@@ -2,11 +2,12 @@
 #define _ESBASE_H_
 
 #include <map>
-#include "MapFunctions.h"
-
-
 #include <vector>
+#include <memory>
+#include <set>
+#include <string>
 
+#include "MapFunctions.h"
 #include "ESFile.h"
 
 

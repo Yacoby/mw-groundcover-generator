@@ -1,3 +1,6 @@
+#include <memory>
+#include <fstream>
+
 #include "ESRecord.h"
 #include "ESSubFloat.h"
 

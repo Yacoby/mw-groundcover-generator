@@ -1,10 +1,7 @@
 #ifndef _ESRECORD_H_
 #define _ESRECORD_H_
 
-#include <string>
-#include <vector>
 #include <fstream>
-#include <cassert>
 
 #include "ESSubString.h"
 #include "ESSubUnknown.h"

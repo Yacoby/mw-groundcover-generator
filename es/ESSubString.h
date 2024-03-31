@@ -1,6 +1,9 @@
 #ifndef _ESSubString_H_
 #define _ESSubString_H_
 
+#include <string>
+#include <fstream>
+
 #include "ESSubRecord.h"
 
 namespace ES3 {

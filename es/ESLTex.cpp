@@ -1,5 +1,7 @@
 #include "ESLTex.h"
 
+#include <cstring>
+
 using namespace ES3;
 
 void ESLTex::read(std::ifstream &ifs, long recordSize) {

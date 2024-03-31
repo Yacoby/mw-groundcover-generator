@@ -1,5 +1,7 @@
 #include "ESFile.h"
 
+#include <cstring>
+
 using namespace ES3;
 
 void ESFile::readHeader(std::ifstream *mIfs) {

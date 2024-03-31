@@ -2,7 +2,6 @@
 #define _ESSubRecord_H_
 
 #include <fstream>
-#include <string>
 
 namespace ES3 {
     class ESSubRecord {

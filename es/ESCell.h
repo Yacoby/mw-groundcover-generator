@@ -1,6 +1,10 @@
 #ifndef _ESCELL_H_
 #define _ESCELL_H_
 
+#include <memory>
+#include <fstream>
+#include <string>
+
 #include "ESRecord.h"
 
 #include "ESSubString.h"

@@ -1,5 +1,6 @@
-#include <cstring>
 #include "ESCell.h"
+
+#include <cstring>
 
 using namespace ES3;
 

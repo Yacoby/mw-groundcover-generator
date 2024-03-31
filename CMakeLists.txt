@@ -17,7 +17,7 @@ include_directories(${MW_MESH_GEN_SOURCE_DIR}/include)
 
 FILE(GLOB es_sources ${MW_MESH_GEN_SOURCE_DIR}/es/*.cpp)
 FILE(GLOB sources ${MW_MESH_GEN_SOURCE_DIR}/src/*.cpp)
-FILE(GLOB gui_sources ${MW_MESH_GEN_SOURCE_DIR}/gui/*.cpp)
+FILE(GLOB gui_sources ${MW_MESH_GEN_SOURCE_DIR}/GUI/*.cpp)
 
 IF (WIN32)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")

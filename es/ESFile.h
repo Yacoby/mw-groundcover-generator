@@ -6,11 +6,10 @@
 #include <list>
 #include <set>
 #include <cstring>
-#include "MapFunctions.h"
-
 #include <vector>
 
-//Records
+#include "MapFunctions.h"
+
 #include "ESRecord.h"
 
 #include "ESHdr.h"

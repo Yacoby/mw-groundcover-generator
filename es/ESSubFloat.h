@@ -1,6 +1,8 @@
 #ifndef _ESSubFloat_H_
 #define _ESSubFloat_H_
 
+#include <fstream>
+
 #include "ESSubRecord.h"
 
 namespace ES3 {
