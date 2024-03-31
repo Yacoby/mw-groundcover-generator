@@ -30,6 +30,24 @@ private:
     std::optional<std::string> getRegKey(const char* pos, const char* name);
 
 protected:
+    void sendStatusUpdate(int progressPercent, const std::string &message) {
+        wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, WORKER_UPDATE);
+        evt.SetInt(progressPercent);
+        evt.SetString(message);
+        wxPostEvent(this, evt);
+    }
+
+    void sendSuccess() {
+        wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, WORKER_SUCCESS);
+        wxPostEvent(this, evt);
+    }
+
+    void sendFailure(const std::string &message) {
+        wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, WORKER_FAILURE);
+        evt.SetString(message);
+        wxPostEvent(this, evt);
+    }
+
     void OnThreadStatusUpdate(wxCommandEvent &event) {
         mProgBar->SetValue(event.GetInt());
         mStatus->SetStatusText(event.GetString());

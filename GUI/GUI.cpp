@@ -3,6 +3,7 @@
 #include "GUI.h"
 #include "GenThread.h"
 #include <vector>
+#include <thread>
 
 namespace fs = boost::filesystem;
 
@@ -118,7 +119,7 @@ void GUI::OnGenPress(wxCommandEvent &event) {
 
     fs::path iniPath = fs::absolute(fs::path(mIniLoc->GetPath().utf8_string()));
     if (!fs::exists(iniPath)) {
-        wxMessageBox("Settings (ini) path " + iniPath.string() + " doesn't exist", wxT("Something went wrong"),
+        wxMessageBox("Settings (ini) path " + iniPath.string() + " doesn'thread exist", wxT("Something went wrong"),
                      wxICON_ERROR);
         return;
     }
@@ -126,23 +127,22 @@ void GUI::OnGenPress(wxCommandEvent &event) {
     fs::path outPath = fs::absolute(basePath / fs::path("Data Files") / fs::path(mOutputFile->GetValue().utf8_string()));
     if (!fs::exists(outPath.parent_path())) {
         wxMessageBox("Output path directory " + outPath.parent_path().string() +
-                     " doesn't exist. Did you set the Morrowind location", wxT("Something went wrong"), wxICON_ERROR);
+                     " doesn'thread exist. Did you set the Morrowind location", wxT("Something went wrong"), wxICON_ERROR);
         return;
     }
 
     int zOffset = fromString<int>(mZOffset->GetValue().utf8_string());
-    GenThread *t = new GenThread(this,
-                                 outPath.string(),
-                                 mID->GetValue().utf8_string(),
-                                 iniPath.string(),
-                                 vals,
-                                 zOffset);
-    t->Create();
-    if (t->Run() != wxTHREAD_NO_ERROR) {
-        delete t;
-        wxMessageBox("Couldn't start the background thread ", wxT("Something went wrong"), wxICON_ERROR);
-    }
+    std::thread thread(Generator::generate,
+                       [&](int progress, const std::string& message) { return this->sendStatusUpdate(progress, message); },
+                       [&]() { return this->sendSuccess(); },
+                       [&](const std::string& message) { return this->sendFailure(message); },
+                       outPath.string(),
+                       mID->GetValue().utf8_string(),
+                       iniPath.string(),
+                       vals,
+                       zOffset);
     mGenerate->Enable(false);
+    thread.detach();
 }
 
 std::optional<std::string> GUI::getRegKey(const char* pos, const char* name) {

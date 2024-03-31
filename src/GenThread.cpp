@@ -1,13 +1,14 @@
-#include <wx/msgdlg.h>
-
 #include "GenThread.h"
 
-std::string GenThread::getMesh(const std::list<GrassIni2::GrassMesh> &meshList, const std::string &cat) {
+#include <wx/msgdlg.h>
+
+#include "Funcs.h"
+
+std::string Generator::getMesh(const std::list<GrassIni2::GrassMesh> &meshList, const std::string &cat) {
     std::string grassID = "UNKNOWN_GRASS";
     float meshRand = getRandom(0, 100);
     float meshChance = 1;
     for (std::list<GrassIni2::GrassMesh>::const_iterator iter = meshList.begin(); iter != meshList.end(); ++iter) {
-
         meshChance += iter->chance;
         if (meshChance > meshRand) {
             if (iter->objectID.length() == 0) {
@@ -21,42 +22,27 @@ std::string GenThread::getMesh(const std::list<GrassIni2::GrassMesh> &meshList, 
     return grassID;
 }
 
-void GenThread::sendStatusUpdate(int progressPercent, const std::string &message) {
-    wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, WORKER_UPDATE);
-    evt.SetInt(progressPercent);
-    evt.SetString(message);
-    wxPostEvent(mGUI, evt);
-}
-
-void GenThread::sendSuccess() {
-    wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, WORKER_SUCCESS);
-    wxPostEvent(mGUI, evt);
-}
-
-void GenThread::sendFailure(const std::string &message) {
-    wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, WORKER_FAILURE);
-    evt.SetString(message);
-    wxPostEvent(mGUI, evt);
-}
-
-float GenThread::getRandom(float min, float max) {
+float Generator::getRandom(float min, float max) {
     std::uniform_real_distribution<float> dist(min, max);
     return dist(randomNumberSequence);
 }
 
-wxThread::ExitCode GenThread::Entry() {
+void Generator::generate(std::function<void(int, std::string)> sendStatusUpdate, std::function<void()> sendSuccess,
+                         std::function<void(std::string)> sendFailure, const std::string &out,
+                         const std::string &idBase, const std::string &iniLoc, std::vector<std::string> files,
+                         int offset) {
     try {
-        return Generate();
+        Generator(sendStatusUpdate, sendSuccess, sendFailure, out, idBase, iniLoc, files, offset)
+                .doGenerate();
     } catch (std::exception &e) {
         sendFailure(e.what());
     }
-    return 0;
 }
 
-wxThread::ExitCode GenThread::Generate() {
+void Generator::doGenerate() {
     if (mFiles.size() == 0) {
         sendFailure("No files to process");
-        return 0;
+        return;
     }
 
     gNumRecords = 0;
@@ -69,7 +55,7 @@ wxThread::ExitCode GenThread::Generate() {
     GrassIni2 ini;
     if (!ini.load(mIniLoc)) {
         sendFailure("Failed to load ini file");
-        return 0;
+        return;
     }
 
     ES3::ESFileContainerRef fc = ES3::ESFileContainerRef(new ES3::ESFileContainer());
@@ -80,7 +66,7 @@ wxThread::ExitCode GenThread::Generate() {
 
         if (!fc->loadDataFile(*iter)) {
             sendFailure("Failed to load data file: " + fileName);
-            return 0;
+            return;
         }
     }
     sendStatusUpdate(0, "Loaded all files");
@@ -90,7 +76,7 @@ wxThread::ExitCode GenThread::Generate() {
     std::ofstream ofs(mOut.c_str(), std::ios::out | std::ios::binary);
     if (!ofs.is_open()) {
         sendFailure("Failed to open output file: " + mOut);
-        return 0;
+        return;
     }
 
     sendStatusUpdate(0, "Writing grass STAT objects to output file");
@@ -120,11 +106,6 @@ wxThread::ExitCode GenThread::Generate() {
         auto cx = cellCoord.first;
         auto cy = cellCoord.second;
         cellsProcessed++;
-
-        if (TestDestroy()) {
-            sendFailure("Generation Failed. Forced Exit");
-            return 0;
-        }
 
         ES3::ESLandRef land = fc->getLand(cx, cy);
         assert(land);
@@ -376,15 +357,17 @@ wxThread::ExitCode GenThread::Generate() {
     ofs.close();
 
     sendSuccess();
-
-    return 0;
-
-
 }
 
-GenThread::GenThread(GUI *gui, const std::string &out, const std::string &idBase, const std::string &iniLoc,
-                     std::vector<std::string> files, int offset) : wxThread(wxTHREAD_DETACHED), mOut(out),
+Generator::Generator(const std::function<void(int, std::string)> sendStatusUpdateArg,
+                     const std::function<void()> sendSuccessArg,
+                     const std::function<void(std::string)> sendFailureArg,
+                     const std::string &out, const std::string &idBase, const std::string &iniLoc,
+                     std::vector<std::string> files, int offset) : sendStatusUpdate(sendStatusUpdateArg),
+                                                                   sendSuccess(sendSuccessArg),
+                                                                   sendFailure(sendFailureArg),
+                                                                   mOut(out),
                                                                    mIdBase(idBase), mIniLoc(iniLoc), mOffset(offset),
-                                                                   mFiles(files), mGUI(gui),
+                                                                   mFiles(files),
                                                                    randomNumberSequence(time(nullptr)) {
 }
