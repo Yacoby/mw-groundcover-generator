@@ -4,6 +4,8 @@
 #include <functional>
 #include <filesystem>
 
+#include <boost/random/mersenne_twister.hpp>
+
 #include "Ini.h"
 
 namespace fs = std::filesystem;
@@ -20,7 +22,7 @@ class Generator {
     std::string mIdBase;
     int mOffset;
 
-    std::mt19937 randomNumberSequence;
+    boost::mt19937 randomNumberSequence;
 
     std::string getMesh(const std::list<GrassIni2::GrassMesh> &meshList, const std::string &cat);
 

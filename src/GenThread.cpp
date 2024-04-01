@@ -1,6 +1,8 @@
 #include "GenThread.h"
 
-#include <wx/msgdlg.h>
+#include <cassert>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random.hpp>
 
 #include "Funcs.h"
 #include "ESBase.h"
@@ -24,7 +26,8 @@ std::string Generator::getMesh(const std::list<GrassIni2::GrassMesh> &meshList, 
 }
 
 float Generator::getRandom(float min, float max) {
-    std::uniform_real_distribution<float> dist(min, max);
+    // Using boost because uniform_real produces consistent output across platforms
+    boost::uniform_real<float> dist(min, max);
     return dist(randomNumberSequence);
 }
 
@@ -109,8 +112,11 @@ void Generator::doGenerate() {
 
     Buff buff;
     const auto& cells = fc->getExteriorCellCoordinates();
+    auto sortedCells = std::vector<std::pair<int32_t, int32_t >>(cells.begin(), cells.end());
+    std::sort(sortedCells.begin(), sortedCells.end());
+
     int cellsProcessed = 0;
-    for (const auto &cellCoord: cells) {
+    for (const auto &cellCoord: sortedCells) {
         auto cx = cellCoord.first;
         auto cy = cellCoord.second;
         cellsProcessed++;
