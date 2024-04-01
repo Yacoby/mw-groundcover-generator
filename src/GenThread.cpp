@@ -3,6 +3,7 @@
 #include <wx/msgdlg.h>
 
 #include "Funcs.h"
+#include "ESBase.h"
 
 std::string Generator::getMesh(const std::list<GrassIni2::GrassMesh> &meshList, const std::string &cat) {
     std::string grassID = "UNKNOWN_GRASS";

@@ -1,7 +1,13 @@
 #ifndef __FUNCS_H_
 #define __FUNCS_H_
 
-#include "includes.h"
+#include <cstdint>
+#include <string>
+#include <sstream>
+#include <vector>
+
+extern uint32_t gNumRecords;
+extern long gNumRecordPos;
 
 template<typename T>
 std::string toString(T s) {

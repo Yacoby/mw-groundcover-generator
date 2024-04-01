@@ -3,9 +3,6 @@
 #include <wx/msgdlg.h>
 #include "GUI.h"
 
-uint32_t gNumRecords = 0;
-long gNumRecordPos = -1;
-
 class MWGrassApp : public wxApp {
 public:
     virtual bool OnInit() {

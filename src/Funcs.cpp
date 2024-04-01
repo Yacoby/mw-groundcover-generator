@@ -1,8 +1,9 @@
-#include "Funcs.h"/*
+#include "Funcs.h"
 
-long gNumRecords = 0;
-long gNumRecordPos = 0;*/
+#include <fstream>
 
+uint32_t gNumRecords = 0;
+long gNumRecordPos = -1;
 
 /**
 * @brief writes the cell data, copying it directly from the buffer
