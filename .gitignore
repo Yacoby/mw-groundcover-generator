@@ -23,3 +23,9 @@
 # Executables
 *.out
 *.app
+
+# Temporary test resources
+tst/output/*.esp
+
+*.DS_Store
+.idea

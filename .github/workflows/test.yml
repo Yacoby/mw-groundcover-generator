@@ -1,0 +1,32 @@
+name: test
+
+on: [push]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ubuntu dependencies
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        # this is the wrong version of wx, but wx only needs to exist for the tests to compile
+        run: |
+          sudo apt-get install libboost-all-dev libwxgtk3.0-gtk3-dev
+      - name: Run tests
+        run: |
+          mkdir build
+          cd build
+          cmake ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} ../
+          make MWMeshGenTests
+          CTEST_OUTPUT_ON_FAILURE=1 make test
+      - name: Archive output on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: tst/output
+          retention-days: 2

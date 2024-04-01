@@ -21,7 +21,7 @@ jobs:
         uses: johnwason/vcpkg-action@v6
         id: vcpkg
         with:
-          pkgs: wxwidgets boost-algorithm boost-random
+          pkgs: wxwidgets boost-algorithm boost-random boost-test
           triplet: x64-windows-static
           token: ${{ github.token }}
           github-binarycache: true
