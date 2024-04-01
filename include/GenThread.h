@@ -13,9 +13,12 @@ class Generator {
     std::function<void()> sendSuccess;
     std::function<void(const std::string&)> sendFailure;
 
-    std::string mOut, mIdBase, mIniLoc;
+    fs::path mIniLoc;
+    std::vector<fs::path> mFiles;
+    fs::path mOut;
+
+    std::string mIdBase;
     int mOffset;
-    std::vector<std::string> mFiles;
 
     std::mt19937 randomNumberSequence;
 
@@ -26,11 +29,12 @@ class Generator {
     Generator(std::function<void(int, std::string)> sendStatusUpdate,
               std::function<void()> sendSuccess,
               std::function<void(std::string)> sendFailure,
-              const std::string &out,
-              const std::string &idBase,
-              const std::string &iniLoc,
-              std::vector<std::string> files,
-              int offset);
+              const fs::path &configurationLocation,
+              const std::vector<fs::path> &inputFiles,
+              const fs::path &outputLocation,
+              const std::string &idPrefix,
+              int offset,
+              unsigned randomSeed);
 
     void doGenerate();
 public:
@@ -39,10 +43,11 @@ public:
             std::function<void(int, std::string)> sendStatusUpdate,
             std::function<void()> sendSuccess,
             std::function<void(std::string)> sendFailure,
-            const std::string &out,
-            const std::string &idBase,
-            const std::string &iniLoc,
-            std::vector<std::string> files,
-            int offset
+            const std::filesystem::path configurationLocation,
+            const std::vector<fs::path> inputFiles,
+            const std::filesystem::path outputLocation,
+            const std::string idPrefix,
+            int offset,
+            unsigned randomSeed
     );
 };

@@ -108,9 +108,9 @@ void GUI::OnGenPress(wxCommandEvent &event) {
     }
     sort(files.begin(), files.end(), GUI::timeSort);
 
-    std::vector<std::string> vals;
+    std::vector<fs::path> vals;
     for (unsigned int i = 0; i < files.size(); i++) {
-        vals.push_back(files[i].file.string());
+        vals.push_back(files[i].file);
     }
 
     if (vals.empty()) {
@@ -137,11 +137,12 @@ void GUI::OnGenPress(wxCommandEvent &event) {
                        [&](int progress, const std::string& message) { return this->sendStatusUpdate(progress, message); },
                        [&]() { return this->sendSuccess(); },
                        [&](const std::string& message) { return this->sendFailure(message); },
-                       outPath.string(),
-                       mID->GetValue().utf8_string(),
-                       iniPath.string(),
+                       iniPath,
                        vals,
-                       zOffset);
+                       outPath,
+                       mID->GetValue().utf8_string(),
+                       zOffset,
+                       time(nullptr));
     mGenerate->Enable(false);
     thread.detach();
 }

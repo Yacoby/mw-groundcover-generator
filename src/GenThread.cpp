@@ -27,12 +27,19 @@ float Generator::getRandom(float min, float max) {
     return dist(randomNumberSequence);
 }
 
-void Generator::generate(std::function<void(int, std::string)> sendStatusUpdate, std::function<void()> sendSuccess,
-                         std::function<void(std::string)> sendFailure, const std::string &out,
-                         const std::string &idBase, const std::string &iniLoc, std::vector<std::string> files,
-                         int offset) {
+void Generator::generate(
+        std::function<void(int, std::string)> sendStatusUpdate,
+        std::function<void()> sendSuccess,
+        std::function<void(std::string)> sendFailure,
+        const fs::path configurationLocation,
+        std::vector<fs::path> inputFiles,
+        const fs::path outputLocation,
+        const std::string idPrefix,
+        int offset,
+        unsigned randomSeed) {
     try {
-        Generator(sendStatusUpdate, sendSuccess, sendFailure, out, idBase, iniLoc, files, offset)
+        Generator(sendStatusUpdate, sendSuccess, sendFailure, configurationLocation, inputFiles, outputLocation,
+                  idPrefix, offset, randomSeed)
                 .doGenerate();
     } catch (std::exception &e) {
         sendFailure(e.what());
@@ -59,8 +66,8 @@ void Generator::doGenerate() {
     }
 
     ES3::ESFileContainerRef fc = ES3::ESFileContainerRef(new ES3::ESFileContainer());
-    for (std::vector<std::string>::iterator iter = mFiles.begin(); iter != mFiles.end(); ++iter) {
-        std::string fileName = fs::path(*iter).filename().string();
+    for (auto iter = mFiles.begin(); iter != mFiles.end(); ++iter) {
+        std::string fileName = (*iter).filename().string();
 
         sendStatusUpdate(0, "Loading: " + fileName);
 
@@ -75,7 +82,7 @@ void Generator::doGenerate() {
 
     std::ofstream ofs(mOut.c_str(), std::ios::out | std::ios::binary);
     if (!ofs.is_open()) {
-        sendFailure("Failed to open output file: " + mOut);
+        sendFailure("Failed to open output file: " + mOut.string());
         return;
     }
 
@@ -362,12 +369,16 @@ void Generator::doGenerate() {
 Generator::Generator(const std::function<void(int, std::string)> sendStatusUpdateArg,
                      const std::function<void()> sendSuccessArg,
                      const std::function<void(std::string)> sendFailureArg,
-                     const std::string &out, const std::string &idBase, const std::string &iniLoc,
-                     std::vector<std::string> files, int offset) : sendStatusUpdate(sendStatusUpdateArg),
-                                                                   sendSuccess(sendSuccessArg),
-                                                                   sendFailure(sendFailureArg),
-                                                                   mOut(out),
-                                                                   mIdBase(idBase), mIniLoc(iniLoc), mOffset(offset),
-                                                                   mFiles(files),
-                                                                   randomNumberSequence(time(nullptr)) {
+                     const fs::path &configurationLocation,
+                     const std::vector<fs::path> &files,
+                     const fs::path &outputLocation,
+                     const std::string &idPrefix,
+                     int offset,
+                     unsigned randomSeed) : sendStatusUpdate(sendStatusUpdateArg),
+                                            sendSuccess(sendSuccessArg),
+                                            sendFailure(sendFailureArg),
+                                            mOut(outputLocation),
+                                            mIdBase(idPrefix), mIniLoc(configurationLocation), mOffset(offset),
+                                            mFiles(files),
+                                            randomNumberSequence(randomSeed) {
 }
