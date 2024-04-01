@@ -3,24 +3,15 @@
 using namespace ES3;
 
 bool ESFileContainer::loadDataFile(const std::filesystem::path &file) {
-    static std::map<std::filesystem::path, ESFileRef> files;
+    auto esFile = ESFileRef(new ESFile());
 
-    if (files.find(file) == files.end()) {
-        files[file] = ESFileRef(new ESFile());
+    if (esFile->loadFile(file)) {
+        mFile.push_back(esFile);
+        return true;
     }
 
-    {
-        if (files[file]->loadFile(file)) {
-            mFile.push_back(files[file]);
-            files.erase(file);
+    return false;
 
-            return true;
-        }
-
-        return false;
-
-    }
-    return true;
 }
 
 ESCellRef ESFileContainer::getFirstCell(int x, int y) {
