@@ -4,20 +4,50 @@
 #include <boost/random/uniform_real.hpp>
 #include <boost/random.hpp>
 
+#include "Configuration.h"
 #include "Funcs.h"
 #include "ESBase.h"
 
-std::string Generator::getMesh(const std::list<GrassIni2::GrassMesh> &meshList, const std::string &cat) {
+std::optional<Selector> getConfigurationSelector(
+        const Configuration& configuration,
+        ES3::ESCellRef cell,
+        const std::string& texture,
+        const std::string& textureId
+) {
+    std::vector textures({texture, textureId});
+    for (const auto &tex: textures) {
+        std::vector<Selector> selectors;
+        if (cell) {
+            if (!cell->getCellName().empty()) {
+                selectors.emplace_back(tex, cell->getCellName());
+                selectors.emplace_back(tex, "ANY_NAMED_CELL");
+            }
+            if (!cell->getRegn().empty()) {
+                selectors.emplace_back(tex, cell->getRegn());
+            }
+        }
+        selectors.emplace_back(tex);
+
+        for (const auto &selector: selectors) {
+            if (configuration.get(selector).has_value()) {
+                return selector;
+            }
+        }
+    }
+    return std::nullopt;
+}
+
+std::string Generator::getMesh(const std::vector<ObjectPlacementPossibility>& placements, const std::string &cat) {
     std::string grassID = "UNKNOWN_GRASS";
     float meshRand = getRandom(0, 100);
     float meshChance = 1;
-    for (std::list<GrassIni2::GrassMesh>::const_iterator iter = meshList.begin(); iter != meshList.end(); ++iter) {
-        meshChance += iter->chance;
+    for (const auto &item: placements) {
+        meshChance += item.chance;
         if (meshChance > meshRand) {
-            if (iter->objectID.length() == 0) {
-                grassID = mIdBase + cat + toString(iter->id);
+            if (std::holds_alternative<ObjectId>(item.idOrMesh)) {
+                grassID = std::get<ObjectId>(item.idOrMesh).get();
             } else {
-                grassID = iter->objectID;
+                grassID = mIdBase + cat + std::to_string(item.deprecatedId);
             }
             break;
         }
@@ -62,12 +92,7 @@ void Generator::doGenerate() {
 
     sendStatusUpdate(0, "Loading configuration (ini) file");
 
-    //load the ini
-    GrassIni2 ini;
-    if (!ini.load(mIniLoc)) {
-        sendFailure("Failed to load ini file");
-        return;
-    }
+    const auto configuration = loadConfigurationFromIni(mIniLoc);
 
     ES3::ESFileContainerRef fc = ES3::ESFileContainerRef(new ES3::ESFileContainer());
     for (auto iter = mFiles.begin(); iter != mFiles.end(); ++iter) {
@@ -93,18 +118,17 @@ void Generator::doGenerate() {
     sendStatusUpdate(0, "Writing grass STAT objects to output file");
     fileWriteEspHdr(ofs);
     {
-        std::list<std::string> texLst = ini.getTextureList();
-        for (std::list<std::string>::iterator iter1 = texLst.begin(); iter1 != texLst.end(); ++iter1) {
-            std::list<GrassIni2::GrassMesh> meshList = ini.getMeshList(*iter1);
-            for (std::list<GrassIni2::GrassMesh>::iterator iter2 = meshList.begin();
-                 iter2 != meshList.end(); ++iter2) {
+        for (const auto &item: configuration) {
+            if (!item.second.placeMeshesBehaviour.has_value()) {
+                continue;
+            }
 
-                if (iter2->objectID.length() == 0) {
-                    fileWriteStatData(ofs, ini.getValue(*iter1, "sRecType"),
-                                      mIdBase + *iter1 + toString(iter2->id), iter2->mesh,
-                                      ini.getValue(*iter1, "sName"), ini.getValue(*iter1, "sScript"));
+            for (const auto &item2: item.second.placeMeshesBehaviour.value().placements) {
+                if (!std::holds_alternative<Mesh>(item2.idOrMesh)) {
+                    continue;
                 }
-
+                auto mesh = std::get<Mesh>(item2.idOrMesh).get();
+                fileWriteStatData(ofs, "STAT", mIdBase + item.first.toLegacyCategory() + std::to_string(item2.deprecatedId), mesh);
             }
         }
     }
@@ -124,7 +148,7 @@ void Generator::doGenerate() {
         ES3::ESLandRef land = fc->getLand(cx, cy);
         assert(land);
 
-        sendStatusUpdate(cellsProcessed / float(cells.size()) * 100, "Cell: " + toString(cx) + ", " + toString(cy));
+        sendStatusUpdate(cellsProcessed / float(cells.size()) * 100, "Cell: " + std::to_string(cx) + ", " + std::to_string(cy));
 
         ES3::ESCellRef cell = fc->getFirstCell(cx, cy);
 
@@ -148,71 +172,37 @@ void Generator::doGenerate() {
 
                 if (!file->getLTexExists(landTex[tx][ty] - 1)) continue; //bad bad bad
 
+                auto selector = getConfigurationSelector(configuration, cell, file->getLTexPath(landTex[tx][ty] - 1), file->getLTex(landTex[tx][ty] - 1)->getID());
+                if (!selector.has_value()) continue; //didn't manage to find a match
+                const auto deprecatedIniCat = selector.value().toLegacyCategory();
+                const auto& behaviour = configuration.get(selector.value()).value().get();
 
-                std::string iniCat("");
-                for (int j = 0; j < 2; ++j) {
-                    std::string tex;
-                    if (j == 0) { tex = file->getLTexPath(landTex[tx][ty] - 1); }
-                    else { tex = file->getLTex(landTex[tx][ty] - 1)->getID(); }
-
-
-                    if (cell) {
-                        if (cell->getCellName().length() > 0 && ini.catExists(tex + ":" + cell->getCellName())) {
-                            iniCat = tex + ":" + cell->getCellName();
-                            break;
-                        } else if (cell->getCellName().length() > 0 && ini.catExists(tex + ":ANY_NAMED_CELL")) {
-                            iniCat = tex + ":ANY_NAMED_CELL";
-                            break;
-                        } else if (cell->getRegn().length() > 0 && ini.catExists(tex + ":" + cell->getRegn())) {
-                            iniCat = tex + ":" + cell->getRegn();
-                            break;
-                        }
-                    }
-                    if (ini.catExists(tex)) {
-                        iniCat = tex;
-                        break;
-                    }
-
-                }
-                if (iniCat.length() == 0) continue; //didn;t manage to find a match
-
-
-                //check if we should place hrass
-                std::optional<std::string> shouldPlaceGrass = ini.getOptionalValue(iniCat, "bPlaceGrass");
-                if (shouldPlaceGrass.has_value() && fromString<bool>(shouldPlaceGrass.value()) == 0) {
+                if (!behaviour.placeMeshesBehaviour.has_value()) {
                     continue;
-                }//skip
+                }
+                auto placeBehaviour = behaviour.placeMeshesBehaviour.value();
 
-                //cache val.
-                bool bRandClump = fromString<bool>(ini.getValue(iniCat, "bRandClump"));
 
                 //find the grass mesh
                 std::string grassID;
-                const std::list<GrassIni2::GrassMesh> &meshList = ini.getMeshList(iniCat);
-                if (bRandClump) {
-                    grassID = getMesh(meshList, iniCat);
+                auto &meshList = placeBehaviour.placements;
+                if (placeBehaviour.clump) {
+                    grassID = getMesh(meshList, deprecatedIniCat);
                 }
 
-                int gap = fromString<float>(ini.getValue(iniCat, "iGap"));
-
                 //allow a max gap of more than 512
-                if (gap > 512) {
-                    float zz = 512 / (float) gap;
+                if (placeBehaviour.gap > 512) {
+                    float zz = 512 / (float) placeBehaviour.gap;
                     float xx = getRandom(0, 100) / 100;
                     if (zz > xx) continue;
                 }
 
                 //put multiple grass objects down
-                bool addRandomElementToPosition = fromString<bool>(ini.getValue(iniCat, "bPosRand"));
-                bool scaleObject = fromString<bool>(ini.getValue(iniCat, "bSclRand"));
-                auto minHeight = ini.getOptionalValue(iniCat, "fMinHeight");
-                auto maxHeight = ini.getOptionalValue(iniCat, "fMaxHeight");
-                auto alignToNormal = ini.getOptionalValue(iniCat, "bAlignObjectNormalToGround");
-                for (int gx = 0; gx < 512; gx += gap) {
-                    for (int gy = 0; gy < 512; gy += gap) {
+                for (int gx = 0; gx < 512; gx += placeBehaviour.gap) {
+                    for (int gy = 0; gy < 512; gy += placeBehaviour.gap) {
 
-                        if (!bRandClump) {
-                            grassID = getMesh(meshList, iniCat);
+                        if (!placeBehaviour.clump) {
+                            grassID = getMesh(meshList, deprecatedIniCat);
                         }
 
                         //calc the morrowind pos of the
@@ -220,11 +210,10 @@ void Generator::doGenerate() {
                         float posy = ty * 512 + cy * 8192 + gy;
 
                         //add a random element
-                        if (addRandomElementToPosition) {
-                            int min = fromString<float>(ini.getValue(iniCat, "fPosMin"));
-                            int max = fromString<float>(ini.getValue(iniCat, "fPosMax"));
-                            posx += getRandom(min, max);
-                            posy += getRandom(min, max);
+                        auto posRand = placeBehaviour.positionRandomization;
+                        if (!(posRand.max == posRand.min && posRand.max == 0)) {
+                            posx += getRandom(posRand.min, posRand.max);
+                            posy += getRandom(posRand.min, posRand.max);
                         }
 
                         //get the correcrt cell, sometimes with the rand function, it goes over a cell boarder
@@ -245,10 +234,9 @@ void Generator::doGenerate() {
                         {
                             bool doContinue = false;
 
-                            //for every banned texture
-                            for (int c = 0; ini.valueExists(iniCat, "sBan" + toString(c)); ++c) {
-                                std::string t = ini.getValue(iniCat, "sBan" + toString(c));
-                                float r = fromString<int>(ini.getValue(iniCat, "iBanOff" + toString(c)));
+                            for (const auto &exclusion: placeBehaviour.exclusions) {
+                                std::string t = exclusion.texture;
+                                float r = exclusion.distanceFromTexture.value();
 
                                 for (int p = 0; p < 4; p++) {
 
@@ -318,28 +306,20 @@ void Generator::doGenerate() {
                         float posZ = land2->getHeightAt(posx, posy) + mOffset;
 
                         ES3::Vector3 rot;
-                        if (!alignToNormal.has_value() || fromString<bool>(alignToNormal.value())) {
+                        if (placeBehaviour.alignToNormal) {
                             rot = land2->getAngleAt(posx, posy);
                         }
                         rot.z = getRandom(0, 2 * PI);
 
-                        if (minHeight.has_value()) {
-                            if (posZ <= fromString<float>(minHeight.value())) {
-                                continue;
-                            }
-                        }
-
-                        if (maxHeight.has_value()) {
-                            if (posZ >= fromString<float>(maxHeight.value())) {
-                                continue;
-                            }
+                        if (posZ <= placeBehaviour.heights.min || posZ >= placeBehaviour.heights.max) {
+                            continue;
                         }
 
                         //get the scale of tthe object
-                        float scale = 1;//config.scale;
-                        if (scaleObject) { //option rot
-                            scale = getRandom(fromString<float>(ini.getValue(iniCat, "fSclMin")),
-                                              fromString<float>(ini.getValue(iniCat, "fSclMax")));
+                        float scale = 1;
+                        auto scaleRand = placeBehaviour.scaleRandomization;
+                        if (!(scaleRand.max == scaleRand.min && scaleRand.max == 1)) {
+                            scale = getRandom(scaleRand.min, scaleRand.max);
                         }
 
 

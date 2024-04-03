@@ -42,10 +42,6 @@ this format
 - grass\_cell\_ref.ini
 - grass\_general\_info.ini
 
-#### Known issues
-
-- Setting `sRecType` to anything but `STAT` is unsupported
-
 ### Building from source
 
 This requires [Boost](https://www.boost.org/) and [wxWidgets](https://www.wxwidgets.org/). The UI is built using wxFormBuilder.
@@ -59,7 +55,11 @@ make
 ```
 
 ### Thanks
+Feedback and testing:
+- Vality7
+- PirateLord
+- zackg
 
-* Vality7 - Huge amount of feedback/testing
-* PirateLord - Feedback/Ideas
-* zackg - Poking me about bugs
+Grass configurations used for testing:
+- [Aesthesia Groundcover](https://www.nexusmods.com/morrowind/mods/46377)
+- [Remiros' Groundcover](https://nexusmods.com/morrowind/mods/46733)

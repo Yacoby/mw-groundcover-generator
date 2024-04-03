@@ -10,6 +10,9 @@
 #include <windows.h>
 #endif
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+
 namespace fs = std::filesystem;
 
 
@@ -46,12 +49,15 @@ void GUI::OnImportPress(wxCommandEvent &event) {
 
     std::string iniPath = fs::absolute(fs::path(mMorrowindLoc->GetPath().utf8_string()) / "Morrowind.ini").string();
 
-    Ini ini;
-    if (!ini.load(iniPath)) {
-        wxMessageBox("Could not find the ini file at: " + iniPath, wxT("Something went wrong"), wxICON_ERROR);
+    boost::property_tree::ptree pt;
+    try {
+        boost::property_tree::ini_parser::read_ini(iniPath, pt);
+    } catch (boost::property_tree::ini_parser_error& e) {
+        wxMessageBox("Could not load the ini file at: " + iniPath + ". " + e.what(), wxT("Something went wrong"), wxICON_ERROR);
         return;
     }
-    if (!ini.catExists("Game Files")) {
+
+    if (pt.find("Game Files") == pt.not_found()) {
         wxMessageBox("Could not find \"Game Files\" section in the ini file", wxT("Something went wrong"),
                      wxICON_ERROR);
         return;
@@ -59,11 +65,12 @@ void GUI::OnImportPress(wxCommandEvent &event) {
 
     mModList->Clear();
 
-    int c = 0;
-    while (ini.valueExists("Game Files", "GameFile" + toString(c))) {
-        const std::string game_file = ini.getValue("Game Files", "GameFile" + toString(c));
-        mModList->Append(game_file);
-        c++;
+    for (int idx = 0;; ++idx) {
+        auto file = pt.get_optional<std::string>("GameFile" + std::to_string(idx));
+        if (!file.has_value()) {
+            break;
+        }
+        mModList->Append(file.value());
     }
 }
 
@@ -136,7 +143,7 @@ void GUI::OnGenPress(wxCommandEvent &event) {
         return;
     }
 
-    int zOffset = fromString<int>(mZOffset->GetValue().utf8_string());
+    int zOffset = std::stoi(mZOffset->GetValue().utf8_string());
     std::thread thread(Generator::generate,
                        [&](int progress, const std::string& message) { return this->sendStatusUpdate(progress, message); },
                        [&]() { return this->sendSuccess(); },

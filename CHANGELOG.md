@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- Simplified configuration. Almost all configuration options now have sane defaults
+- Deprecated `bPosRand` and `bSclRand`
+
+### Removed
+- Removed configuration options `sName`, `sRecType` and `sScript`
+
+### Added
+- Snapshot testing
+- Testing for existing mod configurations
+
 ## 0.2 - 2024-03-29
 
 ### Added

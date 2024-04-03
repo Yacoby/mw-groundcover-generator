@@ -3,27 +3,10 @@
 
 #include <cstdint>
 #include <string>
-#include <sstream>
 #include <vector>
 
 extern uint32_t gNumRecords;
 extern long gNumRecordPos;
-
-template<typename T>
-std::string toString(T s) {
-    std::ostringstream oss;
-    oss << s;
-    return oss.str();
-}
-
-template<typename T>
-T fromString(const std::string &s) {
-    std::istringstream is(s);
-    T t;
-    is >> t;
-    return t;
-}
-
 
 class Buff {
     std::vector<char> mBuffer;
@@ -90,7 +73,7 @@ public:
 
 void fileWriteBuff(Buff* buff, std::ofstream& ofs);
 void buffWriteCellStart(Buff* buff, const std::string& name, uint32_t flags, uint32_t x, uint32_t y, const std::string& rgn, uint32_t col);
-void fileWriteStatData(std::ofstream& ofs,const std::string& type, const std::string& id, const std::string& mesh, const std::string& name, const std::string& script);
+void fileWriteStatData(std::ofstream& ofs,const std::string& type, const std::string& id, const std::string& mesh);
 void buffWriteObjData(Buff* buff, uint32_t frmr, const std::string& id, float scale, float px, float py, float pz, float rx, float ry, float rz  );
 void fileWriteEspHdr(std::ofstream& ofs);
 void fileWriteCellHdr(Buff* buff, std::ofstream& ofs);

@@ -9,6 +9,7 @@
 #include "GenThread.h"
 
 using namespace boost::unit_test;
+namespace fs = std::filesystem;
 
 class EspSubRecord {
 private:
@@ -187,11 +188,39 @@ void test_snapshot(const std::string& name) {
     ));
 }
 
-test_suite* init_unit_test_suite(int argc, char* argv[]) {
-    std::string comparisonCases[] = {"basic", "any_named_cell", "bans", "cell_name", "region"};
+void test_configuration_from_mod(const fs::path& configPath) {
+    // Tests configuration from existing mods loads as expected. We don't verify the output, just the lack of failure
+    Generator::generate(
+            [](int, const std::string&) {},
+            []() {},
+            [](const std::string& err) { throw std::runtime_error(err); },
+            configPath,
+            std::vector<fs::path>({fs::path("snapshots") / fs::path("GrassTestBase.esp")}),
+            fs::path("output") / fs::path("config_test.esp"),
+            "GRS_",
+            10,
+            0
+    );
+}
 
+test_suite* init_unit_test_suite(int argc, char* argv[]) {
+    std::vector<fs::path> snapshotDirectories;
+    for (auto const& entry : fs::directory_iterator{fs::path("snapshots")}) {
+        if (entry.is_directory()) {
+            snapshotDirectories.push_back(entry.path().filename());
+        }
+    }
     framework::master_test_suite().
-            add(BOOST_PARAM_TEST_CASE(&test_snapshot, comparisonCases, comparisonCases+5 ) );
+            add(BOOST_PARAM_TEST_CASE(&test_snapshot, snapshotDirectories.begin(), snapshotDirectories.end()) );
+
+    std::vector<fs::path> iniFiles;
+    for (auto const& entry : fs::recursive_directory_iterator{fs::path("mod_configs")}) {
+        if (entry.is_regular_file() && entry.path().extension() == ".ini") {
+            iniFiles.push_back(entry.path());
+        }
+    }
+    framework::master_test_suite().
+            add(BOOST_PARAM_TEST_CASE(&test_configuration_from_mod, iniFiles.begin(), iniFiles.end() ) );
 
     return nullptr;
 }

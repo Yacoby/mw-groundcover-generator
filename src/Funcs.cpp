@@ -80,21 +80,13 @@ is no sub-record count, just use the record Size value to determine
 when to stop reading a record.
 */
 
-void fileWriteStatData(std::ofstream &ofs, const std::string &type, const std::string &id, const std::string &mesh,
-                       const std::string &name, const std::string &script) {
+void fileWriteStatData(std::ofstream &ofs, const std::string &type, const std::string &id, const std::string &mesh) {
     Buff buff;
 
     buff.writeType("NAME");
     buff.writeData(id);
     buff.writeType("MODL");
     buff.writeData(mesh);
-
-    if (type != "STAT") {
-        buff.writeType("FNAM");
-        buff.writeData(name);
-        buff.writeType("SCPT");
-        buff.writeData(script);
-    }
 
     long len = buff.getSize();
     ofs.write(type.c_str(), 4);
