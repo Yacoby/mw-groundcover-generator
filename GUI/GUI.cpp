@@ -143,7 +143,6 @@ void GUI::OnGenPress(wxCommandEvent &event) {
         return;
     }
 
-    int zOffset = std::stoi(mZOffset->GetValue().utf8_string());
     std::thread thread(Generator::generate,
                        [&](int progress, const std::string& message) { return this->sendStatusUpdate(progress, message); },
                        [&]() { return this->sendSuccess(); },
@@ -151,8 +150,6 @@ void GUI::OnGenPress(wxCommandEvent &event) {
                        iniPath,
                        vals,
                        outPath,
-                       mID->GetValue().utf8_string(),
-                       zOffset,
                        time(nullptr));
     mGenerate->Enable(false);
     thread.detach();

@@ -115,28 +115,6 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 
 	fgSizer3->Add( bSizer4, 0, wxEXPAND, 5 );
 
-	wxFlexGridSizer* fgSizer5;
-	fgSizer5 = new wxFlexGridSizer( 2, 2, 0, 0 );
-	fgSizer5->SetFlexibleDirection( wxBOTH );
-	fgSizer5->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
-
-	m_staticText4 = new wxStaticText( this, wxID_ANY, wxT("ID Append"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText4->Wrap( -1 );
-	fgSizer5->Add( m_staticText4, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-
-	mID = new wxTextCtrl( this, wxID_ANY, wxT("GRS_"), wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer5->Add( mID, 0, wxALL, 5 );
-
-	m_staticText24 = new wxStaticText( this, wxID_ANY, wxT("Z Offset"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText24->Wrap( -1 );
-	fgSizer5->Add( m_staticText24, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-
-	mZOffset = new wxTextCtrl( this, wxID_ANY, wxT("10"), wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer5->Add( mZOffset, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-
-
-	fgSizer3->Add( fgSizer5, 1, wxEXPAND, 5 );
-
 	wxBoxSizer* bSizer3;
 	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
 

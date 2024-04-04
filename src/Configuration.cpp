@@ -104,8 +104,10 @@ Configuration loadConfigurationFromIni(const std::filesystem::path& path) {
     }
 
     for (auto& section : pt) {
+        if (section.first == "global") {
+            continue;
+        }
         auto selector = parseSelector(section.first);
-
         auto sectionProperties = section.second;
 
         if (!sectionProperties.get<bool>("bPlaceGrass", true)) {
@@ -113,9 +115,16 @@ Configuration loadConfigurationFromIni(const std::filesystem::path& path) {
             continue;
         }
 
+        int gap;
+        try {
+            gap = sectionProperties.get<int>("iGap");
+        } catch (boost::property_tree::ptree_bad_path& e) {
+            std::throw_with_nested(std::runtime_error("Failed to read property iGap in section " + section.first + " in the file " + path.string()));
+        }
+
         PlaceMeshesBehaviour behavior = {
                 .clump = sectionProperties.get<bool>("bRandClump", false),
-                .gap = sectionProperties.get<int>("iGap"),
+                .gap = gap,
                 .alignToNormal = sectionProperties.get<bool>("bAlignObjectNormalToGround", true),
                 .heights = getBounds("fMinHeight", "fMaxHeight", sectionProperties, -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity()),
                 .positionRandomization = getOptBounds("bPosRand", "fPosMin", "fPosMax", sectionProperties, 0, 0),
@@ -127,6 +136,10 @@ Configuration loadConfigurationFromIni(const std::filesystem::path& path) {
         configuration.emplace(selector, Behaviour {.placeMeshesBehaviour = std::make_optional(behavior)});
     }
 
-    return Configuration(configuration);
+    return Configuration(
+            configuration,
+            pt.get<int>("global.iZPositionModifier", 10),
+            pt.get<std::string>("global.sObjectPrefix", "GRS_")
+    );
 }
 

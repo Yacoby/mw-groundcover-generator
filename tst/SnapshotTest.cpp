@@ -177,8 +177,6 @@ void test_snapshot(const std::string& name) {
             fs::path("snapshots") / fs::path(name) / fs::path("configuration.ini"),
             std::vector<fs::path>({fs::path("snapshots") / fs::path("GrassTestBase.esp")}),
             fs::path("output") / fs::path(name + ".esp"),
-            "GRS_",
-            10,
             0
     );
 
@@ -197,17 +195,15 @@ void test_configuration_from_mod(const fs::path& configPath) {
             configPath,
             std::vector<fs::path>({fs::path("snapshots") / fs::path("GrassTestBase.esp")}),
             fs::path("output") / fs::path("config_test.esp"),
-            "GRS_",
-            10,
             0
     );
 }
 
 test_suite* init_unit_test_suite(int argc, char* argv[]) {
-    std::vector<fs::path> snapshotDirectories;
+    std::vector<std::string> snapshotDirectories;
     for (auto const& entry : fs::directory_iterator{fs::path("snapshots")}) {
-        if (entry.is_directory()) {
-            snapshotDirectories.push_back(entry.path().filename());
+        if (entry.is_directory() ) { // && entry.path().filename().string() != "global_settings") {
+            snapshotDirectories.push_back(entry.path().filename().string());
         }
     }
     framework::master_test_suite().

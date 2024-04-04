@@ -83,6 +83,9 @@ struct Behaviour {
 class Configuration {
     const std::map<Selector, Behaviour> behaviours;
 public:
+    const int globalOffset;
+    const std::string objectPrefix;
+
     std::optional<std::reference_wrapper<const Behaviour>> get(const Selector& selector) const {
         auto result = behaviours.find(selector);
         if (result == behaviours.end()) {
@@ -99,7 +102,7 @@ public:
         return behaviours.end();
     }
 
-    Configuration(const std::map<Selector, Behaviour>& map) : behaviours(map) {}
+    Configuration(const std::map<Selector, Behaviour>& map, int offset, const std::string& prefix) : behaviours(map), globalOffset(offset), objectPrefix(prefix) {}
 };
 
 

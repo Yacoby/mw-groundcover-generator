@@ -51,10 +51,6 @@ class GrassGen : public wxFrame
 		wxButton* mImport;
 		wxButton* mAdd;
 		wxButton* mRemove;
-		wxStaticText* m_staticText4;
-		wxTextCtrl* mID;
-		wxStaticText* m_staticText24;
-		wxTextCtrl* mZOffset;
 		wxButton* mGenerate;
 		wxGauge* mProgBar;
 		wxStatusBar* mStatus;

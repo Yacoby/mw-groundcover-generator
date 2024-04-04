@@ -37,7 +37,7 @@ std::optional<Selector> getConfigurationSelector(
     return std::nullopt;
 }
 
-std::string Generator::getMesh(const std::vector<ObjectPlacementPossibility>& placements, const std::string &cat) {
+std::string Generator::getMesh(const std::vector<ObjectPlacementPossibility>& placements, const std::string& objectPrefix, const std::string &cat) {
     std::string grassID = "UNKNOWN_GRASS";
     float meshRand = getRandom(0, 100);
     float meshChance = 1;
@@ -47,7 +47,7 @@ std::string Generator::getMesh(const std::vector<ObjectPlacementPossibility>& pl
             if (std::holds_alternative<ObjectId>(item.idOrMesh)) {
                 grassID = std::get<ObjectId>(item.idOrMesh).get();
             } else {
-                grassID = mIdBase + cat + std::to_string(item.deprecatedId);
+                grassID = objectPrefix + cat + std::to_string(item.deprecatedId);
             }
             break;
         }
@@ -68,12 +68,10 @@ void Generator::generate(
         const fs::path configurationLocation,
         std::vector<fs::path> inputFiles,
         const fs::path outputLocation,
-        const std::string idPrefix,
-        int offset,
         unsigned randomSeed) {
     try {
         Generator(sendStatusUpdate, sendSuccess, sendFailure, configurationLocation, inputFiles, outputLocation,
-                  idPrefix, offset, randomSeed)
+                  randomSeed)
                 .doGenerate();
     } catch (std::exception &e) {
         sendFailure(e.what());
@@ -128,7 +126,7 @@ void Generator::doGenerate() {
                     continue;
                 }
                 auto mesh = std::get<Mesh>(item2.idOrMesh).get();
-                fileWriteStatData(ofs, "STAT", mIdBase + item.first.toLegacyCategory() + std::to_string(item2.deprecatedId), mesh);
+                fileWriteStatData(ofs, "STAT", configuration.objectPrefix + item.first.toLegacyCategory() + std::to_string(item2.deprecatedId), mesh);
             }
         }
     }
@@ -187,7 +185,7 @@ void Generator::doGenerate() {
                 std::string grassID;
                 auto &meshList = placeBehaviour.placements;
                 if (placeBehaviour.clump) {
-                    grassID = getMesh(meshList, deprecatedIniCat);
+                    grassID = getMesh(meshList, configuration.objectPrefix, deprecatedIniCat);
                 }
 
                 //allow a max gap of more than 512
@@ -202,7 +200,7 @@ void Generator::doGenerate() {
                     for (int gy = 0; gy < 512; gy += placeBehaviour.gap) {
 
                         if (!placeBehaviour.clump) {
-                            grassID = getMesh(meshList, deprecatedIniCat);
+                            grassID = getMesh(meshList, configuration.objectPrefix, deprecatedIniCat);
                         }
 
                         //calc the morrowind pos of the
@@ -359,13 +357,11 @@ Generator::Generator(const std::function<void(int, std::string)> sendStatusUpdat
                      const fs::path &configurationLocation,
                      const std::vector<fs::path> &files,
                      const fs::path &outputLocation,
-                     const std::string &idPrefix,
-                     int offset,
                      unsigned randomSeed) : sendStatusUpdate(sendStatusUpdateArg),
                                             sendSuccess(sendSuccessArg),
                                             sendFailure(sendFailureArg),
                                             mOut(outputLocation),
-                                            mIdBase(idPrefix), mIniLoc(configurationLocation), mOffset(offset),
+                                            mIniLoc(configurationLocation),
                                             mFiles(files),
                                             randomNumberSequence(randomSeed) {
 }
