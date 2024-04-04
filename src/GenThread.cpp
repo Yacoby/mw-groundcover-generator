@@ -151,7 +151,7 @@ void Generator::doGenerate() {
         ES3::ESCellRef cell = fc->getFirstCell(cx, cy);
 
         ES3::ESFileRef file = fc->getLandFile(cx, cy);
-        const std::vector<std::vector<uint16_t> > &landTex = land->getLandTextures();
+        const auto& landTex = land->getLandTextures();
         int frmr = 0;
 
         if (cell) {

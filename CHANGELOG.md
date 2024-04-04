@@ -5,6 +5,7 @@
 ### Changed
 - Simplified configuration. Almost all configuration options now have sane defaults
 - Deprecated `bPosRand` and `bSclRand`
+- Removed z offset and id prefix from the UI and moved it to the config file
 
 ### Removed
 - Removed configuration options `sName`, `sRecType` and `sScript`

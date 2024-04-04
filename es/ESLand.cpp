@@ -5,27 +5,17 @@
 
 using namespace ES3;
 
-ESLand::ESLand() {
-
-    if (mHeightData.size() < 65) {
-        mHeightData.resize(65);
-        for (int i = 0; i < 65; i++) mHeightData.at(i).resize(65, -256);
-    }
+ESLand::ESLand() : mHeightData(boost::multi_array<int, 2>(boost::extents[65][65])),
+                   mLandTextures(boost::multi_array<uint16_t, 2>(boost::extents[16][16])) {
 
     if (mLandTextures.size() < 16) {
-        mLandTextures.resize(16);
         for (int x = 0; x < 16; x++) {
-            mLandTextures.at(x).resize(16, 0);
-            mLandTextures.at(x).at(0) = 0;
+            mLandTextures[x][0] = 0;
         }
     }
 }
 
 void ESLand::loadVtexRecord(std::ifstream &ifs) {
-
-    mLandTextures.resize(16);
-    for (int x = 0; x < 16; x++) mLandTextures.at(x).resize(16);
-
     for (int y1 = 0; y1 < 4; y1++) {
         for (int x1 = 0; x1 < 4; x1++) {
             for (int y2 = 0; y2 < 4; y2++) {
@@ -43,7 +33,6 @@ void ESLand::loadVhgtRecord(std::ifstream &ifs) {
 
     //mHeightData.resize(65);
     for (int i = 0; i < 65; i++) {
-        mHeightData.at(i).resize(65);
         for (int j = 0; j < 65; j++) {
             mHeightData[i][j] = 0;
         }
@@ -53,7 +42,7 @@ void ESLand::loadVhgtRecord(std::ifstream &ifs) {
         char x;
         ifs.get(x);
         offset += x;
-        mHeightData.at(0).at(y) = +(int) offset;
+        mHeightData[0][y] = +(int) offset;
 
         float pos = offset;
 
@@ -63,7 +52,7 @@ void ESLand::loadVhgtRecord(std::ifstream &ifs) {
             ifs.get(c);
             pos += c;
 
-            mHeightData.at(x).at(y) = (int) pos;
+            mHeightData[x][y] = (int) pos;
 
         }
     }

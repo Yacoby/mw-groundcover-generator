@@ -202,7 +202,7 @@ void test_configuration_from_mod(const fs::path& configPath) {
 test_suite* init_unit_test_suite(int argc, char* argv[]) {
     std::vector<std::string> snapshotDirectories;
     for (auto const& entry : fs::directory_iterator{fs::path("snapshots")}) {
-        if (entry.is_directory() ) { // && entry.path().filename().string() != "global_settings") {
+        if (entry.is_directory()) {
             snapshotDirectories.push_back(entry.path().filename().string());
         }
     }

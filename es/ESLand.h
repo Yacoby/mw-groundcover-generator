@@ -6,6 +6,8 @@
 #include <vector>
 #include <fstream>
 
+#include <boost/multi_array.hpp>
+
 #include "ESRecord.h"
 
 #define PI 3.14159265
@@ -48,14 +50,14 @@ namespace ES3 {
     class ESLand : public ESRecord {
 
 
-        std::vector<std::vector<uint16_t> > mLandTextures;
+        boost::multi_array<uint16_t, 2> mLandTextures;
         /**
         * height data
         * The height data is not absolute values but uses differences between adjacent pixels.
         * Thus a pixel value of 0 means it has the same height as the last pixel. Note that
         * the y-direction of the data is from the bottom up.
         */
-        std::vector<std::vector<int> > mHeightData;
+        boost::multi_array<int, 2> mHeightData;
 
         /**
         * The data on where in the world the cell is
@@ -67,7 +69,7 @@ namespace ES3 {
         ESLand();
 
 
-        const std::vector<std::vector<uint16_t> >& getLandTextures() { return mLandTextures; }
+        const boost::multi_array<uint16_t, 2>& getLandTextures() { return mLandTextures; }
 
         void loadVtexRecord(std::ifstream &ifs);
 
