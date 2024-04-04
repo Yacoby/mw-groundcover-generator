@@ -258,15 +258,11 @@ void Generator::doGenerate() {
                         auto height = fc->getHeightAt(posx, posy);
                         auto rotation = fc->getAngleAt(posx, posy);
 
-                        if (!height.has_value() || !rotation.has_value()) {
-                            continue;
-                        }
-
-                        float posZ = height.value() + mOffset;
+                        float posZ = height + configuration.globalOffset;
 
                         ES3::Vector3 rot;
                         if (placeBehaviour.alignToNormal) {
-                            rot = rotation.value();
+                            rot = rotation;
                         }
                         rot.z = getRandom(0, 2 * PI);
 

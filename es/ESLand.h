@@ -31,12 +31,6 @@ namespace ES3 {
         float x;
         float y;
         float z;
-
-        Vector3() {
-            x = 0;
-            y = 0;
-            z = 0;
-        }
     };
 
     class ESLand;
@@ -68,32 +62,12 @@ namespace ES3 {
 
         ESLand();
 
-
+        const boost::multi_array<int, 2>& getHeightData() { return mHeightData; }
         const boost::multi_array<uint16_t, 2>& getLandTextures() { return mLandTextures; }
 
         void loadVtexRecord(std::ifstream &ifs);
 
         void loadVhgtRecord(std::ifstream &ifs);
-
-        float _temp(float x, int y) {
-            while (x > y) x -= y;
-            while (x < -y) x += y;
-            return x;
-        }
-
-        int _temp2(float x, float y) {
-            int z = 0;
-            while (x > 0) {
-                x -= y;
-                z++;
-            }
-            return z;
-        }
-
-        float getHeightAt(float x, float y);
-
-        ES3::Vector3 getAngleAt(float x, float y);
-
 
         /**
         *	@return Details about what swuare the land is on

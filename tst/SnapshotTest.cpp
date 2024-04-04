@@ -180,10 +180,12 @@ void test_snapshot(const std::string& name) {
             0
     );
 
-    BOOST_TEST(compareEsp(
-            fs::path("output") / fs::path(name + ".esp"),
-            fs::path("snapshots") / fs::path(name) / fs::path("expected.esp")
-    ));
+    BOOST_TEST_CONTEXT("Snapshot test for: " + name) {
+        BOOST_TEST(compareEsp(
+                fs::path("output") / fs::path(name + ".esp"),
+                fs::path("snapshots") / fs::path(name) / fs::path("expected.esp")
+        ));
+    }
 }
 
 void test_configuration_from_mod(const fs::path& configPath) {

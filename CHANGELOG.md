@@ -14,6 +14,9 @@
 - Snapshot testing
 - Testing for existing mod configurations
 
+### Fixed
+- Crash (out of bounds memory access) when generating land
+
 ## 0.2 - 2024-03-29
 
 ### Added
