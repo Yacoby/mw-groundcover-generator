@@ -214,20 +214,6 @@ void Generator::doGenerate() {
                             posy += getRandom(posRand.min, posRand.max);
                         }
 
-                        //get the correcrt cell, sometimes with the rand function, it goes over a cell boarder
-                        int cellx = (int) floor(posx / (float) 8192);//getCell(posx);
-                        int celly = (int) floor(posy / (float) 8192);
-
-                        ES3::ESLandRef land2;
-                        if (cellx != cx ||
-                            celly != cy) {
-                            land2 = fc->getLand(cellx, celly);
-                            //assert (land2);
-                            if (!land2)continue;
-                        } else {
-                            land2 = land;
-                        }
-
                         //check if we really should place it, or if it is on a no place texture
                         {
                             bool doContinue = false;
@@ -256,39 +242,8 @@ void Generator::doGenerate() {
                                             break;
                                     }
 
-                                    //check the cell again
-                                    if ((int) floor(tposx / (float) 8192) != cellx ||
-                                        (int) floor(tposy / (float) 8192) != celly) {
-                                        continue; //ignore it.
-                                    }
-
-
-                                    float offx = (int) (tposx) % (int) 8192;
-                                    int squx = floor(offx / (float) 512);
-                                    if (squx < 0) {
-                                        squx = 16 + squx;
-                                    }
-
-
-                                    float offy = (int) (tposy) % (int) 8192;
-                                    int squy = floor(offy / (float) 512);
-                                    if (squy < 0) {
-                                        squy = 16 + squy;
-                                    }
-
-                                    const std::vector<std::vector<uint16_t> > &landTex2 = land2->getLandTextures();
-                                    ES3::ESFileRef file2 = fc->getLandFile(cellx, celly);
-
-                                    if (landTex2[squx][squy] == 0) {
-                                        continue;
-                                    }
-
-                                    if (!file2->getLTexExists(landTex2[squx][squy] - 1)) {
-                                        continue;
-                                    }
-
-                                    if (t == file2->getLTexPath(landTex2[squx][squy] - 1) ||
-                                        t == file2->getLTex(landTex2[squx][squy] - 1)->getID()) {
+                                    auto ltex = fc->getLandTexture(tposx, tposy);
+                                    if (ltex && (t == ltex->getPath() || t == ltex->getID())) {
                                         //ak, this is not good.
                                         doContinue = true;
                                         break;
@@ -300,12 +255,18 @@ void Generator::doGenerate() {
                             if (doContinue == true) continue;
                         }//{
 
+                        auto height = fc->getHeightAt(posx, posy);
+                        auto rotation = fc->getAngleAt(posx, posy);
 
-                        float posZ = land2->getHeightAt(posx, posy) + mOffset;
+                        if (!height.has_value() || !rotation.has_value()) {
+                            continue;
+                        }
+
+                        float posZ = height.value() + mOffset;
 
                         ES3::Vector3 rot;
                         if (placeBehaviour.alignToNormal) {
-                            rot = land2->getAngleAt(posx, posy);
+                            rot = rotation.value();
                         }
                         rot.z = getRandom(0, 2 * PI);
 

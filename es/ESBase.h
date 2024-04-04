@@ -6,12 +6,16 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <cassert>
 
 #include "MapFunctions.h"
 #include "ESFile.h"
 
 
 namespace ES3 {
+
+    const unsigned CELL_SIZE = 8192;
+    const unsigned LTEX_GRID_SIZE = 512;
 
 
     class ESFileContainer;
@@ -44,6 +48,58 @@ namespace ES3 {
         ESLandRef getLand(int squX, int squY);
 
         ESFileRef getLandFile(int squX, int squY);
+
+        std::optional<float> getHeightAt(float posX, float posY) {
+            int cellX = (int) floor(posX / (float) CELL_SIZE);
+            int cellY = (int) floor(posY / (float) CELL_SIZE);
+            const auto land = getLand(cellX, cellY);
+            if (!land) {
+                return std::nullopt;
+            }
+            return land->getHeightAt(posX, posY);
+        }
+
+        std::optional<Vector3> getAngleAt(float posX, float posY) {
+            int cellX = (int) floor(posX / (float) CELL_SIZE);
+            int cellY = (int) floor(posY / (float) CELL_SIZE);
+            const auto land = getLand(cellX, cellY);
+            if (!land) {
+                return std::nullopt;
+            }
+            return land->getAngleAt(posX, posY);
+        }
+
+        ESLTexRef getLandTexture(float posX, float posY) {
+            int cellX = (int) floor(posX / (float) CELL_SIZE);
+            int cellY = (int) floor(posY / (float) CELL_SIZE);
+
+            float offx = (int) (posX) % (int) CELL_SIZE;
+            int squx = floor(offx / (float) LTEX_GRID_SIZE);
+            if (squx < 0) {
+                squx = 16 + squx;
+            }
+
+            float offy = (int) (posY) % (int) CELL_SIZE;
+            int squy = floor(offy / (float) LTEX_GRID_SIZE);
+            if (squy < 0) {
+                squy = 16 + squy;
+            }
+
+            const auto land = getLand(cellX, cellY);
+            if (land == nullptr) {
+                return nullptr;
+            }
+
+            const auto& ltex = land->getLandTextures();
+            const auto ltexIdx = ltex[squx][squy];
+            if (ltexIdx == 0) {
+                return nullptr;
+            }
+
+            const auto file = getLandFile(cellX, cellY);
+            assert(file != nullptr);
+            return file->getLTex(ltexIdx - 1);
+        }
 
         std::set<std::pair<int32_t, int32_t >> getExteriorCellCoordinates();
     };
