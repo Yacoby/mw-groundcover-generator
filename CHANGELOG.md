@@ -11,11 +11,15 @@
 - Removed configuration options `sName`, `sRecType` and `sScript`
 
 ### Added
+- Load (processing) order is now displayed in the UI
 - Snapshot testing
 - Testing for existing mod configurations
 
 ### Fixed
 - Crash (out of bounds memory access) when generating land
+- Load order correctly sorts ESMs before ESPs
+- Load order sorts based on ESM dependencies as well as time
+
 
 ## 0.2 - 2024-03-29
 

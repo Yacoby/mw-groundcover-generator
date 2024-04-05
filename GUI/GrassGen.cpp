@@ -80,7 +80,7 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxBoxSizer* bSizer4;
 	bSizer4 = new wxBoxSizer( wxVERTICAL );
 
-	m_staticText2 = new wxStaticText( this, wxID_ANY, wxT("Data files to search (order does not matter)"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText2 = new wxStaticText( this, wxID_ANY, wxT("Data files to search (displayed in load order)"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText2->Wrap( -1 );
 	bSizer4->Add( m_staticText2, 0, wxALL, 5 );
 
