@@ -9,6 +9,7 @@
 
 ### Removed
 - Removed configuration options `sName`, `sRecType` and `sScript`
+- Removed the Morrowind directory as a first class citizen. The option to set this is no longer present on the UI
 
 ### Added
 - Load (processing) order is now displayed in the UI

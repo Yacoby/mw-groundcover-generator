@@ -45,7 +45,7 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizer10 = new wxBoxSizer( wxVERTICAL );
 
 	wxFlexGridSizer* fgSizer1;
-	fgSizer1 = new wxFlexGridSizer( 3, 2, 0, 0 );
+	fgSizer1 = new wxFlexGridSizer( 2, 2, 0, 0 );
 	fgSizer1->AddGrowableCol( 1 );
 	fgSizer1->SetFlexibleDirection( wxHORIZONTAL );
 	fgSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
@@ -57,18 +57,11 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	mIniLoc = new wxFilePickerCtrl( this, wxID_ANY, wxT("Grass.ini"), wxT("Select a file"), wxT("*.ini"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
 	fgSizer1->Add( mIniLoc, 0, wxALL|wxEXPAND, 5 );
 
-	m_staticText1 = new wxStaticText( this, wxID_ANY, wxT("Morrowind Location"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText1->Wrap( -1 );
-	fgSizer1->Add( m_staticText1, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-
-	mMorrowindLoc = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	fgSizer1->Add( mMorrowindLoc, 0, wxALL|wxEXPAND, 5 );
-
 	m_staticText6 = new wxStaticText( this, wxID_ANY, wxT("Output File"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText6->Wrap( -1 );
 	fgSizer1->Add( m_staticText6, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
-	mOutputFile = new wxTextCtrl( this, wxID_ANY, wxT("Grass.esp"), wxDefaultPosition, wxDefaultSize, 0 );
+	mOutputFile = new wxFilePickerCtrl( this, wxID_ANY, wxT("Grass.esp"), wxT("Select an output file"), wxT("*.esp"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer1->Add( mOutputFile, 0, wxALL|wxEXPAND, 5 );
 
 

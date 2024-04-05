@@ -17,7 +17,6 @@
 #include <wx/colour.h>
 #include <wx/settings.h>
 #include <wx/filepicker.h>
-#include <wx/textctrl.h>
 #include <wx/listbox.h>
 #include <wx/button.h>
 #include <wx/bitmap.h>
@@ -42,10 +41,8 @@ class GrassGen : public wxFrame
 		wxStaticText* m_staticText3;
 		wxStaticText* m_staticText5;
 		wxFilePickerCtrl* mIniLoc;
-		wxStaticText* m_staticText1;
-		wxDirPickerCtrl* mMorrowindLoc;
 		wxStaticText* m_staticText6;
-		wxTextCtrl* mOutputFile;
+		wxFilePickerCtrl* mOutputFile;
 		wxStaticText* m_staticText2;
 		wxListBox* mModList;
 		wxButton* mImport;

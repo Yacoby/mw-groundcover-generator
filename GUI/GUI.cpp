@@ -34,18 +34,21 @@ GUI::GUI(wxWindow *parent) : GrassGen(parent) {
         if (standardKey.has_value()) {
             const auto gamePath = fs::path(standardKey.value());
             if (fs::exists(gamePath) && fs::is_directory(gamePath)) {
-                mMorrowindLoc->SetPath(standardKey.value());
+                morrowindDirectory = gamePath;
                 break;
             }
         }
     }
+
+    if (!morrowindDirectory.empty()) {
+        mOutputFile->SetPath((morrowindDirectory / "Data Files" / "Grass.esp").string());
+    }
 }
 
 void GUI::OnImportPress(wxCommandEvent &event) {
-    fs::path morrowindPath = mMorrowindLoc->GetPath().utf8_string();
     fs::path iniPath;
-    if (fs::exists(morrowindPath)) {
-        iniPath = fs::path(mMorrowindLoc->GetPath().utf8_string()) / "Morrowind.ini";
+    if (fs::exists(morrowindDirectory)) {
+        iniPath = morrowindDirectory / "Morrowind.ini";
     } else {
         auto dialog = wxFileDialog(
                 this,
@@ -59,7 +62,7 @@ void GUI::OnImportPress(wxCommandEvent &event) {
             return;
         }
         iniPath = dialog.GetPath().utf8_string();
-        morrowindPath = iniPath.parent_path();
+        morrowindDirectory = iniPath.parent_path();
     }
 
     boost::property_tree::ptree pt;
@@ -83,13 +86,13 @@ void GUI::OnImportPress(wxCommandEvent &event) {
         if (!file.has_value()) {
             break;
         }
-        auto filePath = morrowindPath / "Data Files" / file.value();
+        auto filePath = morrowindDirectory / "Data Files" / file.value();
         if (!fs::exists(filePath)) {
             wxMessageBox(iniKey + "=" + file.value() + " was referenced in the ini file, but it doesn't exist at the path: " + filePath.string(), wxT("Something went wrong"),
                          wxICON_ERROR);
             return;
         }
-        gameFiles.push_back(morrowindPath / "Data Files" / file.value());
+        gameFiles.push_back(morrowindDirectory / "Data Files" / file.value());
     }
 
     loadOrder.clear();
@@ -105,7 +108,7 @@ void GUI::OnAddPress(wxCommandEvent &event) {
     auto dialog = wxFileDialog(
             this,
             wxASCII_STR(wxFileSelectorPromptStr),
-            mMorrowindLoc->GetPath(),
+            morrowindDirectory.string(),
             wxEmptyString,
             _("Morrowind plugin files (*.esp, *.esm)|*.esp;*.esm|"),
             wxFD_OPEN | wxFD_MULTIPLE
@@ -142,8 +145,6 @@ void GUI::OnRemovePress(wxCommandEvent &event) {
 }
 
 void GUI::OnGenPress(wxCommandEvent &event) {
-    fs::path basePath = fs::absolute(fs::path(mMorrowindLoc->GetPath().utf8_string()));
-
     std::vector<fs::path> files;
     for (const auto &item: loadOrder.get()) {
         files.push_back(item->path);
@@ -161,10 +162,10 @@ void GUI::OnGenPress(wxCommandEvent &event) {
         return;
     }
 
-    fs::path outPath = fs::absolute(basePath / fs::path("Data Files") / fs::path(mOutputFile->GetValue().utf8_string()));
+    fs::path outPath = fs::absolute(mOutputFile->GetPath().utf8_string());
     if (!fs::exists(outPath.parent_path())) {
         wxMessageBox("Output path directory " + outPath.parent_path().string() +
-                     " doesn'thread exist. Did you set the Morrowind location", wxT("Something went wrong"), wxICON_ERROR);
+                     " doesn't exist. Did you set it correctly?", wxT("Something went wrong"), wxICON_ERROR);
         return;
     }
 
