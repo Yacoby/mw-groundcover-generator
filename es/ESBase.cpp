@@ -1,17 +1,9 @@
 #include "ESBase.h"
 
-using namespace ES3;
-
-bool ESFileContainer::loadDataFile(const std::filesystem::path &file) {
+void ESFileContainer::loadDataFile(const std::filesystem::path &file) {
     auto esFile = ESFileRef(new ESFile());
-
-    if (esFile->loadFile(file)) {
-        mFile.push_back(esFile);
-        return true;
-    }
-
-    return false;
-
+    esFile->loadFile(file);
+    mFile.push_back(esFile);
 }
 
 ESCellRef ESFileContainer::getFirstCell(int x, int y) {

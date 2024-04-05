@@ -5,7 +5,9 @@
 #include <fstream>
 #include <memory>
 #include <vector>
+#include <boost/range/combine.hpp>
 
+#include "EspReader.h"
 #include "GenThread.h"
 
 using namespace boost::unit_test;
@@ -78,95 +80,68 @@ public:
 
 
 std::vector<std::shared_ptr<EspRecord>> readEsp(const std::filesystem::path& path) {
-    std::ifstream ifStream(path, std::ifstream::binary);
-    if (ifStream.fail()) {
-        throw std::runtime_error(path.string() + " could not be opened");
-    }
-
     std::vector<std::shared_ptr<EspRecord>> records;
-
-    while (ifStream.tellg() != -1) {
+    for (const auto &recordParser: EspReader(path)) {
         std::shared_ptr<EspRecord> record = std::make_shared<EspRecord>();
+
+        record->type = recordParser.type;
+        record->length = recordParser.length;
+
         records.push_back(record);
 
-        char type[4];
-        ifStream.read(type, 4);
-        record->type = std::string(type, 4);
-        ifStream.read((char*)&record->length, sizeof(uint32_t));
-        ifStream.seekg(sizeof(uint32_t)*2, std::ifstream::cur);
+        for (auto &subRecordParser: recordParser) {
+            if (recordParser.type == "CELL" && subRecordParser.type == "XSCL") {
+                auto subRecord = std::make_shared<EspCellSubXscl>();
+                subRecord->length = subRecordParser.length;
+                subRecord->type = subRecordParser.type;
+                subRecord->data = subRecordParser.read<float>();
+                record->subRecords.push_back(subRecord);
+            } else if (record->type == "CELL" && subRecordParser.type == "DATA" && subRecordParser.length == sizeof(float)*6) {
+                auto subRecord = std::make_shared<EspCellSubData>();
+                subRecord->type = subRecordParser.type;
+                subRecord->length = subRecordParser.length;
+                subRecord->data = subRecordParser.readArray<float>();
+                record->subRecords.push_back(subRecord);
 
-        std::streampos end = ifStream.tellg() + std::streampos(record->length);
-        while (ifStream.tellg() < end) {
-            std::shared_ptr<EspGenericSubRecord> subRecord = std::make_shared<EspGenericSubRecord>();
-            record->subRecords.push_back(subRecord);
-
-            char subType[4];
-            ifStream.read(subType, 4);
-            subRecord->type = std::string(subType, 4);
-            ifStream.read((char*)&subRecord->length, sizeof(uint32_t));
-
-            char* data = new char[subRecord->length];
-            ifStream.read(data, subRecord->length);
-            subRecord->data = std::string(data);
-            delete[] data;
+            } else {
+                auto subRecord = std::make_shared<EspGenericSubRecord>();
+                subRecord->type = subRecordParser.type;
+                subRecord->length = subRecordParser.length;
+                subRecord->data = subRecordParser.read<std::string>();
+                record->subRecords.push_back(subRecord);
+            }
         }
     }
 
     return records;
-}
-
-std::optional<std::shared_ptr<EspSubRecord>> replaceSubRecords(
-        std::shared_ptr<EspRecord> record,
-        std::shared_ptr<EspSubRecord> subRecord) {
-
-    auto genericSubRecord = dynamic_cast<EspGenericSubRecord*>(subRecord.get());
-    if (!genericSubRecord) {
-        return std::nullopt;
-    }
-
-    if (record->type == "CELL" && subRecord->type == "XSCL") {
-        auto newRecord = std::make_shared<EspCellSubXscl>();
-        newRecord->length = genericSubRecord->length;
-        newRecord->type = genericSubRecord->type;
-        newRecord->data = atof(genericSubRecord->data.c_str());
-        return newRecord;
-    }
-
-    // There are multiple DATA sub records in a CELL record, so verify the length to ensure we have the correct one
-    const int expectedNumberOfFloats = 6;
-    const int expectedLength = sizeof(float) * expectedNumberOfFloats;
-    if (record->type == "CELL" && subRecord->type == "DATA" && subRecord->length == expectedLength) {
-        auto newRecord = std::make_shared<EspCellSubData>();
-        newRecord->type = genericSubRecord->type;
-        newRecord->length = genericSubRecord->length;
-
-        const auto* floatArray = reinterpret_cast<const float*>(genericSubRecord->data.c_str());
-        newRecord->data = std::vector(floatArray, floatArray+expectedNumberOfFloats);
-        return newRecord;
-    }
-
-    return std::nullopt;
 }
 
 std::vector<std::shared_ptr<EspRecord>> parseEsp(std::vector<std::shared_ptr<EspRecord>> records) {
     for (const auto &record: records) {
         std::vector<std::shared_ptr<EspSubRecord>> newSubRecords;
         for (const auto &subRecord: record->subRecords) {
-            auto newSubRecord = replaceSubRecords(record, subRecord);
-            newSubRecords.push_back(newSubRecord.has_value() ? newSubRecord.value() : subRecord);
+            newSubRecords.push_back(subRecord);
         }
         record->subRecords = newSubRecords;
     }
     return records;
 }
 
-bool compareEsp(const fs::path& testPath, const fs::path& expectedPath) {
+void compareEsp(const fs::path& testPath, const fs::path& expectedPath) {
     auto testRecords = parseEsp(readEsp(testPath));
     auto expectedRecords = parseEsp(readEsp(expectedPath));
-    return std::equal(testRecords.begin(), testRecords.end(), expectedRecords.begin(), expectedRecords.end(),
-                      [](const std::shared_ptr<EspRecord> lhs, const std::shared_ptr<EspRecord> rhs) {
-                          return *lhs == *rhs;
-                      });
+
+    BOOST_TEST(testRecords.size() == expectedRecords.size());
+
+    for (auto comparisonTuple : boost::combine(testRecords, expectedRecords)) {
+        std::shared_ptr<EspRecord> test, expected;
+        boost::tie(test, expected) = comparisonTuple;
+        BOOST_TEST(*test == *expected);
+    }
+}
+
+std::ostream& operator << (std::ostream &os, const EspRecord &s) {
+    return (os << "[Record type=" << s.type << "]");
 }
 
 void test_snapshot(const std::string& name) {
@@ -181,10 +156,10 @@ void test_snapshot(const std::string& name) {
     );
 
     BOOST_TEST_CONTEXT("Snapshot test for: " + name) {
-        BOOST_TEST(compareEsp(
+        compareEsp(
                 fs::path("output") / fs::path(name + ".esp"),
                 fs::path("snapshots") / fs::path(name) / fs::path("expected.esp")
-        ));
+        );
     }
 }
 

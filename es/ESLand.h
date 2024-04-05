@@ -8,75 +8,71 @@
 
 #include <boost/multi_array.hpp>
 
-#include "ESRecord.h"
+#include "EspReader.h"
 
 #define PI 3.14159265
 
 
-namespace ES3 {
-
 /**
 * Used for holding the position in the cell grid of a land record
 */
-    struct LandSquare {
-        uint32_t cellX;
-        uint32_t cellY;
-    };
+struct LandSquare {
+    uint32_t cellX;
+    uint32_t cellY;
+};
 
 
 /**
 *	Simple vector3 implementation. This removes the depandance on any other library that implements this (Ogre, Niflib)
 */
-    struct Vector3 {
-        float x;
-        float y;
-        float z;
-    };
+struct Vector3 {
+    float x;
+    float y;
+    float z;
+};
 
-    class ESLand;
+class ESLand;
 
-    typedef std::shared_ptr<ESLand> ESLandRef;
+typedef std::shared_ptr<ESLand> ESLandRef;
 
 /**
 *	Holds a LAND record.
 */
 
-    class ESLand : public ESRecord {
+class ESLand {
 
 
-        boost::multi_array<uint16_t, 2> mLandTextures;
-        /**
-        * height data
-        * The height data is not absolute values but uses differences between adjacent pixels.
-        * Thus a pixel value of 0 means it has the same height as the last pixel. Note that
-        * the y-direction of the data is from the bottom up.
-        */
-        boost::multi_array<int, 2> mHeightData;
+    boost::multi_array<uint16_t, 2> mLandTextures;
+    /**
+    * height data
+    * The height data is not absolute values but uses differences between adjacent pixels.
+    * Thus a pixel value of 0 means it has the same height as the last pixel. Note that
+    * the y-direction of the data is from the bottom up.
+    */
+    boost::multi_array<int, 2> mHeightData;
 
-        /**
-        * The data on where in the world the cell is
-        */
-        LandSquare mLandSquare;
+    /**
+    * The data on where in the world the cell is
+    */
+    LandSquare mLandSquare;
 
-    public:
 
-        ESLand();
+    static void loadVtexRecord(boost::multi_array<uint16_t, 2>& textures, EspReader::SubRecord& record);
+    static void loadVhgtRecord(boost::multi_array<int, 2>& heights, EspReader::SubRecord& record);
+public:
 
-        const boost::multi_array<int, 2>& getHeightData() { return mHeightData; }
-        const boost::multi_array<uint16_t, 2>& getLandTextures() { return mLandTextures; }
+    ESLand();
 
-        void loadVtexRecord(std::ifstream &ifs);
+    const boost::multi_array<int, 2>& getHeightData() { return mHeightData; }
+    const boost::multi_array<uint16_t, 2>& getLandTextures() { return mLandTextures; }
 
-        void loadVhgtRecord(std::ifstream &ifs);
 
-        /**
-        *	@return Details about what swuare the land is on
-        */
-        const LandSquare& getLandPos() { return mLandSquare; }
+    /**
+    *	@return Details about what swuare the land is on
+    */
+    const LandSquare& getLandPos() { return mLandSquare; }
 
-        void read(std::ifstream &ifs, long recordSize);
-    };
-
-}//nspace
+    static ESLand load(EspReader::Record& record);
+};
 
 #endif

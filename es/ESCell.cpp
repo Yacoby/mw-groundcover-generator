@@ -1,36 +1,21 @@
 #include "ESCell.h"
 
-#include <cstring>
+ESCell ESCell::load(EspReader::Record& record) {
+    ESCell cell;
 
-using namespace ES3;
-
-void ESCell::read(std::ifstream &ifs, long recordSize) {
-    std::streampos readTo = recordSize + ifs.tellg();
-
-    while (ifs.tellg() < readTo) {
-        char dataType[5];
-        ifs.read(dataType, 4);
-        dataType[4] = '\0';
-
-        //we have got to the frmrecord part. quit.
-        if (strcmp(dataType, "FRMR") == 0) {
-            return;
+    for (auto &subRecord: record) {
+        if (subRecord.type == "FRMR") {
+            break;
+        } else if (subRecord.type == "DATA") {
+            cell.data = subRecord.read<CellData>();
+        } else if (subRecord.type == "NAME") {
+            cell.cellName = subRecord.readNullTerminatedString();
+        } else if (subRecord.type == "RGNN") {
+            cell.region = subRecord.readNullTerminatedString();
+        } else if (subRecord.type == "NAM0") {
+            cell.colour = subRecord.read<uint32_t>();
         }
-
-        if (strcmp(dataType, "NAME") == 0) {
-            mCellName.read(ifs);
-        } else if (strcmp(dataType, "DATA") == 0) {
-            mCellData.read(ifs);
-        } else if (strcmp(dataType, "RGNN") == 0) {
-            mRegn.read(ifs);
-        } else if (strcmp(dataType, "NAM0") == 0) {
-            mColour.read(ifs);
-        } else {
-            handleUnknownRecord(ifs);
-        }
-
     }
 
-    ifs.seekg(readTo);
-
+    return cell;
 }

@@ -10,7 +10,7 @@
 
 std::optional<Selector> getConfigurationSelector(
         const Configuration& configuration,
-        ES3::ESCellRef cell,
+        ESCellRef cell,
         const std::string& texture,
         const std::string& textureId
 ) {
@@ -92,16 +92,12 @@ void Generator::doGenerate() {
 
     const auto configuration = loadConfigurationFromIni(mIniLoc);
 
-    ES3::ESFileContainerRef fc = ES3::ESFileContainerRef(new ES3::ESFileContainer());
+    ESFileContainer fc = ESFileContainer();
     for (auto iter = mFiles.begin(); iter != mFiles.end(); ++iter) {
         std::string fileName = (*iter).filename().string();
 
         sendStatusUpdate(0, "Loading: " + fileName);
-
-        if (!fc->loadDataFile(*iter)) {
-            sendFailure("Failed to load data file: " + fileName);
-            return;
-        }
+        fc.loadDataFile(*iter);
     }
     sendStatusUpdate(0, "Loaded all files");
 
@@ -133,7 +129,7 @@ void Generator::doGenerate() {
 
 
     Buff buff;
-    const auto& cells = fc->getExteriorCellCoordinates();
+    const auto& cells = fc.getExteriorCellCoordinates();
     auto sortedCells = std::vector<std::pair<int32_t, int32_t >>(cells.begin(), cells.end());
     std::sort(sortedCells.begin(), sortedCells.end());
 
@@ -143,14 +139,14 @@ void Generator::doGenerate() {
         auto cy = cellCoord.second;
         cellsProcessed++;
 
-        ES3::ESLandRef land = fc->getLand(cx, cy);
+        ESLandRef land = fc.getLand(cx, cy);
         assert(land);
 
         sendStatusUpdate(cellsProcessed / float(cells.size()) * 100, "Cell: " + std::to_string(cx) + ", " + std::to_string(cy));
 
-        ES3::ESCellRef cell = fc->getFirstCell(cx, cy);
+        ESCellRef cell = fc.getFirstCell(cx, cy);
 
-        ES3::ESFileRef file = fc->getLandFile(cx, cy);
+        ESFileRef file = fc.getLandFile(cx, cy);
         const auto& landTex = land->getLandTextures();
         int frmr = 0;
 
@@ -242,7 +238,7 @@ void Generator::doGenerate() {
                                             break;
                                     }
 
-                                    auto ltex = fc->getLandTexture(tposx, tposy);
+                                    auto ltex = fc.getLandTexture(tposx, tposy);
                                     if (ltex && (t == ltex->getPath() || t == ltex->getID())) {
                                         //ak, this is not good.
                                         doContinue = true;
@@ -255,12 +251,12 @@ void Generator::doGenerate() {
                             if (doContinue == true) continue;
                         }//{
 
-                        auto height = fc->getHeightAt(posx, posy);
-                        auto rotation = fc->getAngleAt(posx, posy);
+                        auto height = fc.getHeightAt(posx, posy);
+                        auto rotation = fc.getAngleAt(posx, posy);
 
                         float posZ = height + configuration.globalOffset;
 
-                        ES3::Vector3 rot;
+                        Vector3 rot;
                         if (placeBehaviour.alignToNormal) {
                             rot = rotation;
                         }

@@ -5,61 +5,33 @@
 #include <fstream>
 #include <string>
 
-#include "ESRecord.h"
+#include "EspReader.h"
 
-#include "ESSubString.h"
-#include "ESSubFloat.h"
-#include "ESSubLong.h"
-#include "ESSubCellData.h"
+class ESCell;
 
-namespace ES3 {
+typedef std::shared_ptr<ESCell> ESCellRef;
 
+struct CellData {
+    uint32_t flags;
+    int32_t gridX;
+    int32_t gridY;
+};
 
-    class ESCell;
+class ESCell {
+private:
+    std::string cellName;
+    std::string region;
+    uint32_t colour;
+    CellData data;
+public:
+    const std::string& getRegn() { return region; }
+    bool isInterior() { return ((data.flags & 0x01) != 0); }
+    std::string getCellName() { return cellName; }
+    int32_t getCellX() { return data.gridX; }
+    int32_t getCellY() { return data.gridY; }
+    long getNAM0() { return colour; }
 
-    typedef std::shared_ptr<ESCell> ESCellRef;
-
-/**
-* Contains all data releating to a cell...
-*/
-    class ESCell : public ESRecord {
-    private:
-
-        ESSubLong mColour;
-
-        ESSubString mCellName;
-
-        ///Contains data about the cell, e.g. region, gridx, gridy ...
-        ESSubCellData mCellData;
-
-        ///Region
-        ESSubString mRegn;
-    public:
-
-        const std::string& getRegn() { return mRegn.get(); }
-
-        long getNAM0() { return mColour.get(); }
-
-        /**
-        * @return data relating to the cell. This includes grid data, interior, exterior etc
-        */
-        ESSubCellData *getCellData() {
-            return &mCellData;
-        }
-
-        /**
-        * Returns the name of the cell. If the cell is an exterior, it doesn't have a name (0 length string is returned
-        */
-        const std::string& getCellName() {
-            return mCellName.get();
-        }
-
-        /**
-        * Reads all the cell data excluding the FRMR records
-        */
-        void read(std::ifstream &ifs, long recordSize);
-    };
-
-}//namepsace
+    static ESCell load(EspReader::Record& record);
+};
 
 #endif

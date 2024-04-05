@@ -5,49 +5,43 @@
 #include <vector>
 #include <fstream>
 
-#include "ESRecord.h"
-#include "ESSubString.h"
-#include "ESSubLong.h"
+#include "EspReader.h"
 
-namespace ES3 {
 
-    class ESLTex;
-
-    typedef std::shared_ptr<ESLTex> ESLTexRef;
+class ESLTex;
+typedef std::shared_ptr<ESLTex> ESLTexRef;
 
 /**
 * Used for holding land texture details
 */
-    class ESLTex : public ESRecord {
-    private:
-        ///unique id
-        ESSubString mName;
+class ESLTex {
+private:
+    ///unique id
+    std::string mName;
 
-        ///unique index
-        ESSubLong mIndex;
+    ///unique index
+    uint32_t mIndex;
 
-        ///path to the texture
-        ESSubString mPath;
-    public:
+    ///path to the texture
+    std::string mPath;
+public:
 
-        /**
-        *	@return the id of the ltex. I assume this is unique, but I am not sure.
-        */
-        std::string getID() { return mName.get(); }
+    /**
+    *	@return the id of the ltex. I assume this is unique, but I am not sure.
+    */
+    std::string getID() { return mName; }
 
-        /**
-        *	@return the index of the ltex. This is refered to by the landrecord. How the frek it knows between mods IDK.
-        */
-        uint32_t getIndex() { return mIndex.get(); }
+    /**
+    *	@return the index of the ltex. This is refered to by the landrecord. How the frek it knows between mods IDK.
+    */
+    uint32_t getIndex() { return mIndex; }
 
-        /**
-        *	@return the path to the texture
-        */
-        const std::string& getPath() { return mPath.get(); }
+    /**
+    *	@return the path to the texture
+    */
+    const std::string& getPath() { return mPath; }
 
-        void read(std::ifstream &ifs, long recordSize);
+    static ESLTex load(EspReader::Record& record);
 
 
-    };
-
-}
+};

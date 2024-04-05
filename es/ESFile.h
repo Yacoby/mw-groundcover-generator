@@ -9,95 +9,89 @@
 #include <vector>
 #include <filesystem>
 
-#include "MapFunctions.h"
-
-#include "ESRecord.h"
-
-#include "ESHdr.h"
-
 #include "ESCell.h"
 #include "ESLand.h"
 #include "ESLTex.h"
 
+class GridId {
+public:
+    const int x;
+    const int y;
 
-namespace ES3 {
+    GridId(const int x, const int y) : x(x), y(y) {}
 
-    class ESFile;
+    bool operator==(const GridId &rhs) const {
+        return std::tie(x, y) == std::tie(rhs.x, rhs.y);
+    }
 
-    typedef std::shared_ptr<ESFile> ESFileRef;
+    bool operator!=(const GridId &rhs) const {
+        return !(rhs == *this);
+    }
+
+    bool operator<(const GridId &rhs) const {
+        return std::tie(x, y) < std::tie(rhs.x, rhs.y);
+    }
+};
+
+class ESFile;
+typedef std::shared_ptr<ESFile> ESFileRef;
 
 /**
 * Holds the data for a single Morrowind file.
 */
-    class ESFile {
-    private:
-    protected:
-        /**
-        * A list of exterior cells, listed by grid
-        */
-        STD_MAP2d(int, ESCellRef) mpExteriorCell;
+class ESFile {
+private:
+protected:
+    /**
+    * A list of exterior cells, listed by grid
+    */
+    std::map<GridId, ESCellRef> mpExteriorCell;
 
-        STD_MAP2d(int, ESLandRef) mpLand;
+    std::map<GridId, ESLandRef> mpLand;
 
-        std::map<long, ESLTexRef> mLandTex;
-        std::vector<ESLTexRef> mLandTexVec;
+    std::map<long, ESLTexRef> mLandTex;
+    std::vector<ESLTexRef> mLandTexVec;
+public:
 
-        ESHeaderRef mHeader;
-    public:
+    void loadFile(const std::filesystem::path &pFile);
 
-        void readHeader(std::ifstream *mIfs);
+    ESLTexRef getLTex(long id) {
+        return mLandTexVec.at(id);
+    }
 
-        bool loadFile(const std::filesystem::path &pFile);
+    ESCellRef getCell(int squX, int squY) {
+        ESCellRef ref = mpExteriorCell[GridId(squX, squY)];
+        return ref;
+    }
 
-        ESLTexRef getLTex(long id) {
-            return mLandTexVec.at(id);
+    ESLandRef getLand(int squX, int squY) {
+        ESLandRef ref = mpLand[GridId(squX, squY)];
+        return ref;
+    }
+
+    bool cellExists(const int squX, const int squY) {
+        return mpExteriorCell.find(GridId(squX, squY)) != mpExteriorCell.end();
+    }
+
+    bool landExists(const int squX, const int squY) {
+        return mpLand.find(GridId(squX, squY)) != mpLand.end();
+    }
+
+    bool getLTexExists(int index) {
+        return mLandTex.find(index) != mLandTex.end();
+    }
+
+    const std::string& getLTexPath(int index) {
+        return mLandTex[index]->getPath();
+    }
+
+    std::set<std::pair<int32_t, int32_t >> getExteriorCellCoordinates() {
+        std::set<std::pair<int32_t, int32_t> > result;
+        for (const auto &xCordAndCells: mpLand) {
+            result.insert(std::pair(xCordAndCells.first.x, xCordAndCells.first.y));
         }
+        return result;
+    }
+};
 
-        ESCellRef getCell(int squX, int squY) {
-            ESCellRef ref = mpExteriorCell[squX][squY];
-            return ref;
-        }
-
-        ESLandRef getLand(int squX, int squY) {
-            ESLandRef ref = mpLand[squX][squY];
-            return ref;
-        }
-
-        bool cellExists(const int squX, const int squY) {
-            if (map2dDoesExist<int, ESCellRef>(squX, squY, mpExteriorCell)) {
-                return true;
-            }
-            return false;
-        }
-
-        bool landExists(const int squX, const int squY) {
-            if (map2dDoesExist<int, ESLandRef>(squX, squY, mpLand)) {
-                return true;
-            }
-            return false;
-        }
-
-        bool getLTexExists(int index) {
-            if (mLandTex.find(index) == mLandTex.end()) {
-                return false;
-            }
-            return true;
-        }
-
-        const std::string& getLTexPath(int index) {
-            return mLandTex[index]->getPath();
-        }
-
-        std::set<std::pair<int32_t, int32_t >> getExteriorCellCoordinates() {
-            std::set<std::pair<int32_t, int32_t> > result;
-            for (const auto &xCordAndCells: mpLand) {
-                for (const auto &yCordAndCell: xCordAndCells.second) {
-                    result.insert(std::pair(xCordAndCells.first, yCordAndCell.first));
-                }
-            }
-            return result;
-        }
-    };
-
-}//namespace
 #endif
