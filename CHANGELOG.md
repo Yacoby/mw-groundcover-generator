@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## 0.3 - 2024-04-06
 
 ### Changed
 - Simplified configuration. Almost all configuration options now have sane defaults

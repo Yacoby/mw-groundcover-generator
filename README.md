@@ -1,6 +1,6 @@
 This is a project mostly written in a hurry in 2009, with a few patches over the years. It is unsupported.
 
-### MW Mesh Generator 0.2
+### MW Mesh Generator
 
 ### Introduction
 
