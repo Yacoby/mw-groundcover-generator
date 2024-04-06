@@ -12,16 +12,16 @@ class ESCell;
 typedef std::shared_ptr<ESCell> ESCellRef;
 
 struct CellData {
-    uint32_t flags;
-    int32_t gridX;
-    int32_t gridY;
+    uint32_t flags = 0;
+    int32_t gridX = std::numeric_limits<int32_t>::max();
+    int32_t gridY = std::numeric_limits<int32_t>::max();
 };
 
 class ESCell {
 private:
     std::string cellName;
     std::string region;
-    uint32_t colour;
+    uint32_t colour = 0;
     CellData data;
 public:
     const std::string& getRegn() { return region; }

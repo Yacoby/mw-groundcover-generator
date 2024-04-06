@@ -6,7 +6,7 @@ FILE(GLOB es_sources ${MW_MESH_GEN_SOURCE_DIR}/es/*.cpp)
 FILE(GLOB sources ${MW_MESH_GEN_SOURCE_DIR}/src/*.cpp)
 
 add_executable (MWMeshGenTests SnapshotTest.cpp ${sources} ${es_sources})
-target_compile_features(MWMeshGenTests PRIVATE cxx_std_17)
+target_compile_features(MWMeshGenTests PRIVATE cxx_std_20)
 target_link_libraries (MWMeshGenTests ${Boost_LIBRARIES})
 
 enable_testing()

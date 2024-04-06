@@ -27,7 +27,7 @@ ELSE()
 ENDIF()
 
 
-target_compile_features(MWMeshGen PRIVATE cxx_std_17)
+target_compile_features(MWMeshGen PRIVATE cxx_std_20)
 target_link_libraries(MWMeshGen ${wxWidgets_LIBRARIES})
 
 enable_testing()

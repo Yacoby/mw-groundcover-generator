@@ -7,7 +7,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - macos-latest
+          # Disabled mac os as it is expensive
+          #- macos-latest
           - windows-latest
     runs-on: ${{ matrix.os }}
     steps:
@@ -21,7 +22,7 @@ jobs:
         uses: johnwason/vcpkg-action@v6
         id: vcpkg
         with:
-          pkgs: wxwidgets boost-algorithm boost-random boost-test
+          pkgs: wxwidgets boost-algorithm boost-random boost-test boost-multi-array boost-property-tree
           triplet: x64-windows-static
           token: ${{ github.token }}
           github-binarycache: true

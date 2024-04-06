@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <filesystem>
+#include <variant>
 
 class ObjectId {
     const std::string value;

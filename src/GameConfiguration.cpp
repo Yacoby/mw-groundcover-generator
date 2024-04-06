@@ -109,7 +109,7 @@ std::vector<std::filesystem::path> resolveOpenMwPluginPaths(const OpenMwConfig& 
 
 std::vector<std::string> loadMwIni(const std::filesystem::path& iniPath) {
     boost::property_tree::ptree pt;
-    boost::property_tree::ini_parser::read_ini(iniPath, pt);
+    boost::property_tree::ini_parser::read_ini(iniPath.string(), pt);
 
     std::vector<std::string> plugins;
     for (int idx = 0;; ++idx) {

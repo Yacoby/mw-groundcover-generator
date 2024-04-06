@@ -7,6 +7,7 @@
 #include <cassert>
 #include <vector>
 #include <set>
+#include <filesystem>
 
 class EspReader {
 public:
@@ -28,13 +29,6 @@ public:
             T t;
             ifStream->read(reinterpret_cast<char*>(&t), sizeof(T));
             return t;
-        }
-
-        template<>
-        std::string read() {
-            std::string result(length, '\0');
-            ifStream->read(result.data(), length);
-            return result;
         }
 
         template<class T>
@@ -142,5 +136,12 @@ public:
     EndIterator end()  { return EndIterator{}; }
 };
 
+// Template specialization is defined outside of the class for GCC support
+template<>
+inline std::string EspReader::SubRecord::read<std::string>() {
+    std::string result(length, '\0');
+    ifStream->read(result.data(), length);
+    return result;
+}
 
 #endif //MW_MESH_GEN_ESPREADER_H

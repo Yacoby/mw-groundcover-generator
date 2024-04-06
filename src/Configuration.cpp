@@ -98,7 +98,7 @@ Configuration loadConfigurationFromIni(const std::filesystem::path& path) {
 
     boost::property_tree::ptree pt;
     try {
-        boost::property_tree::ini_parser::read_ini(path.c_str(), pt);
+        boost::property_tree::ini_parser::read_ini(path.string(), pt);
     } catch (boost::property_tree::ini_parser_error& e) {
         std::throw_with_nested(std::runtime_error("Failed to load ini file at " + path.string()));
     }

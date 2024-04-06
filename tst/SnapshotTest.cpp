@@ -13,6 +13,9 @@
 using namespace boost::unit_test;
 namespace fs = std::filesystem;
 
+// Account for different systems and compilers
+const float MAX_FLOAT_ERROR = 0.001f;
+
 class EspSubRecord {
 private:
     virtual bool doCompare(const EspSubRecord& rhs) const = 0;
@@ -30,7 +33,7 @@ public:
 class EspCellSubXscl : public EspSubRecord {
     bool doCompare(const EspSubRecord& rhs) const override {
         const auto* rhsType = dynamic_cast<const EspCellSubXscl*>(&rhs);
-        return rhsType && fabs(data - rhsType->data) < 0.0001f;
+        return rhsType && fabs(data - rhsType->data) < MAX_FLOAT_ERROR;
     }
 public:
     float data;
@@ -42,7 +45,7 @@ class EspCellSubData : public EspSubRecord {
         return rhsType &&
                 std::equal(data.begin(), data.end(), rhsType->data.begin(), rhsType->data.end(),
                            [](float lhs, float rhs) {
-                               return fabs(rhs - lhs) < 0.0001f;
+                               return fabs(rhs - lhs) < MAX_FLOAT_ERROR;
                            });;
     }
 public:
@@ -132,16 +135,27 @@ void compareEsp(const fs::path& testPath, const fs::path& expectedPath) {
     auto expectedRecords = parseEsp(readEsp(expectedPath));
 
     BOOST_TEST(testRecords.size() == expectedRecords.size());
-
-    for (auto comparisonTuple : boost::combine(testRecords, expectedRecords)) {
+    for (auto recordComparisonTuple : boost::combine(testRecords, expectedRecords)) {
         std::shared_ptr<EspRecord> test, expected;
-        boost::tie(test, expected) = comparisonTuple;
+        boost::tie(test, expected) = recordComparisonTuple;
+
+        BOOST_TEST(test->subRecords.size() == expected->subRecords.size());
+        for (auto subRecordcomparisonTuple : boost::combine(test->subRecords, expected->subRecords)) {
+            std::shared_ptr<EspSubRecord> testSub, expectedSub;
+            boost::tie(testSub, expectedSub) = subRecordcomparisonTuple;
+            BOOST_TEST(*testSub == *expectedSub);
+        }
+
         BOOST_TEST(*test == *expected);
     }
 }
 
 std::ostream& operator << (std::ostream &os, const EspRecord &s) {
     return (os << "[Record type=" << s.type << "]");
+}
+
+std::ostream& operator << (std::ostream &os, const EspSubRecord &s) {
+    return (os << "[SubRecord type=" << s.type << "]");
 }
 
 void test_snapshot(const std::string& name) {
