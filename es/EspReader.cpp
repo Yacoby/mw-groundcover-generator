@@ -3,8 +3,8 @@
 const std::set<std::string> VAlID_RECORD_TYPES = {
         "ACTI", "ALCH", "APPA", "ARMO", "BODY", "BOOK", "BSGN", "CELL", "CLAS", "CLOT", "CONT", "CREA", "DIAL", "DOOR",
         "ENCH", "FACT", "FRMR", "GLOB", "GMST", "INFO", "INGR", "LAND", "LEVC", "LEVI", "LIGH", "LOCK", "LTEX", "MGEF",
-        "MISC", "NPC_", "PGRD", "PROB", "RACE", "REGN", "REPA", "SCPT", "SKIL", "SNDG", "SOUN", "SPEL", "STAT", "TES3",
-        "WEAP"
+        "MISC", "NPC_", "PGRD", "PROB", "RACE", "REGN", "REPA", "SCPT", "SKIL", "SNDG", "SOUN", "SPEL", "SSCR", "STAT",
+        "TES3", "WEAP"
 };
 
 void EspReader::RecordIterator::next() {
