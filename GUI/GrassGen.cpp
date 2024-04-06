@@ -93,11 +93,17 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	mImport = new wxButton( this, wxID_ANY, wxT("Import from Morrowind.ini"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer6->Add( mImport, 0, wxALIGN_CENTER|wxALL, 5 );
 
-	mAdd = new wxButton( this, wxID_ANY, wxT("Add"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer6->Add( mAdd, 0, wxALIGN_CENTER|wxALL, 5 );
+	mImportOpenMW = new wxButton( this, wxID_ANY, wxT("Import from OpenMW"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer6->Add( mImportOpenMW, 0, wxALIGN_CENTER|wxALL, 5 );
+
+	mAddPluginFromFile = new wxButton( this, wxID_ANY, wxT("Add from file"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer6->Add( mAddPluginFromFile, 0, wxALIGN_CENTER|wxALL, 5 );
 
 	mRemove = new wxButton( this, wxID_ANY, wxT("Remove selected"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer6->Add( mRemove, 0, wxALIGN_CENTER|wxALL, 5 );
+
+	mReset = new wxButton( this, wxID_ANY, wxT("Reset"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer6->Add( mReset, 0, wxALIGN_CENTER|wxALL, 5 );
 
 
 	fgSizer4->Add( bSizer6, 1, wxEXPAND, 5 );
@@ -136,8 +142,10 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 
 	// Connect Events
 	mImport->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnImportPress ), NULL, this );
-	mAdd->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnAddPress ), NULL, this );
+	mImportOpenMW->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnImportOpenMwPress ), NULL, this );
+	mAddPluginFromFile->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnAddPress ), NULL, this );
 	mRemove->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRemovePress ), NULL, this );
+	mReset->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnResetPress ), NULL, this );
 	mGenerate->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnGenPress ), NULL, this );
 }
 
@@ -145,8 +153,10 @@ GrassGen::~GrassGen()
 {
 	// Disconnect Events
 	mImport->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnImportPress ), NULL, this );
-	mAdd->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnAddPress ), NULL, this );
+	mImportOpenMW->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnImportOpenMwPress ), NULL, this );
+	mAddPluginFromFile->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnAddPress ), NULL, this );
 	mRemove->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRemovePress ), NULL, this );
+	mReset->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnResetPress ), NULL, this );
 	mGenerate->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnGenPress ), NULL, this );
 
 }

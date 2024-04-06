@@ -12,6 +12,9 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
+#include <boost/algorithm/string.hpp>
+
+#include "GameConfiguration.h"
 
 namespace fs = std::filesystem;
 
@@ -22,7 +25,7 @@ BEGIN_EVENT_TABLE(GUI, wxFrame)
                 EVT_MENU(WORKER_FAILURE, GUI::OnThreadFailure)
 END_EVENT_TABLE()
 
-GUI::GUI(wxWindow *parent) : GrassGen(parent) {
+GUI::GUI(wxWindow *parent) : GrassGen(parent), loadOrder(std::unique_ptr<LastModifiedLoadOrder>(new LastModifiedLoadOrder())) {
     const std::pair<const char*, const char *> registryPaths[] = {
             std::pair(R"(Software\Bethesda Softworks\Morrowind)", "Installed Path"),
             std::pair(R"(Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 22320)", "InstallLocation"),
@@ -65,43 +68,62 @@ void GUI::OnImportPress(wxCommandEvent &event) {
         morrowindDirectory = iniPath.parent_path();
     }
 
-    boost::property_tree::ptree pt;
+    std::vector<std::string> plugins;
     try {
-        boost::property_tree::ini_parser::read_ini(iniPath, pt);
+        plugins = loadMwIni(iniPath);
     } catch (boost::property_tree::ini_parser_error& e) {
         wxMessageBox("Could not load the ini file at: " + iniPath.string() + ". " + e.what(), wxT("Something went wrong"), wxICON_ERROR);
         return;
     }
 
-    if (pt.find("Game Files") == pt.not_found()) {
-        wxMessageBox("Could not find \"Game Files\" section in the ini file", wxT("Something went wrong"),
-                     wxICON_ERROR);
-        return;
-    }
-
-    std::vector<fs::path> gameFiles;
-    for (int idx = 0;; ++idx) {
-        auto iniKey = "Game Files.GameFile" + std::to_string(idx);
-        auto file = pt.get_optional<std::string>(iniKey);
-        if (!file.has_value()) {
-            break;
-        }
-        auto filePath = morrowindDirectory / "Data Files" / file.value();
+    std::vector<fs::path> pluginPaths;
+    for (const auto &plugin: plugins) {
+        auto filePath = morrowindDirectory / "Data Files" / plugin;
         if (!fs::exists(filePath)) {
-            wxMessageBox(iniKey + "=" + file.value() + " was referenced in the ini file, but it doesn't exist at the path: " + filePath.string(), wxT("Something went wrong"),
+            wxMessageBox(plugin + " was referenced in the ini file, but it doesn't exist at the path: " + filePath.string(), wxT("Something went wrong"),
                          wxICON_ERROR);
             return;
         }
-        gameFiles.push_back(morrowindDirectory / "Data Files" / file.value());
+        pluginPaths.push_back(morrowindDirectory / "Data Files" / plugin);
     }
 
-    loadOrder.clear();
     mModList->Clear();
-    loadOrder.insert(gameFiles);
-    for (const auto &item: loadOrder.get()) {
+    loadOrder = std::unique_ptr<LoadOrder>(new LastModifiedLoadOrder());
+    mAddPluginFromFile->Enable();
+    loadOrder->insert(pluginPaths);
+    for (const auto &item: loadOrder->get()) {
         mModList->Append(item->fileName);
     }
-    assert(loadOrder.get().size() == mModList->GetCount());
+    assert(loadOrder->get().size() == mModList->GetCount());
+}
+
+void GUI::OnImportOpenMwPress(wxCommandEvent &event) {
+    auto cfgPath = getOpenMwCfgPath();
+    if (cfgPath.empty()) {
+        auto dialog = wxFileDialog(
+                this,
+                "Select your OpenMW openmw.cfg",
+                wxEmptyString,
+                wxEmptyString,
+                _("OpenMW openmw.cfg  (*.cfg)|*.cfg|"),
+                wxFD_OPEN
+        );
+        if (dialog.ShowModal() != wxID_OK) {
+            return;
+        }
+        cfgPath = dialog.GetPath().utf8_string();
+    }
+
+    auto cfg = loadOpenMwCfg(cfgPath);
+    auto paths = resolveOpenMwPluginPaths(cfg);
+
+    loadOrder = std::unique_ptr<LoadOrder>(new FixedLoadOrder());
+    mAddPluginFromFile->Enable(false);
+    loadOrder->insert(paths);
+    for (const auto &item: loadOrder->get()) {
+        mModList->Append(item->fileName);
+    }
+    assert(mModList->GetCount() == loadOrder->get().size());
 }
 
 void GUI::OnAddPress(wxCommandEvent &event) {
@@ -124,29 +146,37 @@ void GUI::OnAddPress(wxCommandEvent &event) {
     for (const auto &s: paths) {
         fsPaths.push_back(s.utf8_string());
     }
-    loadOrder.insert(fsPaths);
+    loadOrder->insert(fsPaths);
 
     int i = 0;
-    for (const auto &item: loadOrder.get()) {
+    for (const auto &item: loadOrder->get()) {
         if (mModList->FindString(item->fileName) == -1) {
             mModList->Insert(item->fileName, i);
         }
         ++i;
     }
-    assert(mModList->GetCount() == loadOrder.get().size());
+    assert(mModList->GetCount() == loadOrder->get().size());
 }
 
 void GUI::OnRemovePress(wxCommandEvent &event) {
     int sel = mModList->GetSelection();
     if (sel == wxNOT_FOUND) return;
-    loadOrder.remove(mModList->GetString(sel).utf8_string());
+    loadOrder->remove(mModList->GetString(sel).utf8_string());
     mModList->Delete(sel);
-    assert(mModList->GetCount() == loadOrder.get().size());
+    assert(mModList->GetCount() == loadOrder->get().size());
 }
+
+void GUI::OnResetPress(wxCommandEvent &event) {
+    loadOrder = std::unique_ptr<LoadOrder>(new LastModifiedLoadOrder());
+    mAddPluginFromFile->Enable();
+    mModList->Clear();
+    assert(mModList->GetCount() == loadOrder->get().size());
+}
+
 
 void GUI::OnGenPress(wxCommandEvent &event) {
     std::vector<fs::path> files;
-    for (const auto &item: loadOrder.get()) {
+    for (const auto &item: loadOrder->get()) {
         files.push_back(item->path);
     }
 

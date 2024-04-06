@@ -4,38 +4,48 @@
 #include <filesystem>
 #include <vector>
 #include <set>
+#include <boost/algorithm/string/case_conv.hpp>
 
 namespace fs = std::filesystem;
 
+struct Plugin {
+    const std::string fileName;
+    const bool isEsp;
+    const fs::path path;
+    const fs::file_time_type lastModified;
+    const std::set<std::string> dependencies;
+};
+
 class LoadOrder {
 public:
-    struct Plugin {
-        const std::string fileName;
-        const bool isEsp;
-        const fs::path path;
-        const fs::file_time_type lastModified;
-        const std::set<std::string> dependencies;
-    };
+    virtual ~LoadOrder() { };
 
-    void insert(const std::vector<fs::path>& paths);
+    virtual void insert(const std::vector<fs::path>& paths) = 0;
 
-    void remove(const std::string& fileName);
+    virtual void remove(const std::string& fileName) = 0;
 
-    void clear() {
+    virtual void clear() = 0;
+
+    virtual const std::vector<std::unique_ptr<Plugin>>& get() const  = 0;
+};
+
+class LastModifiedLoadOrder : public LoadOrder {
+public:
+    ~LastModifiedLoadOrder() {}
+
+    void insert(const std::vector<fs::path>& paths) override;
+
+    void remove(const std::string& fileName) override;
+
+    void clear() override {
         loadOrder.clear();
     }
 
-    size_t indexOf(const std::string& name) const;
-
-    const std::vector<std::unique_ptr<Plugin>>& get() const {
+    const std::vector<std::unique_ptr<Plugin>>& get() const override {
         return loadOrder;
     }
 private:
     std::vector<std::unique_ptr<Plugin>> loadOrder;
-
-    bool isEsp(const fs::path& path) {
-        return (path.extension().string() == ".esp");
-    }
 
     void topologicalSort();
 
@@ -47,7 +57,25 @@ private:
     );
 
     std::set<std::string> getDependencies(const fs::path& path);
+};
 
+class FixedLoadOrder : public LoadOrder {
+public:
+    ~FixedLoadOrder() {}
+
+    void insert(const std::vector<fs::path>& paths) override;
+
+    void remove(const std::string& fileName) override;
+
+    void clear() override {
+        loadOrder.clear();
+    }
+
+    const std::vector<std::unique_ptr<Plugin>>& get() const override {
+        return loadOrder;
+    }
+private:
+    std::vector<std::unique_ptr<Plugin>> loadOrder;
 };
 
 #endif //MW_MESH_GEN_LOADORDER_H

@@ -9,7 +9,13 @@
 
 namespace fs = std::filesystem;
 
-std::set<std::string> LoadOrder::getDependencies(const fs::path& path) {
+bool isEsp(const fs::path& path) {
+    std::string extension = path.extension().string();
+    boost::algorithm::to_lower(extension);
+    return (extension == ".esp");
+}
+
+std::set<std::string> LastModifiedLoadOrder::getDependencies(const fs::path& path) {
     std::set<std::string> dependencies;
     auto reader = EspReader(path);
     const auto header = *reader.begin();
@@ -21,7 +27,7 @@ std::set<std::string> LoadOrder::getDependencies(const fs::path& path) {
     return dependencies;
 }
 
-void LoadOrder::insert(const std::vector<fs::path>& paths) {
+void LastModifiedLoadOrder::insert(const std::vector<fs::path>& paths) {
     for (const auto &path: paths) {
         std::string fileName = path.filename().string();
 
@@ -37,7 +43,7 @@ void LoadOrder::insert(const std::vector<fs::path>& paths) {
     topologicalSort();
 }
 
-void LoadOrder::remove(const std::string& fileName) {
+void LastModifiedLoadOrder::remove(const std::string& fileName) {
     loadOrder.erase(std::remove_if(loadOrder.begin(),
                                    loadOrder.end(),
                                    [fileName](const std::unique_ptr<Plugin>& item) {
@@ -45,7 +51,7 @@ void LoadOrder::remove(const std::string& fileName) {
                                    }), loadOrder.end());
 }
 
-void LoadOrder::topologicalSortImpl(
+void LastModifiedLoadOrder::topologicalSortImpl(
         std::set<std::string>& pluginsAdded,
         std::vector<std::unique_ptr<Plugin>>& inputQueue,
         std::vector<std::unique_ptr<Plugin>>& newLoadOrder,
@@ -82,7 +88,7 @@ void LoadOrder::topologicalSortImpl(
     } while (!queue.empty());
 }
 
-void LoadOrder::topologicalSort() {
+void LastModifiedLoadOrder::topologicalSort() {
     std::set<std::string> allPluginNames;
     std::set<std::string> allDependencies;
     for (const auto &item: loadOrder) {
@@ -107,14 +113,28 @@ void LoadOrder::topologicalSort() {
               std::back_inserter(loadOrder));
 }
 
-
-size_t LoadOrder::indexOf(const std::string& name) const {
-    auto result = std::find_if(loadOrder.begin(), loadOrder.end(), [&](const auto& item) {
-        return item->fileName == name;
-    });
-    if (result != loadOrder.end()) {
-        return std::distance(loadOrder.begin(), result);
+void FixedLoadOrder::insert(const std::vector<fs::path> &paths) {
+    if (!loadOrder.empty()) {
+        throw std::runtime_error("Cannot insert more elements into a fixed load order");
     }
 
-    return -1;
+    for (const auto &path: paths) {
+        std::string fileName = path.filename().string();
+
+        loadOrder.push_back(std::make_unique<Plugin>(Plugin{
+                .fileName = fileName,
+                .isEsp = isEsp(path),
+                .path = path,
+                .lastModified = last_write_time(path),
+                .dependencies = std::set<std::string>(),
+        }));
+    }
+}
+
+void FixedLoadOrder::remove(const std::string &fileName) {
+    loadOrder.erase(std::remove_if(loadOrder.begin(),
+                                   loadOrder.end(),
+                                   [fileName](const std::unique_ptr<Plugin>& item) {
+                                       return item->fileName == fileName;
+                                   }), loadOrder.end());
 }

@@ -13,6 +13,7 @@
 
 ### Added
 - Load (processing) order is now displayed in the UI
+- First class OpenMW support
 - Snapshot testing
 - Testing for existing mod configurations
 

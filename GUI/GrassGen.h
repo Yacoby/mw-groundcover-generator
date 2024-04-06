@@ -46,16 +46,20 @@ class GrassGen : public wxFrame
 		wxStaticText* m_staticText2;
 		wxListBox* mModList;
 		wxButton* mImport;
-		wxButton* mAdd;
+		wxButton* mImportOpenMW;
+		wxButton* mAddPluginFromFile;
 		wxButton* mRemove;
+		wxButton* mReset;
 		wxButton* mGenerate;
 		wxGauge* mProgBar;
 		wxStatusBar* mStatus;
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OnImportPress( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnImportOpenMwPress( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnAddPress( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRemovePress( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnResetPress( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnGenPress( wxCommandEvent& event ) { event.Skip(); }
 
 
