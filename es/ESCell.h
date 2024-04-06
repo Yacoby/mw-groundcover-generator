@@ -19,17 +19,17 @@ struct CellData {
 
 class ESCell {
 private:
-    std::string cellName;
-    std::string region;
-    uint32_t colour = 0;
+    std::optional<std::string> cellName;
+    std::optional<std::string> region;
+    std::optional<uint32_t> colour;
     CellData data;
 public:
-    const std::string& getRegn() { return region; }
+    const std::optional<std::string>& getRegn() { return region; }
+    const std::optional<std::string>& getCellName() { return cellName; }
     bool isInterior() { return ((data.flags & 0x01) != 0); }
-    std::string getCellName() { return cellName; }
     int32_t getCellX() { return data.gridX; }
     int32_t getCellY() { return data.gridY; }
-    long getNAM0() { return colour; }
+    std::optional<uint32_t> getNAM0() { return colour; }
 
     static ESCell load(EspReader::Record& record);
 };

@@ -10,21 +10,19 @@
 
 std::optional<Selector> getConfigurationSelector(
         const Configuration& configuration,
-        ESCellRef cell,
+        const ESFileContainer::CellInformation& cellInfo,
         const std::string& texture,
         const std::string& textureId
 ) {
     std::vector textures({texture, textureId});
     for (const auto &tex: textures) {
         std::vector<Selector> selectors;
-        if (cell) {
-            if (!cell->getCellName().empty()) {
-                selectors.emplace_back(tex, cell->getCellName());
-                selectors.emplace_back(tex, "ANY_NAMED_CELL");
-            }
-            if (!cell->getRegn().empty()) {
-                selectors.emplace_back(tex, cell->getRegn());
-            }
+        if (cellInfo.name.has_value()) {
+            selectors.emplace_back(tex, cellInfo.name.value());
+            selectors.emplace_back(tex, "ANY_NAMED_CELL");
+        }
+        if (cellInfo.region.has_value() && !cellInfo.region->empty()) {
+            selectors.emplace_back(tex, cellInfo.region.value());
         }
         selectors.emplace_back(tex);
 
@@ -144,17 +142,15 @@ void Generator::doGenerate() {
 
         sendStatusUpdate(cellsProcessed / float(cells.size()) * 100, "Cell: " + std::to_string(cx) + ", " + std::to_string(cy));
 
-        ESCellRef cell = fc.getFirstCell(cx, cy);
 
         ESFileRef file = fc.getLandFile(cx, cy);
         const auto& landTex = land->getLandTextures();
         int frmr = 0;
 
-        if (cell) {
-            buffWriteCellStart(&buff, cell->getCellName(), 0, cx, cy, cell->getRegn(), cell->getNAM0());
-        } else {
-            buffWriteCellStart(&buff, "", 0, cx, cy, "", 0);
-        }
+        ESFileContainer::CellInformation cellInformation = fc.getCellInformation(cx, cy);
+        ESCellRef cell = fc.getFirstCell(cx, cy);
+        long colour = cell ? cell->getNAM0().value_or(0) : 0;
+        buffWriteCellStart(&buff, cellInformation.name.value_or(""), 0, cx, cy, cellInformation.region.value_or(""), colour);
 
         bool hasGrassAdded = false;
 
@@ -166,7 +162,7 @@ void Generator::doGenerate() {
 
                 if (!file->getLTexExists(landTex[tx][ty] - 1)) continue; //bad bad bad
 
-                auto selector = getConfigurationSelector(configuration, cell, file->getLTexPath(landTex[tx][ty] - 1), file->getLTex(landTex[tx][ty] - 1)->getID());
+                auto selector = getConfigurationSelector(configuration, cellInformation, file->getLTexPath(landTex[tx][ty] - 1), file->getLTex(landTex[tx][ty] - 1)->getID());
                 if (!selector.has_value()) continue; //didn't manage to find a match
                 const auto deprecatedIniCat = selector.value().toLegacyCategory();
                 const auto& behaviour = configuration.get(selector.value()).value().get();

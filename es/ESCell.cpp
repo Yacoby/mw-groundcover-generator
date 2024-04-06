@@ -1,5 +1,12 @@
 #include "ESCell.h"
 
+std::optional<std::string> emptyStringToEmptyOptional(const std::string& s) {
+    if (s.empty()) {
+        return std::nullopt;
+    }
+    return s;
+}
+
 ESCell ESCell::load(EspReader::Record& record) {
     ESCell cell;
 
@@ -9,7 +16,7 @@ ESCell ESCell::load(EspReader::Record& record) {
         } else if (subRecord.type == "DATA") {
             cell.data = subRecord.read<CellData>();
         } else if (subRecord.type == "NAME") {
-            cell.cellName = subRecord.readNullTerminatedString();
+            cell.cellName = emptyStringToEmptyOptional(subRecord.readNullTerminatedString());
         } else if (subRecord.type == "RGNN") {
             cell.region = subRecord.readNullTerminatedString();
         } else if (subRecord.type == "NAM0") {

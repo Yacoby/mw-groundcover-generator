@@ -25,12 +25,18 @@ private:
     std::vector<ESFileRef> mFile;
 
 public:
+    struct CellInformation {
+        std::optional<std::string> name;
+        std::optional<std::string> region;
+    };
+
     ESLandRef getLand(int squX, int squY);
     ESFileRef getLandFile(int squX, int squY);
 
     void loadDataFile(const std::filesystem::path &file);
 
     ESCellRef getFirstCell(int x, int y);
+    CellInformation getCellInformation(int x, int y);
 
     ESLTexRef getLandTexture(float posX, float posY) {
         int cellX = (int) floor(posX / (float) CELL_SIZE);

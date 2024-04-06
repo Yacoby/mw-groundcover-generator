@@ -1,5 +1,7 @@
 #include "ESBase.h"
 
+#include <ranges>
+
 void ESFileContainer::loadDataFile(const std::filesystem::path &file) {
     auto esFile = ESFileRef(new ESFile());
     esFile->loadFile(file);
@@ -13,6 +15,28 @@ ESCellRef ESFileContainer::getFirstCell(int x, int y) {
         }
     }
     return NULL;
+}
+
+ESFileContainer::CellInformation ESFileContainer::getCellInformation(int x, int y) {
+    CellInformation info;
+    for (const auto& it : std::ranges::reverse_view(mFile)) {
+        const auto cell = it->getCell(x, y);
+        if (!cell) {
+            continue;
+        }
+
+        if (!info.name.has_value() && cell->getCellName().has_value()) {
+            info.name = cell->getCellName();
+        }
+        if (!info.region.has_value() && cell->getRegn().has_value()) {
+            info.region = cell->getRegn();
+        }
+        if (info.name.has_value() && info.region.has_value()) {
+            break;
+        }
+    }
+
+    return info;
 }
 
 ESLandRef ESFileContainer::getLand(int squX, int squY) {
