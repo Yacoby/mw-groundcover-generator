@@ -31,7 +31,7 @@ jobs:
           mkdir build
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} ..
-          cmake --build . --config Release
+          cmake --build . --config Release --target MWMeshGen
       - name: Make release directory, copy common artifacts
         run: |
           mkdir release

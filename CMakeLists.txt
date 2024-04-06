@@ -26,7 +26,6 @@ ELSE()
     add_executable(MWMeshGen ${sources} ${gui_sources} ${es_sources})
 ENDIF()
 
-
 target_compile_features(MWMeshGen PRIVATE cxx_std_20)
 target_link_libraries(MWMeshGen ${wxWidgets_LIBRARIES})
 
