@@ -41,8 +41,8 @@ jobs:
 
           mkdir -p release/docs/examples
 
-          cp package/grass_cell_ref.ini release/docs/grass_cell_ref.ini
-          cp package/grass_general_info.ini release/docs/grass_general_info.ini
+          cp docs/grass_cell_ref.ini release/docs/grass_cell_ref.ini
+          cp docs/grass_general_info.ini release/docs/grass_general_info.ini
 
           cp tst/snapshots/any_named_cell_exclusion/configuration.ini release/docs/examples/any_named_cell_exclusion.ini
           cp tst/snapshots/bans/configuration.ini release/docs/examples/bans.ini

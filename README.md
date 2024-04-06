@@ -11,36 +11,28 @@ The motivation for this was to enable grass mods in Morrowind
 
 ### Installation
 
-- [Download the binary from Nexus Mods](https://www.nexusmods.com/morrowind/mods/23065)
-- Extract the files to any location.
+- Download the binary from either:
+  - [GitHub](https://github.com/Yacoby/mw-mesh-gen/releases/latest)
+  - [Nexus Mods](https://www.nexusmods.com/morrowind/mods/23065)
+- Extract the files to any location
 
 ### Using the software
 
 #### General settings
 
 - Settings Location - The configuration file with details of what grass to generate
-- Morrowind Location - This should be the location of your Morrowind folder (the folder with Morrowind.exe in)
-- Output file - What the new esp will be called (saved to the "Data Files" folder)
-
-- ID Append - The unique ID appended to the front of all created objects
-- Z offset - Increase or decrease the height of all placed objects by a fixed amount
+- Output file - Where the generated file will be saved
 
 #### Data files
 
 This program supports multiple data files. You can load them
-directly from your Morrowind.ini or add files manually. The files you
-add manually *must* exist in the "Data Files" folder your Morrowind directory.
-
-The order the files show in this tool doesn't matter. As part of the generation, the files will be loaded in the same
-order as Morrowind will load them.
+directly from your Morrowind.ini, OpenMW openmw.cfg or add them manually.
 
 #### Configuration
 
 The grass is generated according to a configuration file (an ini file). Included are some documented examples to explain
-this format
+this format in the "docs" directory.
 
-- grass\_cell\_ref.ini
-- grass\_general\_info.ini
 
 ### Building from source
 

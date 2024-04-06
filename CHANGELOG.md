@@ -10,18 +10,20 @@
 
 ### Removed
 - Removed configuration options `sName`, `sRecType` and `sScript`
-- Removed the Morrowind directory as a first class citizen. The option to set this is no longer present on the UI
+- Removed the Morrowind directory as a first class citizen. The option to set this is no longer present on the UI and
+  instead the output path should set to the full path as it is no longer relative to the Morrowind directory path.
 
 ### Added
-- Load (processing) order is now displayed in the UI
+- Load order (i.e processing order) is now displayed in the UI
 - First class OpenMW support
-- Snapshot testing
-- Testing for existing mod configurations
+- Automated testing
+  - Snapshot tests
+  - Validation of existing mod configuration
 
 ### Fixed
-- Crash (out of bounds memory access) when generating land
-- Load order correctly sorts ESMs before ESPs
-- Load order sorts based on ESM dependencies as well as time
+- Crash (out of bounds memory access) when getting heights at a point
+- Correctly sorts ESMs before ESPs
+- Sort based on ESM dependencies as well as time
 
 
 ## 0.2 - 2024-03-29
