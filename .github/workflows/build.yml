@@ -38,9 +38,15 @@ jobs:
           cp LICENCE.txt release/LICENCE.txt
           cp CHANGELOG.md release/CHANGELOG.md.txt
 
-          mkdir release/examples
-          cp package/grass_cell_ref.ini release/examples/grass_cell_ref.ini
-          cp package/grass_general_info.ini release/examples/grass_general_info.ini
+          mkdir -p release/docs/examples
+
+          cp package/grass_cell_ref.ini release/docs/grass_cell_ref.ini
+          cp package/grass_general_info.ini release/docs/grass_general_info.ini
+
+          cp tst/snapshots/any_named_cell_exclusion/configuration.ini release/docs/examples/any_named_cell_exclusion.ini
+          cp tst/snapshots/bans/configuration.ini release/docs/examples/bans.ini
+          cp tst/snapshots/cell_name_exclusion/configuration.ini release/docs/examples/cell_name_exclusion.ini
+          cp tst/snapshots/region_exclusion/configuration.ini release/docs/examples/region_exclusion.ini
       - name: Copy windows artifacts to the release directory
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
