@@ -148,9 +148,7 @@ void Generator::doGenerate() {
         int frmr = 0;
 
         ESFileContainer::CellInformation cellInformation = fc.getCellInformation(cx, cy);
-        ESCellRef cell = fc.getFirstCell(cx, cy);
-        long colour = cell ? cell->getNAM0().value_or(0) : 0;
-        buffWriteCellStart(&buff, cellInformation.name.value_or(""), 0, cx, cy, cellInformation.region.value_or(""), colour);
+        buffWriteCellStart(&buff, 0, cx, cy, cellInformation.name.value_or(""));
 
         bool hasGrassAdded = false;
 

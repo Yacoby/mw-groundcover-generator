@@ -19,8 +19,6 @@ ESCell ESCell::load(EspReader::Record& record) {
             cell.cellName = emptyStringToEmptyOptional(subRecord.readNullTerminatedString());
         } else if (subRecord.type == "RGNN") {
             cell.region = subRecord.readNullTerminatedString();
-        } else if (subRecord.type == "NAM0") {
-            cell.colour = subRecord.read<uint32_t>();
         }
     }
 

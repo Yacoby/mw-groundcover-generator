@@ -72,7 +72,7 @@ public:
 };
 
 void fileWriteBuff(Buff* buff, std::ofstream& ofs);
-void buffWriteCellStart(Buff* buff, const std::string& name, uint32_t flags, uint32_t x, uint32_t y, const std::string& rgn, uint32_t col);
+void buffWriteCellStart(Buff* buff, uint32_t flags, uint32_t x, uint32_t y, const std::string& cellName);
 void fileWriteStatData(std::ofstream& ofs,const std::string& type, const std::string& id, const std::string& mesh);
 void buffWriteObjData(Buff* buff, uint32_t frmr, const std::string& id, float scale, float px, float py, float pz, float rx, float ry, float rz  );
 void fileWriteEspHdr(std::ofstream& ofs);

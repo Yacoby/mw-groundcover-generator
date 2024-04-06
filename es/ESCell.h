@@ -21,7 +21,6 @@ class ESCell {
 private:
     std::optional<std::string> cellName;
     std::optional<std::string> region;
-    std::optional<uint32_t> colour;
     CellData data;
 public:
     const std::optional<std::string>& getRegn() { return region; }
@@ -29,7 +28,6 @@ public:
     bool isInterior() { return ((data.flags & 0x01) != 0); }
     int32_t getCellX() { return data.gridX; }
     int32_t getCellY() { return data.gridY; }
-    std::optional<uint32_t> getNAM0() { return colour; }
 
     static ESCell load(EspReader::Record& record);
 };

@@ -18,18 +18,14 @@ void fileWriteBuff(Buff *buff, std::ofstream &ofs) {
 
 /**
 * @param buff the buffer to write the data to
-* @param name cell id string
 * @param flags, x, y cell data, x,y is the grid cords
-* @param rgn the reginon string
-* @param col map colour of the cell
 */
 
 void
-buffWriteCellStart(Buff *buff, const std::string &name, uint32_t flags, uint32_t x, uint32_t y, const std::string &rgn,
-                   uint32_t col) {
+buffWriteCellStart(Buff* buff, uint32_t flags, uint32_t x, uint32_t y, const std::string& cellName) {
     //NAME = Cell ID string.
     buff->writeType("NAME");
-    buff->writeData(name);
+    buff->writeData(cellName);
 
     /*
     DATA = Cell Data
@@ -47,19 +43,6 @@ buffWriteCellStart(Buff *buff, const std::string &name, uint32_t flags, uint32_t
     buff->writeRaw(x);
     buff->writeRaw(y);
     //buff->writeData(flags);	buff->writeData(x);	buff->writeData(y);
-
-
-    if (rgn.length() > 0) {
-        ////RGNN = Region name string
-        buff->writeType("RGNN");
-        buff->writeData(rgn);
-    }
-
-    if (col != 0) {
-        ////NAM5 = Map Color (4 bytes, long, COLORREF)
-        buff->writeType("NAM5");
-        buff->writeData(col);
-    }
 }
 
 /*
