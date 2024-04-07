@@ -69,10 +69,6 @@ public:
         return ref;
     }
 
-    bool cellExists(const int squX, const int squY) {
-        return mpExteriorCell.find(GridId(squX, squY)) != mpExteriorCell.end();
-    }
-
     bool landExists(const int squX, const int squY) {
         return mpLand.find(GridId(squX, squY)) != mpLand.end();
     }
