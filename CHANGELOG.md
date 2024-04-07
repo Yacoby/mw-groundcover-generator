@@ -4,6 +4,7 @@
 
 ### Fixed
 - Correctly load textures when multiple files change the same land record
+- Performance
 
 ## 0.3 - 2024-04-06
 

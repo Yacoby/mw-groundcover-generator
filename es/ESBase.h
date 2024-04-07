@@ -24,12 +24,14 @@ private:
     */
     std::vector<ESFileRef> mFile;
 
-    struct LandCache {
+    template<class T>
+    struct SquareCache {
         int squX;
         int squY;
-        ESLandRef land;
+        T value;
     };
-    std::optional<LandCache> cache;
+    std::optional<SquareCache<ESLandRef>> landRefCache;
+    std::optional<SquareCache<ESFileRef>> fileRefCache;
 
 public:
     struct CellInformation {

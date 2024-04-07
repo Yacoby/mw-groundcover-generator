@@ -32,8 +32,8 @@ ESFileContainer::CellInformation ESFileContainer::getCellInformation(int x, int 
 }
 
 ESLandRef ESFileContainer::getLand(int squX, int squY) {
-    if (cache.has_value() && cache.value().squX == squX && cache.value().squY == squY) {
-        return cache.value().land;
+    if (landRefCache.has_value() && landRefCache.value().squX == squX && landRefCache.value().squY == squY) {
+        return landRefCache.value().value;
     }
 
     ESLandRef land = nullptr;
@@ -44,21 +44,32 @@ ESLandRef ESFileContainer::getLand(int squX, int squY) {
         }
     }
 
-    cache = std::optional<LandCache>(LandCache{
+    landRefCache = std::optional<SquareCache<ESLandRef>>(SquareCache<ESLandRef> {
             .squX = squX,
             .squY = squY,
-            .land = land,
+            .value = land,
     });
     return land;
 }
 
 ESFileRef ESFileContainer::getLandFile(int squX, int squY) {
+    if (fileRefCache.has_value() && fileRefCache.value().squX == squX && fileRefCache.value().squY == squY) {
+        return fileRefCache.value().value;
+    }
+
+    ESFileRef file = nullptr;
     for (const auto& it : std::ranges::reverse_view(mFile)) {
         if (it->landExists(squX, squY)) {
-            return it;
+            file = it;
+            break;
         }
     }
-    return nullptr;
+    fileRefCache = std::optional<SquareCache<ESFileRef>>(SquareCache<ESFileRef> {
+            .squX = squX,
+            .squY = squY,
+            .value = file,
+    });
+    return file;
 }
 
 std::set<std::pair<int32_t, int32_t >> ESFileContainer::getExteriorCellCoordinates() {
