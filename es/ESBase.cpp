@@ -37,9 +37,10 @@ ESLandRef ESFileContainer::getLand(int squX, int squY) {
     }
 
     ESLandRef land = nullptr;
-    for (unsigned i = 0; i < mFile.size(); i++) {
-        if (mFile[i]->landExists(squX, squY)) {
-            land = mFile[i]->getLand(squX, squY);
+    for (const auto& it : std::ranges::reverse_view(mFile)) {
+        if (it->landExists(squX, squY)) {
+            land = it->getLand(squX, squY);
+            break;
         }
     }
 
@@ -52,12 +53,12 @@ ESLandRef ESFileContainer::getLand(int squX, int squY) {
 }
 
 ESFileRef ESFileContainer::getLandFile(int squX, int squY) {
-    for (unsigned i = 0; i < mFile.size(); i++) {
-        if (mFile[i]->landExists(squX, squY)) {
-            return mFile[i];
+    for (const auto& it : std::ranges::reverse_view(mFile)) {
+        if (it->landExists(squX, squY)) {
+            return it;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 std::set<std::pair<int32_t, int32_t >> ESFileContainer::getExteriorCellCoordinates() {

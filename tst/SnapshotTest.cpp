@@ -177,6 +177,28 @@ void test_snapshot(const std::string& name) {
     }
 }
 
+void test_snapshot_with_overridden_base(const std::string& name) {
+    Generator::generate(
+            [](int, const std::string&) {},
+            [](int duration) {},
+            [](const std::string& err) { throw std::runtime_error(err); },
+            fs::path("snapshots") / fs::path(name) / fs::path("configuration.ini"),
+            std::vector<fs::path>({
+                                          fs::path("snapshots") / fs::path("GrassTestBaseToBeOverridden.esp"),
+                                          fs::path("snapshots") / fs::path("GrassTestBase.esp"),
+                                  }),
+            fs::path("output") / fs::path(name + ".esp"),
+            0
+    );
+
+    BOOST_TEST_CONTEXT("Snapshot test for: " + name) {
+        compareEsp(
+                fs::path("output") / fs::path(name + ".esp"),
+                fs::path("snapshots") / fs::path(name) / fs::path("expected.esp")
+        );
+    }
+}
+
 void test_configuration_from_mod(const fs::path& configPath) {
     // Tests configuration from existing mods loads as expected. We don't verify the output, just the lack of failure
     Generator::generate(
@@ -199,6 +221,8 @@ test_suite* init_unit_test_suite(int argc, char* argv[]) {
     }
     framework::master_test_suite().
             add(BOOST_PARAM_TEST_CASE(&test_snapshot, snapshotDirectories.begin(), snapshotDirectories.end()) );
+    framework::master_test_suite().
+            add(BOOST_PARAM_TEST_CASE(&test_snapshot_with_overridden_base, snapshotDirectories.begin(), snapshotDirectories.end()) );
 
     std::vector<fs::path> iniFiles;
     for (auto const& entry : fs::recursive_directory_iterator{fs::path("mod_configs")}) {
