@@ -24,6 +24,13 @@ private:
     */
     std::vector<ESFileRef> mFile;
 
+    struct LandCache {
+        int squX;
+        int squY;
+        ESLandRef land;
+    };
+    std::optional<LandCache> cache;
+
 public:
     struct CellInformation {
         std::optional<std::string> name;

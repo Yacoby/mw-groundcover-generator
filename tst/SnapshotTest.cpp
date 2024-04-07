@@ -161,7 +161,7 @@ std::ostream& operator << (std::ostream &os, const EspSubRecord &s) {
 void test_snapshot(const std::string& name) {
     Generator::generate(
             [](int, const std::string&) {},
-            []() {},
+            [](int duration) {},
             [](const std::string& err) { throw std::runtime_error(err); },
             fs::path("snapshots") / fs::path(name) / fs::path("configuration.ini"),
             std::vector<fs::path>({fs::path("snapshots") / fs::path("GrassTestBase.esp")}),
@@ -181,7 +181,7 @@ void test_configuration_from_mod(const fs::path& configPath) {
     // Tests configuration from existing mods loads as expected. We don't verify the output, just the lack of failure
     Generator::generate(
             [](int, const std::string&) {},
-            []() {},
+            [](int duration) {},
             [](const std::string& err) { throw std::runtime_error(err); },
             configPath,
             std::vector<fs::path>({fs::path("snapshots") / fs::path("GrassTestBase.esp")}),

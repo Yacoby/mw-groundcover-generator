@@ -201,7 +201,7 @@ void GUI::OnGenPress(wxCommandEvent &event) {
 
     std::thread thread(Generator::generate,
                        [&](int progress, const std::string& message) { return this->sendStatusUpdate(progress, message); },
-                       [&]() { return this->sendSuccess(); },
+                       [&](int duration) { return this->sendSuccess(duration); },
                        [&](const std::string& message) { return this->sendFailure(message); },
                        iniPath,
                        files,

@@ -1,6 +1,7 @@
 #include "ESBase.h"
 
 #include <ranges>
+#include <optional>
 
 void ESFileContainer::loadDataFile(const std::filesystem::path &file) {
     auto esFile = ESFileRef(new ESFile());
@@ -40,12 +41,23 @@ ESFileContainer::CellInformation ESFileContainer::getCellInformation(int x, int 
 }
 
 ESLandRef ESFileContainer::getLand(int squX, int squY) {
+    if (cache.has_value() && cache.value().squX == squX && cache.value().squY == squY) {
+        return cache.value().land;
+    }
+
+    ESLandRef land = nullptr;
     for (unsigned i = 0; i < mFile.size(); i++) {
         if (mFile[i]->landExists(squX, squY)) {
-            return mFile[i]->getLand(squX, squY);
+            land = mFile[i]->getLand(squX, squY);
         }
     }
-    return NULL;
+
+    cache = std::optional<LandCache>(LandCache{
+            .squX = squX,
+            .squY = squY,
+            .land = land,
+    });
+    return land;
 }
 
 ESFileRef ESFileContainer::getLandFile(int squX, int squY) {

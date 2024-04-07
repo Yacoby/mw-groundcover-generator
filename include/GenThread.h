@@ -12,7 +12,7 @@ namespace fs = std::filesystem;
 
 class Generator {
     std::function<void(int, const std::string&)> sendStatusUpdate;
-    std::function<void()> sendSuccess;
+    std::function<void(int duration)> sendSuccess;
     std::function<void(const std::string&)> sendFailure;
 
     fs::path mIniLoc;
@@ -26,7 +26,7 @@ class Generator {
     float getRandom(float min, float max);
 
     Generator(std::function<void(int, std::string)> sendStatusUpdate,
-              std::function<void()> sendSuccess,
+              std::function<void(int duration)> sendSuccess,
               std::function<void(std::string)> sendFailure,
               const fs::path &configurationLocation,
               const std::vector<fs::path> &inputFiles,
@@ -38,7 +38,7 @@ public:
 
     static void generate(
             std::function<void(int, std::string)> sendStatusUpdate,
-            std::function<void()> sendSuccess,
+            std::function<void(int duration)> sendSuccess,
             std::function<void(std::string)> sendFailure,
             const std::filesystem::path configurationLocation,
             const std::vector<fs::path> inputFiles,

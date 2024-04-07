@@ -33,8 +33,9 @@ protected:
         wxPostEvent(this, evt);
     }
 
-    void sendSuccess() {
+    void sendSuccess(int duration) {
         wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, WORKER_SUCCESS);
+        evt.SetInt(duration);
         wxPostEvent(this, evt);
     }
 
@@ -51,7 +52,8 @@ protected:
 
     void OnThreadSuccess(wxCommandEvent &event) {
         mProgBar->SetValue(100);
-        mStatus->SetStatusText("Success");
+        auto duration = event.GetInt();
+        mStatus->SetStatusText("Success in " + std::to_string(duration) + " seconds");
         mGenerate->Enable(true);
     }
 

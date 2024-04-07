@@ -1,8 +1,8 @@
 #include "GenThread.h"
 
 #include <cassert>
+#include <chrono>
 #include <boost/random/uniform_real.hpp>
-#include <boost/random.hpp>
 
 #include "Configuration.h"
 #include "Funcs.h"
@@ -61,7 +61,7 @@ float Generator::getRandom(float min, float max) {
 
 void Generator::generate(
         std::function<void(int, std::string)> sendStatusUpdate,
-        std::function<void()> sendSuccess,
+        std::function<void(int duration)> sendSuccess,
         std::function<void(std::string)> sendFailure,
         const fs::path configurationLocation,
         std::vector<fs::path> inputFiles,
@@ -81,6 +81,8 @@ void Generator::doGenerate() {
         sendFailure("No files to process");
         return;
     }
+
+    auto startTime = std::chrono::high_resolution_clock::now();
 
     gNumRecords = 0;
     gNumRecordPos = -1;
@@ -295,11 +297,12 @@ void Generator::doGenerate() {
 
     ofs.close();
 
-    sendSuccess();
+    auto now = std::chrono::high_resolution_clock::now();
+    sendSuccess(std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count());
 }
 
 Generator::Generator(const std::function<void(int, std::string)> sendStatusUpdateArg,
-                     const std::function<void()> sendSuccessArg,
+                     const std::function<void(int duration)> sendSuccessArg,
                      const std::function<void(std::string)> sendFailureArg,
                      const fs::path &configurationLocation,
                      const std::vector<fs::path> &files,
