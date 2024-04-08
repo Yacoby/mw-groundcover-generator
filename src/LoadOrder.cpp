@@ -5,6 +5,8 @@
 #include <queue>
 #include <algorithm>
 
+#include <boost/algorithm/string/case_conv.hpp>
+
 #include "EspReader.h"
 
 namespace fs = std::filesystem;

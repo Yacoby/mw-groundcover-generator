@@ -10,9 +10,7 @@
 #include <windows.h>
 #endif
 
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include "GameConfiguration.h"
 
@@ -115,7 +113,7 @@ void GUI::OnImportOpenMwPress(wxCommandEvent &event) {
     }
 
     auto cfg = loadOpenMwCfg(cfgPath);
-    auto paths = resolveOpenMwPluginPaths(cfg);
+    auto paths = filterSupportedPlugins(resolveOpenMwPluginPaths(cfg));
 
     loadOrder = std::unique_ptr<LoadOrder>(new FixedLoadOrder());
     mAddPluginFromFile->Enable(false);
@@ -132,7 +130,7 @@ void GUI::OnAddPress(wxCommandEvent &event) {
             wxASCII_STR(wxFileSelectorPromptStr),
             morrowindDirectory.string(),
             wxEmptyString,
-            _("Morrowind plugin files (*.esp, *.esm)|*.esp;*.esm|"),
+            _("Morrowind plugin files (*.esp, *.esm, *.omwaddon)|*.esp;*.esm;*.omwaddon|"),
             wxFD_OPEN | wxFD_MULTIPLE
     );
     if (dialog.ShowModal() != wxID_OK) {

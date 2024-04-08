@@ -4,12 +4,19 @@
 #include <vector>
 #include <fstream>
 #include <optional>
+#include <ranges>
+#include <set>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 namespace fs = std::filesystem;
+
+const std::set<std::string> SUPPORTED_EXTENSIONS = {
+        ".esp", ".esm", ".owmaddon"
+};
 
 std::optional<std::string> getEnvString(const char* name) {
     auto value = getenv(name);
@@ -88,16 +95,27 @@ OpenMwConfig loadOpenMwCfg(const std::filesystem::path& cfgPath) {
     };
 }
 
+std::vector<std::filesystem::path> filterSupportedPlugins(const std::vector<std::filesystem::path>& plugins) {
+    std::vector<std::filesystem::path> supportedPlugins;
+    for (const auto& item: plugins) {
+        auto extension = item.filename().extension().string();
+        boost::algorithm::to_lower(extension);
+        if (SUPPORTED_EXTENSIONS.find(extension) != SUPPORTED_EXTENSIONS.end()) {
+            supportedPlugins.push_back(item);
+        }
+    }
+    return supportedPlugins;
+}
+
 std::vector<std::filesystem::path> resolveOpenMwPluginPaths(const OpenMwConfig& cfg) {
 
     std::vector<std::string> plugins;
     plugins.insert(plugins.end(), cfg.content.begin(), cfg.content.end());
     plugins.insert(plugins.end(), cfg.groundCover.begin(), cfg.groundCover.end());
 
-    // TODO this may not handle conflicts correctly
     std::vector<fs::path> paths;
     for (const auto &pluginName: plugins) {
-        for (const auto &dataPath: cfg.data) {
+        for (const auto &dataPath: std::ranges::reverse_view(cfg.data)) {
             if (fs::exists(dataPath / pluginName)) {
                 paths.push_back(dataPath / pluginName);
                 break;

@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <vector>
 #include <set>
-#include <boost/algorithm/string/case_conv.hpp>
+#include <functional>
 
 namespace fs = std::filesystem;
 

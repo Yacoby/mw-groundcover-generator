@@ -15,6 +15,7 @@ std::filesystem::path getOpenMwCfgPath();
 OpenMwConfig loadOpenMwCfg(const std::filesystem::path& cfg);
 
 std::vector<std::filesystem::path> resolveOpenMwPluginPaths(const OpenMwConfig& cfg);
+std::vector<std::filesystem::path> filterSupportedPlugins(const std::vector<std::filesystem::path>& plugins);
 
 std::vector<std::string> loadMwIni(const std::filesystem::path& ini);
 
