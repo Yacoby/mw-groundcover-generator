@@ -3,10 +3,25 @@
 #include <cassert>
 #include <chrono>
 #include <boost/random/uniform_real.hpp>
+#include <boost/algorithm/string/join.hpp>
 
 #include "Configuration.h"
 #include "Funcs.h"
 #include "ESBase.h"
+
+std::vector<std::string> getNestedExceptionMessages(const std::exception& e) {
+    std::vector<std::string> messages;
+    messages.push_back(e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch(const std::exception& ne) {
+        auto subMessages = getNestedExceptionMessages(ne);
+        messages.insert(messages.end(), subMessages.begin(), subMessages.end());
+    } catch(...) {
+
+    }
+    return messages;
+}
 
 std::optional<Selector> getConfigurationSelector(
         const Configuration& configuration,
@@ -72,7 +87,8 @@ void Generator::generate(
                   randomSeed)
                 .doGenerate();
     } catch (std::exception &e) {
-        sendFailure(e.what());
+        auto messages = getNestedExceptionMessages(e);
+        sendFailure(boost::algorithm::join(messages, "\n"));
     }
 }
 
@@ -97,7 +113,11 @@ void Generator::doGenerate() {
         std::string fileName = (*iter).filename().string();
 
         sendStatusUpdate(0, "Loading: " + fileName);
-        fc.loadDataFile(*iter);
+        try {
+            fc.loadDataFile(*iter);
+        } catch (std::exception& e) {
+            std::throw_with_nested(std::runtime_error("Failed to load plugin " + fileName));
+        }
     }
     sendStatusUpdate(0, "Loaded all files");
 

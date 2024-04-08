@@ -185,7 +185,7 @@ void GUI::OnGenPress(wxCommandEvent &event) {
 
     fs::path iniPath = fs::absolute(fs::path(mIniLoc->GetPath().utf8_string()));
     if (!fs::exists(iniPath)) {
-        wxMessageBox("Settings (ini) path " + iniPath.string() + " doesn'thread exist", wxT("Something went wrong"),
+        wxMessageBox("Settings (ini) path " + iniPath.string() + " doesn't exist", wxT("Something went wrong"),
                      wxICON_ERROR);
         return;
     }
