@@ -33,15 +33,20 @@ directly from your Morrowind.ini, OpenMW openmw.cfg or add them manually.
 The grass is generated according to a configuration file (an ini file). Included are some documented examples to explain
 this format in the "docs" directory.
 
+#### Troubleshooting
+
+Logs are written to the file 'MWMeshGenLog.txt' and include information such as:
+- The textures and configuration rules in each cell
+- The plugins loaded
 
 ### Building from source
 
-This requires [Boost](https://www.boost.org/) and [wxWidgets](https://www.wxwidgets.org/). The UI is built using wxFormBuilder.
+This requires [Boost](https://www.boost.org/), [wxWidgets](https://www.wxwidgets.org/) and [spdlog](https://github.com/gabime/spdlog). The UI is built using wxFormBuilder.
 
 #### Mac
 
 ```shell
-brew install boost wxwidgets
+brew install boost wxwidgets spdlog
 cmake .
 make
 ```

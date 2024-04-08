@@ -23,7 +23,7 @@ BEGIN_EVENT_TABLE(GUI, wxFrame)
                 EVT_MENU(WORKER_FAILURE, GUI::OnThreadFailure)
 END_EVENT_TABLE()
 
-GUI::GUI(wxWindow *parent) : GrassGen(parent), loadOrder(std::unique_ptr<LastModifiedLoadOrder>(new LastModifiedLoadOrder())) {
+GUI::GUI(wxWindow *parent, std::shared_ptr<spdlog::logger> logger) : GrassGen(parent), logger(logger), loadOrder(std::unique_ptr<LastModifiedLoadOrder>(new LastModifiedLoadOrder())) {
     const std::pair<const char*, const char *> registryPaths[] = {
             std::pair(R"(Software\Bethesda Softworks\Morrowind)", "Installed Path"),
             std::pair(R"(Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 22320)", "InstallLocation"),
@@ -35,6 +35,7 @@ GUI::GUI(wxWindow *parent) : GrassGen(parent), loadOrder(std::unique_ptr<LastMod
         if (standardKey.has_value()) {
             const auto gamePath = fs::path(standardKey.value());
             if (fs::exists(gamePath) && fs::is_directory(gamePath)) {
+                logger->info(R"(Found Morrowind at "{}" from ini "{}")", gamePath.string(), standardKey.value());
                 morrowindDirectory = gamePath;
                 break;
             }
@@ -198,6 +199,7 @@ void GUI::OnGenPress(wxCommandEvent &event) {
     }
 
     std::thread thread(Generator::generate,
+                       logger,
                        [&](int progress, const std::string& message) { return this->sendStatusUpdate(progress, message); },
                        [&](int duration) { return this->sendSuccess(duration); },
                        [&](const std::string& message) { return this->sendFailure(message); },

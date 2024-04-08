@@ -3,6 +3,9 @@
 #include "EspReader.h"
 
 void ESFile::loadFile(const std::filesystem::path &pFile) {
+    assert(filePath.empty()); // undefined behaviour to call loadFile twice
+    filePath = pFile;
+
     for (auto record: EspReader(pFile)) {
         if (record.type == "LAND") {
             ESLandRef land = ESLandRef(new ESLand(ESLand::load(record)));

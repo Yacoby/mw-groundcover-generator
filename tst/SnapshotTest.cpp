@@ -130,6 +130,11 @@ std::vector<std::shared_ptr<EspRecord>> parseEsp(std::vector<std::shared_ptr<Esp
     return records;
 }
 
+std::shared_ptr<spdlog::logger> makeNullLogger() {
+    std::vector<spdlog::sink_ptr> sinks;
+    return std::make_shared<spdlog::logger>("null_logger", begin(sinks), end(sinks));
+}
+
 void compareEsp(const fs::path& testPath, const fs::path& expectedPath) {
     auto testRecords = parseEsp(readEsp(testPath));
     auto expectedRecords = parseEsp(readEsp(expectedPath));
@@ -160,6 +165,7 @@ std::ostream& operator << (std::ostream &os, const EspSubRecord &s) {
 
 void test_snapshot(const std::string& name) {
     Generator::generate(
+            makeNullLogger(),
             [](int, const std::string&) {},
             [](int duration) {},
             [](const std::string& err) { throw std::runtime_error(err); },
@@ -179,6 +185,7 @@ void test_snapshot(const std::string& name) {
 
 void test_snapshot_with_overridden_base(const std::string& name) {
     Generator::generate(
+            makeNullLogger(),
             [](int, const std::string&) {},
             [](int duration) {},
             [](const std::string& err) { throw std::runtime_error(err); },
@@ -202,6 +209,7 @@ void test_snapshot_with_overridden_base(const std::string& name) {
 void test_configuration_from_mod(const fs::path& configPath) {
     // Tests configuration from existing mods loads as expected. We don't verify the output, just the lack of failure
     Generator::generate(
+            makeNullLogger(),
             [](int, const std::string&) {},
             [](int duration) {},
             [](const std::string& err) { throw std::runtime_error(err); },

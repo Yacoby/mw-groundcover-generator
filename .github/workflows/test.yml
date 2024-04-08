@@ -15,7 +15,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         # this is the wrong version of wx, but wx only needs to exist for the tests to compile
         run: |
-          sudo apt-get install libboost-all-dev libwxgtk3.0-gtk3-dev
+          sudo apt-get install libboost-all-dev libwxgtk3.0-gtk3-dev libspdlog-dev
       - name: Run tests
         run: |
           mkdir build

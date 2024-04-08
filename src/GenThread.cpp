@@ -9,6 +9,41 @@
 #include "Funcs.h"
 #include "ESBase.h"
 
+void Generator::logCellStart(int squX, int squY, const ESFileRef& landRecordFile, const std::optional<std::string>& cellName, const std::optional<std::string>& cellRegion) {
+    auto fileName = landRecordFile->getFilePath().filename().string();
+    if (cellName.has_value() && cellRegion.has_value()) {
+        logger->info(R"(Processing cell {}, {}, cell name="{}, region="{}", using LAND record from="{}")", squX, squY, cellName.value(), cellRegion.value(), fileName);
+    } else if (cellName.has_value()) {
+        logger->info(R"(Processing cell {}, {}, cell name="{}", using LAND record from="{}")", squX, squY, cellName.value(), fileName);
+    } else if (cellRegion.has_value()) {
+        logger->info(R"(Processing cell {}, {}, region="{}", using LAND record from="{}")", squX, squY, cellRegion.value(), fileName);
+    } else {
+        logger->info("Processing cell {}, {}, using LAND record from=\"{}\"", squX, squY, fileName);
+    }
+}
+
+
+void Generator::logCellInformation(const std::vector<CellTextureLog>& cellTextureLogs) {
+    logger->info("Saw the following textures and applied rules:");
+    std::set<CellTextureLog> seen;
+    for (const auto& item: cellTextureLogs) {
+        if (seen.find(item) != seen.end()) {
+            continue;
+        }
+        seen.insert(item);
+
+        std::string selectorStr = "none (no rule found)";
+        if (item.selector.has_value()) {
+            selectorStr = "\"" + item.selector.value().toLegacyCategory() + "\"";
+        }
+        logger->info("\ttexture id=\"{}\", (texture name=\"{}\"), applied configuration rule={}", item.textureId, item.textureName, selectorStr);
+    }
+
+    if (seen.empty()) {
+        logger->info("\tnone");
+    }
+}
+
 std::vector<std::string> getNestedExceptionMessages(const std::exception& e) {
     std::vector<std::string> messages;
     messages.push_back(e.what());
@@ -75,6 +110,7 @@ float Generator::getRandom(float min, float max) {
 }
 
 void Generator::generate(
+        std::shared_ptr<spdlog::logger> logger,
         std::function<void(int, std::string)> sendStatusUpdate,
         std::function<void(int duration)> sendSuccess,
         std::function<void(std::string)> sendFailure,
@@ -83,7 +119,7 @@ void Generator::generate(
         const fs::path outputLocation,
         unsigned randomSeed) {
     try {
-        Generator(sendStatusUpdate, sendSuccess, sendFailure, configurationLocation, inputFiles, outputLocation,
+        Generator(logger, sendStatusUpdate, sendSuccess, sendFailure, configurationLocation, inputFiles, outputLocation,
                   randomSeed)
                 .doGenerate();
     } catch (std::exception &e) {
@@ -109,12 +145,13 @@ void Generator::doGenerate() {
     const auto configuration = loadConfigurationFromIni(mIniLoc);
 
     ESFileContainer fc = ESFileContainer();
-    for (auto iter = mFiles.begin(); iter != mFiles.end(); ++iter) {
-        std::string fileName = (*iter).filename().string();
+    for (const auto& filePath: mFiles) {
+        std::string fileName = filePath.filename().string();
 
+        logger->info("Loading plugin: {}", filePath.string());
         sendStatusUpdate(0, "Loading: " + fileName);
         try {
-            fc.loadDataFile(*iter);
+            fc.loadDataFile(filePath);
         } catch (std::exception& e) {
             std::throw_with_nested(std::runtime_error("Failed to load plugin " + fileName));
         }
@@ -170,9 +207,15 @@ void Generator::doGenerate() {
         int frmr = 0;
 
         ESFileContainer::CellInformation cellInformation = fc.getCellInformation(cx, cy);
+
+        logCellStart(cx, cy, file, cellInformation.name, cellInformation.region);
+
         buffWriteCellStart(&buff, 0, cx, cy, cellInformation.name.value_or(""));
 
         bool hasGrassAdded = false;
+
+        std::vector<CellTextureLog> textureLogs;
+        textureLogs.reserve(16*16);
 
         //for each tex
         for (int tx = 0; tx < 16; tx++) {
@@ -183,6 +226,12 @@ void Generator::doGenerate() {
                 if (!file->getLTexExists(landTex[tx][ty] - 1)) continue; //bad bad bad
 
                 auto selector = getConfigurationSelector(configuration, cellInformation, file->getLTexPath(landTex[tx][ty] - 1), file->getLTex(landTex[tx][ty] - 1)->getID());
+                textureLogs.emplace_back(CellTextureLog{
+                    .textureId = file->getLTex(landTex[tx][ty] - 1)->getID(),
+                    .textureName = file->getLTexPath(landTex[tx][ty] - 1),
+                    .selector = selector,
+                });
+
                 if (!selector.has_value()) continue; //didn't manage to find a match
                 const auto deprecatedIniCat = selector.value().toLegacyCategory();
                 const auto& behaviour = configuration.get(selector.value()).value().get();
@@ -306,6 +355,8 @@ void Generator::doGenerate() {
             gNumRecords++;
         }
 
+        logCellInformation(textureLogs);
+
         buff.clear();
 
 
@@ -318,20 +369,31 @@ void Generator::doGenerate() {
     ofs.close();
 
     auto now = std::chrono::high_resolution_clock::now();
-    sendSuccess(std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count());
+    long long seconds = std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count();
+
+    logger->info("Generation complete in {} seconds", seconds);
+    logger->flush();
+
+    sendSuccess(seconds);
 }
 
-Generator::Generator(const std::function<void(int, std::string)> sendStatusUpdateArg,
+Generator::Generator(std::shared_ptr<spdlog::logger> logger,
+                     const std::function<void(int, std::string)> sendStatusUpdateArg,
                      const std::function<void(int duration)> sendSuccessArg,
                      const std::function<void(std::string)> sendFailureArg,
                      const fs::path &configurationLocation,
                      const std::vector<fs::path> &files,
                      const fs::path &outputLocation,
-                     unsigned randomSeed) : sendStatusUpdate(sendStatusUpdateArg),
+                     unsigned randomSeed) : logger(logger),
+                                            sendStatusUpdate(sendStatusUpdateArg),
                                             sendSuccess(sendSuccessArg),
                                             sendFailure(sendFailureArg),
                                             mOut(outputLocation),
                                             mIniLoc(configurationLocation),
                                             mFiles(files),
                                             randomNumberSequence(randomSeed) {
+    logger->info("Creating generator with configuration:");
+    logger->info("\tconfiguration location={}", configurationLocation.string());
+    logger->info("\toutput location={}", outputLocation.string());
+    logger->info("\tseed={}", randomSeed);
 }

@@ -58,6 +58,15 @@ public:
             return texture;
         }
     }
+
+    bool operator==(const Selector& rhs) const {
+        return texture == rhs.texture &&
+               selector == rhs.selector;
+    }
+
+    bool operator!=(const Selector& rhs) const {
+        return !(rhs == *this);
+    }
 };
 
 

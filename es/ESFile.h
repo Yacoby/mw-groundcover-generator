@@ -41,7 +41,7 @@ typedef std::shared_ptr<ESFile> ESFileRef;
 */
 class ESFile {
 private:
-protected:
+    std::filesystem::path filePath;
     /**
     * A list of exterior cells, listed by grid
     */
@@ -52,6 +52,10 @@ protected:
     std::map<long, ESLTexRef> mLandTex;
     std::vector<ESLTexRef> mLandTexVec;
 public:
+
+    const std::filesystem::path& getFilePath() {
+        return filePath;
+    }
 
     void loadFile(const std::filesystem::path &pFile);
 

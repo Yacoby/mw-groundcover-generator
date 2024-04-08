@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.2 - 2024-04-08
+
+### Added
+- Execution logs, which are written to `MWMeshGenLog.txt`
+
 ## 0.3.1 - 2024-04-08
 
 ### Fixed

@@ -10,6 +10,8 @@ include("${wxWidgets_USE_FILE}")
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
+find_package(spdlog REQUIRED)
+
 include_directories(${MW_MESH_GEN_SOURCE_DIR}/src)
 include_directories(${MW_MESH_GEN_SOURCE_DIR}/GUI)
 include_directories(${MW_MESH_GEN_SOURCE_DIR}/es)
@@ -27,7 +29,7 @@ ELSE()
 ENDIF()
 
 target_compile_features(MWMeshGen PRIVATE cxx_std_20)
-target_link_libraries(MWMeshGen ${wxWidgets_LIBRARIES})
+target_link_libraries(MWMeshGen ${wxWidgets_LIBRARIES} spdlog::spdlog_header_only)
 
 enable_testing()
 add_subdirectory(tst)
