@@ -1,6 +1,6 @@
 # Changelog
 
-## [unreleased]
+## 0.3.1 - 2024-04-08
 
 ### Fixed
 - Correctly load textures when multiple files change the same land record
