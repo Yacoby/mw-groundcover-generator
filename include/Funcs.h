@@ -66,13 +66,14 @@ public:
     void writeRaw(const std::string &d) { writeToBuffer(d.c_str(), (int) d.length() - 1); }
 
     void writeRaw(const uint32_t d) { writeToBuffer((char *) &d, 4); }
+    void writeRaw(const int32_t d) { writeToBuffer((char *) &d, 4); }
 
     void writeRaw(const float d) { writeToBuffer((char *) &d, 4); }
 
 };
 
 void fileWriteBuff(Buff* buff, std::ofstream& ofs);
-void buffWriteCellStart(Buff* buff, uint32_t flags, uint32_t x, uint32_t y, const std::string& cellName);
+void buffWriteCellStart(Buff* buff, uint32_t flags, int32_t x, int32_t y, const std::string& cellName);
 void fileWriteStatData(std::ofstream& ofs,const std::string& type, const std::string& id, const std::string& mesh);
 void buffWriteObjData(Buff* buff, uint32_t frmr, const std::string& id, float scale, float px, float py, float pz, float rx, float ry, float rz  );
 void fileWriteEspHdr(std::ofstream& ofs);

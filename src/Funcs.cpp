@@ -22,7 +22,7 @@ void fileWriteBuff(Buff *buff, std::ofstream &ofs) {
 */
 
 void
-buffWriteCellStart(Buff* buff, uint32_t flags, uint32_t x, uint32_t y, const std::string& cellName) {
+buffWriteCellStart(Buff* buff, uint32_t flags, int32_t x, int32_t y, const std::string& cellName) {
     //NAME = Cell ID string.
     buff->writeType("NAME");
     buff->writeData(cellName);

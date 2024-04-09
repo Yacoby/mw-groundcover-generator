@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.3 - 2024-04-09
+
+### Fixed
+- Fixed coordinates in generated CELL records
+
 ## 0.3.2 - 2024-04-08
 
 ### Added
