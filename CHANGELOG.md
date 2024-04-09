@@ -1,5 +1,11 @@
 # Changelog
 
+## [unreleased]
+
+### Fixed
+- Placed objects are written to the correct CELL record in all cases
+
+
 ## 0.3.3 - 2024-04-09
 
 ### Fixed

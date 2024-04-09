@@ -9,6 +9,13 @@
 #include "Funcs.h"
 #include "ESBase.h"
 
+struct ObjectInstance {
+    const ObjectId objectId;
+    const Vector3 position;
+    const Vector3 rotation;
+    const float scale;
+};
+
 void Generator::logCellStart(int squX, int squY, const ESFileRef& landRecordFile, const std::optional<std::string>& cellName, const std::optional<std::string>& cellRegion) {
     auto fileName = landRecordFile->getFilePath().filename().string();
     if (cellName.has_value() && cellRegion.has_value()) {
@@ -158,34 +165,8 @@ void Generator::doGenerate() {
     }
     sendStatusUpdate(0, "Loaded all files");
 
-    //setStatusText("Writing STAT records");
+    std::map<GridId, std::vector<ObjectInstance>> placedInstances;
 
-    std::ofstream ofs(mOut.c_str(), std::ios::out | std::ios::binary);
-    if (!ofs.is_open()) {
-        sendFailure("Failed to open output file: " + mOut.string());
-        return;
-    }
-
-    sendStatusUpdate(0, "Writing grass STAT objects to output file");
-    fileWriteEspHdr(ofs);
-    {
-        for (const auto &item: configuration) {
-            if (!item.second.placeMeshesBehaviour.has_value()) {
-                continue;
-            }
-
-            for (const auto &item2: item.second.placeMeshesBehaviour.value().placements) {
-                if (!std::holds_alternative<Mesh>(item2.idOrMesh)) {
-                    continue;
-                }
-                auto mesh = std::get<Mesh>(item2.idOrMesh).get();
-                fileWriteStatData(ofs, "STAT", configuration.objectPrefix + item.first.toLegacyCategory() + std::to_string(item2.deprecatedId), mesh);
-            }
-        }
-    }
-
-
-    Buff buff;
     const auto& cells = fc.getExteriorCellCoordinates();
     auto sortedCells = std::vector<std::pair<int32_t, int32_t >>(cells.begin(), cells.end());
     std::sort(sortedCells.begin(), sortedCells.end());
@@ -195,24 +176,20 @@ void Generator::doGenerate() {
         auto cx = cellCoord.first;
         auto cy = cellCoord.second;
         cellsProcessed++;
+        int perCellPlacedMeshesCount = 0;
 
         ESLandRef land = fc.getLand(cx, cy);
         assert(land);
 
-        sendStatusUpdate(cellsProcessed / float(cells.size()) * 100, "Cell: " + std::to_string(cx) + ", " + std::to_string(cy));
+        sendStatusUpdate(cellsProcessed / float(cells.size()) * 100, "Processing cell: " + std::to_string(cx) + ", " + std::to_string(cy));
 
 
         ESFileRef file = fc.getLandFile(cx, cy);
         const auto& landTex = land->getLandTextures();
-        int frmr = 0;
 
         ESFileContainer::CellInformation cellInformation = fc.getCellInformation(cx, cy);
 
         logCellStart(cx, cy, file, cellInformation.name, cellInformation.region);
-
-        buffWriteCellStart(&buff, 0, cx, cy, cellInformation.name.value_or(""));
-
-        bool hasGrassAdded = false;
 
         std::vector<CellTextureLog> textureLogs;
         textureLogs.reserve(16*16);
@@ -338,10 +315,16 @@ void Generator::doGenerate() {
                             scale = getRandom(scaleRand.min, scaleRand.max);
                         }
 
+                        Vector3 pos;
+                        pos.x = posx;
+                        pos.y = posy;
+                        pos.z = posZ;
 
-                        buffWriteObjData(&buff, ++frmr, grassID, scale, posx, posy, posZ, rot.x, rot.y, rot.z);
-                        hasGrassAdded = true;
-
+                        // Might be a different cell
+                        placedInstances[GridId::fromPosition(pos.x, pos.y)].push_back(
+                                ObjectInstance{.objectId = ObjectId(grassID), .position = pos, .rotation = rot, .scale = scale}
+                        );
+                        perCellPlacedMeshesCount++;
                     }
 
                 }
@@ -349,24 +332,73 @@ void Generator::doGenerate() {
             }
         }
 
-        if (hasGrassAdded) {//write the cell to the disk
-            fileWriteCellHdr(&buff, ofs);
-            fileWriteBuff(&buff, ofs);
-            gNumRecords++;
-        }
-
         logCellInformation(textureLogs);
-
-        buff.clear();
-
+        logger->info("Placed {} objects (although some may be in surrounding cells)", perCellPlacedMeshesCount);
 
     }//	for
 
-    //fix the number of records
-    ofs.seekp(gNumRecordPos);
-    ofs.write((char *) &gNumRecords, 4);
 
-    ofs.close();
+    std::ofstream ofstream(mOut.string(),  std::ios::out | std::ios::binary);
+    if (!ofstream.is_open()) {
+        sendFailure("Failed to open output file: " + mOut.string());
+        return;
+    }
+
+    sendStatusUpdate(100, "Writing STAT objects to output file");
+
+    fileWriteEspHdr(ofstream);
+    {
+        for (const auto &item: configuration) {
+            if (!item.second.placeMeshesBehaviour.has_value()) {
+                continue;
+            }
+
+            for (const auto &item2: item.second.placeMeshesBehaviour.value().placements) {
+                if (!std::holds_alternative<Mesh>(item2.idOrMesh)) {
+                    continue;
+                }
+                auto mesh = std::get<Mesh>(item2.idOrMesh).get();
+                fileWriteStatData(ofstream, "STAT", configuration.objectPrefix + item.first.toLegacyCategory() + std::to_string(item2.deprecatedId), mesh);
+            }
+        }
+    }
+
+    sendStatusUpdate(0, "Writing CELL records to the output file");
+
+    int progress = 0;
+    for (const auto &cellCoord: sortedCells) {
+        int cx = cellCoord.first;
+        int cy = cellCoord.second;
+
+        sendStatusUpdate(progress++ * 100 / sortedCells.size(), "Writing CELL records to the output file");
+
+        const auto& cellRecordsItr = placedInstances.find(GridId(cx, cy));
+        if (cellRecordsItr == placedInstances.end()) {
+            continue;
+        }
+
+        ESFileContainer::CellInformation cellInformation = fc.getCellInformation(cx, cy);
+
+        Buff buffer;
+        buffWriteCellStart(&buffer, 0, cx, cy, cellInformation.name.value_or(""));
+
+        int frmr = 0;
+        for (const auto &item: cellRecordsItr->second) {
+            buffWriteObjData(&buffer, ++frmr, item.objectId.get(), item.scale, item.position.x, item.position.y,
+                             item.position.z, item.rotation.x, item.rotation.y, item.rotation.z);
+        }
+
+        fileWriteCellHdr(&buffer, ofstream);
+        fileWriteBuff(&buffer, ofstream);
+
+        gNumRecords++;
+    }
+
+    //fix the number of records
+    ofstream.seekp(gNumRecordPos);
+    ofstream.write((char *) &gNumRecords, 4);
+
+    ofstream.close();
 
     auto now = std::chrono::high_resolution_clock::now();
     long long seconds = std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count();

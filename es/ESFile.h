@@ -20,6 +20,10 @@ public:
 
     GridId(const int x, const int y) : x(x), y(y) {}
 
+    static GridId fromPosition(const double x, const double y) {
+        return GridId(floor(x / 8192), floor(y / 8192));
+    }
+
     bool operator==(const GridId &rhs) const {
         return std::tie(x, y) == std::tie(rhs.x, rhs.y);
     }
