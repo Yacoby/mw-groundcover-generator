@@ -6,19 +6,16 @@ jobs:
   build:
     strategy:
       matrix:
-        os:
-          # Disabled mac os as it is expensive
-          #- macos-latest
-          - windows-latest
-    runs-on: ${{ matrix.os }}
+        os: [ { runner: 'windows-latest', output-suffix: 'windows-x64' } ]
+    runs-on: ${{ matrix.os.runner }}
     steps:
       - uses: actions/checkout@v4
       - name: Install mac dependencies
-        if: ${{ matrix.os == 'macos-latest' }}
+        if: ${{ matrix.os.runner == 'macos-latest' }}
         run: |
           brew install wxwidgets boost spdlog
       - name: Build windows dependencies
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os.runner == 'windows-latest' }}
         uses: johnwason/vcpkg-action@v6
         id: vcpkg
         with:
@@ -49,16 +46,16 @@ jobs:
           cp tst/snapshots/cell_name_exclusion/configuration.ini release/docs/examples/cell_name_exclusion.ini
           cp tst/snapshots/region_exclusion/configuration.ini release/docs/examples/region_exclusion.ini
       - name: Copy windows artifacts to the release directory
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os.runner == 'windows-latest' }}
         run: |
           cp build/Release/MWMeshGen.exe release/MWMeshGen.exe
       - name: Copy macos artifacts to the release directory
-        if: ${{ matrix.os == 'macos-latest' }}
+        if: ${{ matrix.os.runner == 'macos-latest' }}
         run: |
           cp build/MWMeshGen release/MWMeshGen
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}
+          name: 'mw-mesh-generator-${{ matrix.os.output-suffix }}'
           path: release/
           if-no-files-found: error
