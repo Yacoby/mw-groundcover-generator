@@ -174,6 +174,8 @@ void Generator::doGenerate() {
         auto cy = cellCoord.second;
         cellsProcessed++;
         int perCellPlacedMeshesCount = 0;
+        int excludedDueToHeightBounds = 0;
+        int excludedDueToTexture = 0;
 
         ESLandRef land = fc.getLand(cx, cy);
         assert(land);
@@ -279,6 +281,7 @@ void Generator::doGenerate() {
 
                                     auto ltex = fc.getLandTexture(tposx, tposy);
                                     if (ltex && (t == ltex->getPath() || t == ltex->getID())) {
+                                        excludedDueToTexture++;
                                         //ak, this is not good.
                                         doContinue = true;
                                         break;
@@ -302,6 +305,7 @@ void Generator::doGenerate() {
                         rot.z = getRandom(0, 2 * PI);
 
                         if (posZ <= placeBehaviour.heights.min || posZ >= placeBehaviour.heights.max) {
+                            excludedDueToHeightBounds++;
                             continue;
                         }
 
@@ -330,7 +334,7 @@ void Generator::doGenerate() {
         }
 
         logCellInformation(textureLogs);
-        logger->info("Placed {} objects (although some may be in surrounding cells)", perCellPlacedMeshesCount);
+        logger->info("Placed {} objects in this and possibly surrounding cells. {} were excluded due to height bounds, {} because of banned textures", perCellPlacedMeshesCount, excludedDueToHeightBounds, excludedDueToTexture);
 
     }//	for
 
