@@ -1,19 +1,7 @@
 #include "Funcs.h"
 
 #include <fstream>
-
-uint32_t gNumRecords = 0;
-long gNumRecordPos = -1;
-
-/**
-* @brief writes the cell data, copying it directly from the buffer
-*/
-void fileWriteBuff(Buff *buff, std::ofstream &ofs) {
-    int size = buff->getSize();
-    for (int i = 0; i < size; i++) {
-        ofs.put(buff->getByte(i));
-    }
-}
+#include "EspWriter.h"
 
 
 /**
@@ -22,10 +10,9 @@ void fileWriteBuff(Buff *buff, std::ofstream &ofs) {
 */
 
 void
-buffWriteCellStart(Buff* buff, uint32_t flags, int32_t x, int32_t y, const std::string& cellName) {
-    //NAME = Cell ID string.
-    buff->writeType("NAME");
-    buff->writeData(cellName);
+buffWriteCellStart(RecordWriter& recordWriter, uint32_t flags, int32_t x, int32_t y, const std::string& cellName) {
+
+    recordWriter.writeSubRecordAndData(RecordType("NAME"), cellName);
 
     /*
     DATA = Cell Data
@@ -37,12 +24,13 @@ buffWriteCellStart(Buff* buff, uint32_t flags, int32_t x, int32_t y, const std::
     long GridX
     long GridY
     */
-    buff->writeType("DATA");
-    buff->writeRaw((uint32_t) 12);
-    buff->writeRaw(flags);
-    buff->writeRaw(x);
-    buff->writeRaw(y);
-    //buff->writeData(flags);	buff->writeData(x);	buff->writeData(y);
+
+    auto sub = recordWriter.writeSubRecord(RecordType("DATA"));
+    sub.write(0);
+    sub.write(x);
+    sub.write(y);
+
+    sub.close();
 }
 
 /*
@@ -63,33 +51,18 @@ is no sub-record count, just use the record Size value to determine
 when to stop reading a record.
 */
 
-void fileWriteStatData(std::ofstream &ofs, const std::string &type, const std::string &id, const std::string &mesh) {
-    Buff buff;
-
-    buff.writeType("NAME");
-    buff.writeData(id);
-    buff.writeType("MODL");
-    buff.writeData(mesh);
-
-    long len = buff.getSize();
-    ofs.write(type.c_str(), 4);
-    ofs.write((char *) &len, 4);
-    len = 0;
-    ofs.write((char *) &len, 4);
-    ofs.write((char *) &len, 4);
-
-    fileWriteBuff(&buff, ofs);
-
-    gNumRecords++;
-
-
+void fileWriteStatData(EspWriter &espWriter, const std::string &type, const std::string &id, const std::string &mesh) {
+    auto recordWriter = espWriter.writeRecord(RecordType(type), 0, 0);
+    recordWriter.writeSubRecordAndData("NAME", id);
+    recordWriter.writeSubRecordAndData("MODL", mesh);
+    recordWriter.close();
 }
 
 /*
 
 */
 void
-buffWriteObjData(Buff *buff, uint32_t frmr, const std::string &id, float scale, float px, float py, float pz, float rx,
+buffWriteObjData(RecordWriter& recordWriter, uint32_t frmr, const std::string &id, float scale, float px, float py, float pz, float rx,
                  float ry, float rz) {
     /*
     FRMR = Object Index (starts at 1) (4 bytes, long)
@@ -97,17 +70,11 @@ buffWriteObjData(Buff *buff, uint32_t frmr, const std::string &id, float scale, 
     index starts at 1 and is incremented for each new object added.  For modified
     objects the index is kept the same.
     */
-    buff->writeType("FRMR");
-    buff->writeData(frmr);
-
-    //NAME = Object ID string
-    buff->writeType("NAME");
-    buff->writeData(id);
+    recordWriter.writeSubRecordAndData<uint32_t>(RecordType("FRMR"), frmr);
+    recordWriter.writeSubRecordAndData(RecordType("NAME"), id);
 
     if (scale != 1) {
-        //XSCL = Scale (4 bytes, float) Static
-        buff->writeType("XSCL");
-        buff->writeData(scale);
+        recordWriter.writeSubRecordAndData<float>(RecordType("XSCL"), scale);
     }
 
     /*
@@ -119,14 +86,14 @@ buffWriteObjData(Buff *buff, uint32_t frmr, const std::string &id, float scale, 
     float YRotate
     float ZRotate
     */
-    buff->writeType("DATA");
-    buff->writeRaw((uint32_t) 24);
-    buff->writeRaw(px);
-    buff->writeRaw(py);
-    buff->writeRaw(pz);
-    buff->writeRaw(rx);
-    buff->writeRaw(ry);
-    buff->writeRaw(rz);
+    auto srw = recordWriter.writeSubRecord(RecordType("DATA"), 24);
+    srw.write<float>(px);
+    srw.write<float>(py);
+    srw.write<float>(pz);
+    srw.write<float>(rx);
+    srw.write<float>(ry);
+    srw.write<float>(rz);
+    srw.close();
 }
 
 /*
@@ -149,56 +116,18 @@ The MAST and DATA records are always found together, the DATA following the MAST
 that it refers to.
 */
 
-void fileWriteEspHdr(std::ofstream &ofs) {
-    const float ver = 1.2;
-    uint32_t unk = 0;
-    char tes3[] = "TES3";
+void fileWriteEspHdr(EspWriter& writer, uint32_t recordCount) {
+    auto recordWriter = writer.writeRecord(RecordType("TES3"), 0, 0);
+    auto subRecordWriter = recordWriter.writeSubRecord(RecordType("HEDR"));
+    subRecordWriter.write<uint32_t>(1.2);
+    subRecordWriter.write<uint32_t>(0);
 
-    //buld header
-    Buff b;
-    b.writeType("HEDR");
-    b.writeRaw((uint32_t) 300);
-    b.writeRaw((uint32_t) ver);
-    b.writeRaw((uint32_t) 0);
-
-    for (int i = 0; i < 32 + 256; i += 4) {
-        b.writeRaw((uint32_t) 0);
+    for (int i = 0; i < 32 + 256; i++) {
+        subRecordWriter.write<char>(0);
     }
 
+    subRecordWriter.write<uint32_t>(recordCount);
 
-    gNumRecordPos = b.getSize();
-    b.writeRaw(gNumRecords);
-
-    //header finished
-
-
-
-    unk = b.getSize();
-    ofs.write(tes3, 4);
-    ofs.write((char *) &unk, 4);
-    unk = 0;
-    ofs.write((char *) &unk, 4);
-    ofs.write((char *) &unk, 4);
-
-    gNumRecordPos += 4 + 4 + 4 + 4;
-
-    for (int i = 0; i < b.getSize(); i++) {
-        char c = b.getByte(i);
-        ofs.write((char *) &c, 1);
-    }
-}
-
-/**
-* @brief writes the 16 bytes of header for the cell rec
-*/
-void fileWriteCellHdr(Buff *buff, std::ofstream &ofs) {
-    uint32_t size = buff->getSize();
-
-    ofs.write((char *) "CELL", 4);
-    ofs.write((char *) &size, 4);
-
-    uint32_t junk = 0; //set junk
-    ofs.write((char *) &junk, 4); //junk
-    ofs.write((char *) &junk, 4); //junk
-
+    subRecordWriter.close();
+    recordWriter.close();
 }

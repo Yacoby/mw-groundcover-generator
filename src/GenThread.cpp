@@ -8,6 +8,7 @@
 #include "Configuration.h"
 #include "Funcs.h"
 #include "ESBase.h"
+#include "EspWriter.h"
 
 struct ObjectInstance {
     const ObjectId objectId;
@@ -142,10 +143,6 @@ void Generator::doGenerate() {
     }
 
     auto startTime = std::chrono::high_resolution_clock::now();
-
-    gNumRecords = 0;
-    gNumRecordPos = -1;
-
 
     sendStatusUpdate(0, "Loading configuration (ini) file");
 
@@ -338,15 +335,11 @@ void Generator::doGenerate() {
     }//	for
 
 
-    std::ofstream ofstream(mOut.string(),  std::ios::out | std::ios::binary);
-    if (!ofstream.is_open()) {
-        sendFailure("Failed to open output file: " + mOut.string());
-        return;
-    }
+    EspWriter espWriter(mOut);
 
     sendStatusUpdate(100, "Writing STAT objects to output file");
 
-    fileWriteEspHdr(ofstream);
+    std::vector<std::pair<std::string, std::string>> statToCreate;
     {
         for (const auto &item: configuration) {
             if (!item.second.placeMeshesBehaviour.has_value()) {
@@ -358,10 +351,19 @@ void Generator::doGenerate() {
                     continue;
                 }
                 auto mesh = std::get<Mesh>(item2.idOrMesh).get();
-                fileWriteStatData(ofstream, "STAT", configuration.objectPrefix + item.first.toLegacyCategory() + std::to_string(item2.deprecatedId), mesh);
+                statToCreate.push_back(std::pair<std::string, std::string>(
+                        configuration.objectPrefix + item.first.toLegacyCategory() + std::to_string(item2.deprecatedId),
+                        mesh
+                ));
             }
         }
     }
+
+    fileWriteEspHdr(espWriter, placedInstances.size() + statToCreate.size());
+    for (const auto& stat: statToCreate) {
+        fileWriteStatData(espWriter, "STAT", stat.first, stat.second);
+    }
+
 
     sendStatusUpdate(0, "Writing CELL records to the output file");
 
@@ -379,26 +381,19 @@ void Generator::doGenerate() {
 
         ESFileContainer::CellInformation cellInformation = fc.getCellInformation(cx, cy);
 
-        Buff buffer;
-        buffWriteCellStart(&buffer, 0, cx, cy, cellInformation.name.value_or(""));
+        auto cellWriter = espWriter.writeRecord("CELL", 0, 0);
+        buffWriteCellStart(cellWriter, 0, cx, cy, cellInformation.name.value_or(""));
 
         int frmr = 0;
         for (const auto &item: cellRecordsItr->second) {
-            buffWriteObjData(&buffer, ++frmr, item.objectId.get(), item.scale, item.position.x, item.position.y,
+            buffWriteObjData(cellWriter, ++frmr, item.objectId.get(), item.scale, item.position.x, item.position.y,
                              item.position.z, item.rotation.x, item.rotation.y, item.rotation.z);
         }
 
-        fileWriteCellHdr(&buffer, ofstream);
-        fileWriteBuff(&buffer, ofstream);
-
-        gNumRecords++;
+        cellWriter.close();
     }
 
-    //fix the number of records
-    ofstream.seekp(gNumRecordPos);
-    ofstream.write((char *) &gNumRecords, 4);
-
-    ofstream.close();
+    espWriter.close();
 
     auto now = std::chrono::high_resolution_clock::now();
     long long seconds = std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count();
