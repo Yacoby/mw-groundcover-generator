@@ -28,7 +28,7 @@ jobs:
           mkdir build
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} ..
-          cmake --build . --config Release --target MWMeshGen
+          cmake --build . --config Release --target MWGroundcoverGenerator
       - name: Make release directory, copy common artifacts
         run: |
           mkdir release
@@ -41,21 +41,21 @@ jobs:
           cp docs/grass_cell_ref.ini release/docs/grass_cell_ref.ini
           cp docs/grass_general_info.ini release/docs/grass_general_info.ini
 
-          cp tst/snapshots/any_named_cell_exclusion/configuration.ini release/docs/examples/any_named_cell_exclusion.ini
-          cp tst/snapshots/bans/configuration.ini release/docs/examples/bans.ini
-          cp tst/snapshots/cell_name_exclusion/configuration.ini release/docs/examples/cell_name_exclusion.ini
-          cp tst/snapshots/region_exclusion/configuration.ini release/docs/examples/region_exclusion.ini
+          cp tst/generation_snapshots/any_named_cell_exclusion/configuration.ini release/docs/examples/any_named_cell_exclusion.ini
+          cp tst/generation_snapshots/bans/configuration.ini release/docs/examples/bans.ini
+          cp tst/generation_snapshots/cell_name_exclusion/configuration.ini release/docs/examples/cell_name_exclusion.ini
+          cp tst/generation_snapshots/region_exclusion/configuration.ini release/docs/examples/region_exclusion.ini
       - name: Copy windows artifacts to the release directory
         if: ${{ matrix.os.runner == 'windows-latest' }}
         run: |
-          cp build/Release/MWMeshGen.exe release/MWMeshGen.exe
+          cp build/Release/MWGroundcoverGenerator.exe release/MWGroundcoverGenerator.exe
       - name: Copy macos artifacts to the release directory
         if: ${{ matrix.os.runner == 'macos-latest' }}
         run: |
-          cp build/MWMeshGen release/MWMeshGen
+          cp build/MWGroundcoverGenerator release/MWGroundcoverGenerator
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: 'mw-mesh-generator-${{ matrix.os.output-suffix }}'
+          name: 'mw-groundcover-generator-${{ matrix.os.output-suffix }}'
           path: release/
           if-no-files-found: error

@@ -1,10 +1,21 @@
 # Changelog
 
-## [unreleased]
+## 0.4 - 2024-04-24
+
+### Added
+- Tooling to fix existing floating groundcover
+- Tooling to regenerate groundcover where land has changed
+- UI fields are now saved and restored (for ease of testing)
 
 ### Fixed
 - Placed objects are written to the correct CELL record in all cases
 
+### Changed
+- Program name from "MW Mesh Generator" to "Morrowind Groundcover Generator"
+- ESM dependencies are added to generated files (for ease of testing)
+
+### Removed
+- Ubuntu build (as the Ubuntu GitHub runner has an old version of GCC which doesn't support modern language features)
 
 ## 0.3.3 - 2024-04-09
 

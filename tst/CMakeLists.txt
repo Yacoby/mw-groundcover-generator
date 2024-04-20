@@ -4,12 +4,15 @@ include_directories (${Boost_INCLUDE_DIRS})
 
 find_package(spdlog REQUIRED)
 
-FILE(GLOB es_sources ${MW_MESH_GEN_SOURCE_DIR}/es/*.cpp)
-FILE(GLOB sources ${MW_MESH_GEN_SOURCE_DIR}/src/*.cpp)
+FILE(GLOB sources
+        ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/esp/*.cpp
+        ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/logic/*.cpp)
 
-add_executable (MWMeshGenTests SnapshotTest.cpp ${sources} ${es_sources})
-target_compile_features(MWMeshGenTests PRIVATE cxx_std_20)
-target_link_libraries (MWMeshGenTests spdlog::spdlog_header_only)
+FILE(GLOB test_sources ${MW_MESH_GEN_SOURCE_DIR}/tst/*.cpp)
+
+add_executable (MWGroundcoverGeneratorTests ${test_sources} ${sources})
+target_compile_features(MWGroundcoverGeneratorTests PRIVATE cxx_std_20)
+target_link_libraries (MWGroundcoverGeneratorTests spdlog::spdlog_header_only)
 
 enable_testing()
-add_test(NAME MWMeshGenTests COMMAND MWMeshGenTests WORKING_DIRECTORY ${MW_MESH_GEN_SOURCE_DIR}/tst)
+add_test(NAME MWGroundcoverGeneratorTests COMMAND MWGroundcoverGeneratorTests WORKING_DIRECTORY ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/tst)
