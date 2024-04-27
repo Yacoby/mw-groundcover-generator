@@ -15,6 +15,15 @@ Selector parseSelector(const std::string& sectionName) {
 }
 
 std::vector<ObjectPlacementPossibility> getPlacements(const std::string& sectionName, const StringPropertyTree& sectionProperties) {
+    float sumOfChances = 0;
+    for(int i = 0;; ++i) {
+        auto chance = sectionProperties.get_optional<int>("sChance" + std::to_string(i));
+        if (!chance.has_value()) {
+            break;
+        }
+        sumOfChances += static_cast<float>(chance.value());
+    }
+
     std::vector<ObjectPlacementPossibility> placements;
     for(int i = 0;; ++i) {
         auto chance = sectionProperties.get_optional<int>("sChance" + std::to_string(i));
@@ -35,7 +44,9 @@ std::vector<ObjectPlacementPossibility> getPlacements(const std::string& section
 
         placements.push_back(ObjectPlacementPossibility{
                 .idOrMesh = id.has_value() && !id.value().empty() ? std::variant<ObjectId, Mesh>(ObjectId(id.value())) : std::variant<ObjectId, Mesh>(Mesh(mesh.value())),
-                .chance = chance.value(),
+                // Technically dividing by the sum of chances is not required, but might make it more obvious what is
+                // going on in the logged configuration
+                .chance = static_cast<float>(chance.value()) / sumOfChances,
                 .deprecatedId = i,
         });
     }
@@ -143,3 +154,85 @@ Configuration loadConfigurationFromIni(const std::filesystem::path& path) {
     );
 }
 
+std::ostream& operator<<(std::ostream& os, const Bounds& bounds) {
+    os << "{Bounds min: " << bounds.min << " max: " << bounds.max << "}";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const PlacementExclusions& exclusions) {
+    if (exclusions.distanceFromTexture.has_value()) {
+        os << "{PlacementExclusions texture: " << exclusions.texture << " distanceFromTexture: "
+           << exclusions.distanceFromTexture.value() << "}";
+    } else {
+        os << "{PlacementExclusions texture: " << exclusions.texture << " distanceFromTexture: "
+           << "{optional empty}" << "}";
+    }
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const ObjectPlacementPossibility& possibility) {
+    os << "{ObjectPlacementPossibility idOrMesh: ";
+    if (std::holds_alternative<ObjectId>(possibility.idOrMesh)) {
+        os << std::get<ObjectId>(possibility.idOrMesh);
+    } else {
+        os << std::get<Mesh>(possibility.idOrMesh);
+    }
+    os << " chance: " << possibility.chance << " deprecatedId: " << possibility.deprecatedId << "}";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const std::optional<PlaceMeshesBehaviour>& behaviour) {
+    if (behaviour.has_value()) {
+        os << behaviour.value();
+    } else {
+        os << "[optional empty]";
+    }
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Behaviour& behaviour) {
+    os << "{Behaviour placeMeshesBehaviour: " << behaviour.placeMeshesBehaviour << "}";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const std::vector<ObjectPlacementPossibility>& possibilities) {
+    os << "[";
+    for (const auto& item: possibilities) {
+        os << item << ", ";
+    }
+    os << "]";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const std::vector<PlacementExclusions>& exclusions) {
+    os << "[";
+    for (const auto& item: exclusions) {
+        os << item << ", ";
+    }
+    os << "]";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const std::map<Selector, Behaviour>& behaviours) {
+    os << "{";
+    for (const auto& item: behaviours) {
+        os << item.first << " = " << item.second << ", ";
+    }
+    os << "}";
+    return os;
+}
+
+
+std::ostream& operator<<(std::ostream& os, const PlaceMeshesBehaviour& behaviour) {
+    os << "{PlaceMeshesBehaviour clump: " << behaviour.clump << " gap: " << behaviour.gap << " alignToNormal: " << behaviour.alignToNormal
+       << " heights: " << behaviour.heights << " positionRandomization: " << behaviour.positionRandomization
+       << " scaleRandomization: " << behaviour.scaleRandomization << " placements: " << behaviour.placements
+       << " exclusions: " << behaviour.exclusions << "}";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Configuration& configuration) {
+    os << "{Configuration behaviours: " << configuration.behaviours << " globalOffset: " << configuration.globalOffset
+       << " objectPrefix: " << configuration.objectPrefix << "}";
+    return os;
+}

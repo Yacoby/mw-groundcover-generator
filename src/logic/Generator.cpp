@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <boost/random/uniform_real.hpp>
+#include <boost/random/discrete_distribution.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 
 #include "esp/ESFileContainer.h"
@@ -53,6 +54,12 @@ void Generator::logCellInformation(const std::vector<CellTextureLog>& cellTextur
     }
 }
 
+void Generator::logConfiguration(const Configuration& configuration) {
+    std::stringstream ss;
+    ss << configuration;
+    logger->info("Loaded configuration: {}", ss.str());
+}
+
 std::optional<Selector> getConfigurationSelector(
         const Configuration& configuration,
         const ESFileContainer::CellInformation& cellInfo,
@@ -81,21 +88,19 @@ std::optional<Selector> getConfigurationSelector(
 }
 
 std::string Generator::getMesh(const std::vector<ObjectPlacementPossibility>& placements, const std::string& objectPrefix, const std::string &cat) {
-    std::string grassID = "UNKNOWN_GRASS";
-    float meshRand = getRandom(0, 100);
-    float meshChance = 1;
-    for (const auto &item: placements) {
-        meshChance += item.chance;
-        if (meshChance > meshRand) {
-            if (std::holds_alternative<ObjectId>(item.idOrMesh)) {
-                grassID = std::get<ObjectId>(item.idOrMesh).get();
-            } else {
-                grassID = objectPrefix + cat + std::to_string(item.deprecatedId);
-            }
-            break;
-        }
+    std::vector<float> weights;
+    for (const auto& placement: placements) {
+        weights.push_back(placement.chance);
     }
-    return grassID;
+
+    boost::random::discrete_distribution<> dist(weights.begin(), weights.end());
+
+    auto& placement = placements.at(dist(randomNumberSequence));
+    if (std::holds_alternative<ObjectId>(placement.idOrMesh)) {
+        return std::get<ObjectId>(placement.idOrMesh).get();
+    } else {
+        return objectPrefix + cat + std::to_string(placement.deprecatedId);
+    }
 }
 
 bool Generator::isIntersecting(float circleX, float circleY, float radius, float squareCenterX, float squareCenterY, float squareWidth) {
@@ -226,6 +231,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
     sendStatusUpdate(0, "Loading configuration (ini) file");
 
     const auto configuration = loadConfigurationFromIni(mIniLoc);
+    logConfiguration(configuration);
 
     int pluginProgress = 0;
     ESFileContainer fc = ESFileContainer();
@@ -376,7 +382,10 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
         }
 
         logCellInformation(textureLogs);
-        logger->info("Placed {} objects in this and possibly surrounding cells. {} were excluded due to height bounds, {} because of banned textures", perCellPlacedMeshesCount, excludedDueToHeightBounds, excludedDueToTexture);
+        logger->info(
+                "Placed {} objects in this and possibly surrounding cells. {} were excluded due to height bounds, {} because of banned textures",
+                perCellPlacedMeshesCount, excludedDueToHeightBounds, excludedDueToTexture
+        );
 
     }//	for
 

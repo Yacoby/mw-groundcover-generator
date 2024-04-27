@@ -4,6 +4,7 @@
 
 ### Fixed
 - Banning placed objects from being near a texture now works correctly
+- Change probabilities (iChanceX in the configuration) to be a weight. This means that they no longer need to sum to 100%
 
 ## 0.4 - 2024-04-24
 

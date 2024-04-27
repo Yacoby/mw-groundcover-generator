@@ -69,6 +69,7 @@ class Generator {
 
     float getRandom(float min, float max);
 
+    void logConfiguration(const Configuration&);
     void doGenerate(MutableEsp& esp, const std::function<bool(ESFileContainer&,GridId)>& cellUpdatePredicate);
 public:
 

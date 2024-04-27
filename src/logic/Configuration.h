@@ -7,12 +7,18 @@
 #include <map>
 #include <filesystem>
 #include <variant>
+#include <ostream>
 
 class ObjectId {
     const std::string value;
 public:
     ObjectId(const std::string& v) : value(v) {}
     const std::string& get() const { return value; }
+
+    friend std::ostream& operator<<(std::ostream& os, const ObjectId& id) {
+        os << "{ObjectId id:" << id.value << "}";
+        return os;
+    }
 };
 
 
@@ -21,21 +27,32 @@ class Mesh {
 public:
     Mesh(const std::string& v) : value(v) {}
     const std::string& get() const { return value; }
+
+    friend std::ostream& operator<<(std::ostream& os, const Mesh& mesh) {
+        os << "{Mesh value: " << mesh.value << "}";
+        return os;
+    }
 };
 
 struct Bounds {
+    friend std::ostream& operator<<(std::ostream& os, const Bounds& bounds);
+
     const float min;
     const float max;
 };
 
 struct PlacementExclusions {
+    friend std::ostream& operator<<(std::ostream& os, const PlacementExclusions& exclusions);
+
     const std::string texture;
     const std::optional<int> distanceFromTexture;
 };
 
 struct ObjectPlacementPossibility {
+    friend std::ostream& operator<<(std::ostream& os, const ObjectPlacementPossibility& possibility);
+
     const std::variant<ObjectId, Mesh> idOrMesh;
-    const int chance;
+    const float chance;
     const int deprecatedId;
 };
 
@@ -67,10 +84,17 @@ public:
     bool operator!=(const Selector& rhs) const {
         return !(rhs == *this);
     }
+
+    friend std::ostream& operator<<(std::ostream& os, const Selector& aSelector) {
+        os << "{Selector " << aSelector.toLegacyCategory() << "}";
+        return os;
+    }
 };
 
 
 struct PlaceMeshesBehaviour {
+    friend std::ostream& operator<<(std::ostream& os, const PlaceMeshesBehaviour& behaviour);
+
     const bool clump;
 
     const int gap;
@@ -87,6 +111,8 @@ struct PlaceMeshesBehaviour {
 
 
 struct Behaviour {
+    friend std::ostream& operator<<(std::ostream& os, const Behaviour& behaviour);
+
     const std::optional<PlaceMeshesBehaviour> placeMeshesBehaviour;
 };
 
@@ -113,6 +139,8 @@ public:
     }
 
     Configuration(const std::map<Selector, Behaviour>& map, int offset, const std::string& prefix) : behaviours(map), globalOffset(offset), objectPrefix(prefix) {}
+
+    friend std::ostream& operator<<(std::ostream& os, const Configuration& configuration);
 };
 
 
