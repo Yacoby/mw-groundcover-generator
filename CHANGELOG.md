@@ -1,5 +1,10 @@
 # Changelog
 
+## [unreleased]
+
+### Fixed
+- Banning placed objects from being near a texture now works correctly
+
 ## 0.4 - 2024-04-24
 
 ### Added

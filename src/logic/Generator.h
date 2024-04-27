@@ -64,6 +64,8 @@ class Generator {
     void logCellInformation(const std::vector<CellTextureLog>& cellTextureLogs);
 
     std::string getMesh(const std::vector<ObjectPlacementPossibility>& placements, const std::string &objectPrefix, const std::string &cat);
+    bool isIntersecting(float circleX, float circleY, float radius, float squareCenterX, float squareCenterY, float squareWidth);
+    bool isPlacedNearExcludedTexture(ESFileContainer& fc, const PlaceMeshesBehaviour& placeBehaviour, float posx, float posy);
 
     float getRandom(float min, float max);
 

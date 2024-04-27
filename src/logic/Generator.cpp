@@ -98,6 +98,73 @@ std::string Generator::getMesh(const std::vector<ObjectPlacementPossibility>& pl
     return grassID;
 }
 
+bool Generator::isIntersecting(float circleX, float circleY, float radius, float squareCenterX, float squareCenterY, float squareWidth) {
+    float distX = abs(circleX - squareCenterX);
+    float distY = abs(circleY - squareCenterY);
+
+    if (distX > (squareWidth / 2 + radius)) return false;
+    if (distY > (squareWidth / 2 + radius)) return false;
+
+    if (distX <= (squareWidth / 2)) return true;
+    if (distY <= (squareWidth / 2)) return true;
+
+    double cornerDist = pow(distX - squareWidth / 2, 2) + pow(distY - squareWidth / 2, 2);
+
+    return (cornerDist <= pow(radius, 2));
+}
+
+bool Generator::isPlacedNearExcludedTexture(
+        ESFileContainer& fc,
+        const PlaceMeshesBehaviour& placeBehaviour,
+        float posx,
+        float posy
+) {
+    // find every grid texture within x points of the placement
+    for (const auto &exclusion: placeBehaviour.exclusions) {
+        auto exclusionDistance = static_cast<float>(exclusion.distanceFromTexture.value());
+
+        // find every ltex square that could intersect
+        float minX = posx - exclusionDistance;
+        float minY = posy - exclusionDistance;
+        float maxX = posx + exclusionDistance;
+        float maxY = posy + exclusionDistance;
+
+        std::set<std::pair<int, int>> possiblyIntersectingLtexIndexes;
+        for (float x = minX; x < maxX; x += static_cast<float>(LTEX_GRID_SIZE)) {
+            for (float y = minY; y < maxY; y += static_cast<float>(LTEX_GRID_SIZE)) {
+                possiblyIntersectingLtexIndexes.insert({
+                    static_cast<int>(floor(x / LTEX_GRID_SIZE)),
+                    static_cast<int>(floor(y / LTEX_GRID_SIZE)),
+                });
+            }
+        }
+
+        std::vector<std::pair<int, int>> intersectingLtexIndexes;
+        for (const auto& ltexIdx: possiblyIntersectingLtexIndexes) {
+            bool doesIntersectExactly = isIntersecting(
+                    posx, posy, exclusionDistance,
+                    static_cast<float>(ltexIdx.first) * LTEX_GRID_SIZE + static_cast<float>(LTEX_GRID_SIZE) / 2,
+                    static_cast<float>(ltexIdx.second) * LTEX_GRID_SIZE + static_cast<float>(LTEX_GRID_SIZE) / 2,
+                    LTEX_GRID_SIZE
+            );
+            if (doesIntersectExactly) {
+                intersectingLtexIndexes.push_back(ltexIdx);
+            }
+        }
+
+        for (const auto& ltexIdx: intersectingLtexIndexes) {
+            auto ltex = fc.getLandTexture(
+                    static_cast<float>(ltexIdx.first) * LTEX_GRID_SIZE + static_cast<float>(LTEX_GRID_SIZE) / 2,
+                    static_cast<float>(ltexIdx.second) * LTEX_GRID_SIZE + static_cast<float>(LTEX_GRID_SIZE) / 2
+            );
+            if (ltex && (exclusion.texture == ltex->getPath() || exclusion.texture == ltex->getID())) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 float Generator::getRandom(float min, float max) {
     // Using boost because uniform_real produces consistent output across platforms
     boost::uniform_real<float> dist(min, max);
@@ -264,46 +331,10 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
                             posy += getRandom(posRand.min, posRand.max);
                         }
 
-                        //check if we really should place it, or if it is on a no place texture
-                        {
-                            bool doContinue = false;
-
-                            for (const auto &exclusion: placeBehaviour.exclusions) {
-                                auto r = static_cast<float>(exclusion.distanceFromTexture.value());
-                                for (int p = 0; p < 4; p++) {
-
-                                    float tposx = posx;
-                                    float tposy = posy;
-
-                                    switch (p) {
-                                        case 0:
-                                            tposx += r;
-                                            break;
-                                        case 1:
-                                            tposx -= r;
-                                            break;
-                                        case 2:
-                                            tposy += r;
-                                            break;
-                                        case 3:
-                                            tposy -= r;
-                                            break;
-                                    }
-
-                                    const auto& t = exclusion.texture;
-                                    auto ltex = fc.getLandTexture(tposx, tposy);
-                                    if (ltex && (t == ltex->getPath() || t == ltex->getID())) {
-                                        excludedDueToTexture++;
-                                        //ak, this is not good.
-                                        doContinue = true;
-                                        break;
-                                    } //if (t==file2->getLTexPath(land...
-                                    if (doContinue == true) break;
-                                }//for ( int p = 0; p < 4; p++){
-                                if (doContinue == true) break;
-                            }//for ( int c = 0;ini.valueExists(iniCat, "sBan"+toString(c));++c ){
-                            if (doContinue == true) continue;
-                        }//{
+                        if (isPlacedNearExcludedTexture(fc, placeBehaviour, posx, posy)) {
+                            excludedDueToTexture++;
+                            continue;
+                        }
 
                         auto height = fc.getHeightAt(posx, posy);
                         auto rotation = fc.getAngleAt(posx, posy);
