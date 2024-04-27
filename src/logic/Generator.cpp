@@ -179,9 +179,38 @@ float Generator::getRandom(float min, float max) {
 void Generator::generate() {
     try {
         MutableEsp esp;
-        doGenerate(esp, [](const ESFileContainer&, GridId) { return true; });
+        doGenerate(esp, [](ESFileContainer&, const MutableEsp&, const GridId&) { return true; });
     } catch (std::exception& e) {
         sendFailure(e);
+    }
+}
+
+bool Generator::hasCellBeenChanged(ESFileContainer& fc, const MutableEsp& esp, const GridId& g) {
+    const auto& cellIter = esp.exteriorCells.find(g);
+    if (cellIter == esp.exteriorCells.end()) {
+        logger->info("Cell {} should be regenerated as the cell doesn't exist", g);
+        return true;
+    }
+
+    const auto& cell = cellIter->second;
+    for (const auto& reference: cell->references) {
+        auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + PositionUpdater::DEFAULT_GENERATION_OFFSET;
+        if (fabs(expectedZ - reference.position.z) > PositionUpdater::MAX_ALLOWED_Z_ERROR) {
+            logger->info("Cell {} should be regenerated as found object instance {} with a height of {}, but expected it to have a height of {}",
+                         g, reference.name, reference.position.z, expectedZ);
+            return true;
+        }
+
+        // this doesn't check if the objects are on the correct texture
+    }
+
+    bool isCellEmpty = cell->references.empty();
+    if (isCellEmpty) {
+        logger->info("Cell {} should be regenerated as it is empty", g);
+        return true;
+    } else {
+        logger->info("Cell {} isn't empty, and all object instances are in the correct place. Should skip regeneration", g);
+        return false;
     }
 }
 
@@ -196,32 +225,13 @@ void Generator::generateFromExisting(const fs::path& existingPlugin) {
             std::throw_with_nested(std::runtime_error("Failed to load plugin " + existingPlugin.string()));
         }
 
-        auto shouldUpdateCellPredicate = [&] (ESFileContainer& fc, GridId g) {
-            const auto& cellIter = esp.exteriorCells.find(g);
-            if (cellIter == esp.exteriorCells.end()) {
-                return true;
-            }
-            const auto& cell = cellIter->second;
-
-            for (const auto& reference: cell->references) {
-                auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + PositionUpdater::DEFAULT_GENERATION_OFFSET;
-                if (fabs(expectedZ - reference.position.z) > PositionUpdater::MAX_ALLOWED_Z_ERROR) {
-                    return true;
-                }
-
-                // this doesn't check if the objects are on the correct texture
-            }
-
-            return cell->references.empty();
-        };
-
-        doGenerate(esp, shouldUpdateCellPredicate);
+        doGenerate(esp, [this] (ESFileContainer& fc, const MutableEsp& esp,const GridId& g) { return this->hasCellBeenChanged(fc, esp, g); });
     } catch (std::exception& e) {
         sendFailure(e);
     }
 }
 
-void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileContainer&,GridId)>& cellUpdatePredicate) {
+void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileContainer&,const MutableEsp&,const GridId&)>& cellUpdatePredicate) {
     if (mFiles.size() == 0) {
         throw std::runtime_error("No files to process");
     }
@@ -401,7 +411,8 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
         }
     }
 
-    sendStatusUpdate(100, "Writing STAT objects to output file");
+    sendStatusUpdate(100, "Writing STAT objects");
+    logger->info("Writing STAT objects", mOut.string());
 
     {
         for (const auto &item: configuration) {
@@ -421,6 +432,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
     }
 
     sendStatusUpdate(0, "Constructing CELL records");
+    logger->info("Constructing CELL records");
 
     int progress = 0;
     for (const auto &cellCoord: sortedCells) {
@@ -429,7 +441,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
 
         sendStatusUpdate(static_cast<int>(progress++ * 100 / sortedCells.size()), "Constructing CELL records");
 
-        if (!cellUpdatePredicate(fc, GridId(cx, cy))) {
+        if (!cellUpdatePredicate(fc, esp, GridId(cx, cy))) {
             logger->info("Skipped creating/updating cell {}, {}", cx, cy);
             continue;
         }
@@ -462,7 +474,8 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
         esp.addOrReplaceCell(cell);
     }
 
-    sendStatusUpdate(0, "Saving plugin file");
+    sendStatusUpdate(0, std::format("Saving plugin file to: {}", mOut.filename().string()));
+    logger->info("Saving plugin file to: {}", mOut.string());
     esp.save(mOut);
 
     auto now = std::chrono::high_resolution_clock::now();

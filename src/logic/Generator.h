@@ -70,7 +70,8 @@ class Generator {
     float getRandom(float min, float max);
 
     void logConfiguration(const Configuration&);
-    void doGenerate(MutableEsp& esp, const std::function<bool(ESFileContainer&,GridId)>& cellUpdatePredicate);
+    bool hasCellBeenChanged(ESFileContainer&, const MutableEsp&, const GridId&);
+    void doGenerate(MutableEsp& esp, const std::function<bool(ESFileContainer&,const MutableEsp&,const GridId&)>& cellUpdatePredicate);
 public:
 
     Generator(std::shared_ptr<spdlog::logger> logger,

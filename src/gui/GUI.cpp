@@ -91,6 +91,12 @@ void GUI::OnClose(wxCloseEvent& event) {
         logger->error("Failed to write ini, got error: {}", e.what());
     }
 
+    try {
+        logger->flush();
+    } catch (std::exception& e) {
+
+    }
+
     event.Skip();
 }
 
@@ -370,6 +376,7 @@ void GUI::OnFixStart( wxCommandEvent& event ) {
         }
     }
 
+    fixButton->Enable(false);
     std::thread thread([=, this] {
         PositionUpdater positionUpdater(
                 logger,

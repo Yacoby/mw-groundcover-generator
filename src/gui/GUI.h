@@ -57,7 +57,12 @@ protected:
     void sendFailure(int baseId, const std::exception& exception) {
         wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, baseId + 3);
         auto messages = getNestedExceptionMessages(exception);
-        evt.SetString(boost::algorithm::join(messages, "\n"));
+        auto stringMessage = boost::algorithm::join(messages, "\n");
+
+        logger->error("Saw failure from thread:\n {}", stringMessage);
+        logger->flush();
+
+        evt.SetString(stringMessage);
         wxPostEvent(this, evt);
     }
 

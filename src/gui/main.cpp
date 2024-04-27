@@ -9,10 +9,10 @@
 #include "GUI.h"
 
 class MWGrassApp : public wxApp {
+    std::shared_ptr<spdlog::logger> logger = nullptr;
 public:
     virtual bool OnInit() {
-        spdlog::set_pattern("[%H:%M:%S.%e] %v");
-        std::shared_ptr<spdlog::logger> logger;
+        spdlog::set_pattern("[%H:%M:%S.%e %L] %v");
         try {
             logger = spdlog::basic_logger_mt<spdlog::async_factory>("async_file_logger", "MWMeshGenLog.txt", true);
         } catch (const spdlog::spdlog_ex& ex) {
@@ -30,6 +30,11 @@ public:
             throw;
         } catch (std::exception &e) {
             wxMessageBox(e.what(), wxT("Something went wrong"), wxICON_ERROR);
+
+            if (logger) {
+                logger->critical("Got exception in main loop: {}", e.what());
+                logger->flush();
+            }
         }
         return false;
     }

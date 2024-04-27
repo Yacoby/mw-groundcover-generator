@@ -11,7 +11,7 @@ The motivation for this tool was to enable groundcover mods in Morrowind
 ## Installation
 
 - Download the binary from either:
-  - [GitHub](https://github.com/Yacoby/mw-mesh-gen/releases/latest)
+  - [GitHub](https://github.com/Yacoby/mw-groundcover-generator/releases/latest)
   - [Nexus Mods](https://www.nexusmods.com/morrowind/mods/23065)
 - Extract the files to any location
 

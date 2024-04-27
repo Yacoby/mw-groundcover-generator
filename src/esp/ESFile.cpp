@@ -44,3 +44,8 @@ bool GridId::operator!=(const GridId& rhs) const {
 bool GridId::operator<(const GridId& rhs) const {
     return std::tie(x, y) < std::tie(rhs.x, rhs.y);
 }
+
+std::ostream& operator<<(std::ostream& os, const GridId& id) {
+    os << "( " << id.x << ", " << id.y << ")";
+    return os;
+}

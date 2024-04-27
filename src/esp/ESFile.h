@@ -1,13 +1,15 @@
 #ifndef _ESDATA_H_
 #define _ESDATA_H_
 
-
 #include <map>
 #include <list>
 #include <set>
 #include <cstring>
 #include <vector>
 #include <filesystem>
+#include <ostream>
+
+#include "spdlog/fmt/fmt.h"
 
 #include "ESCell.h"
 #include "ESLand.h"
@@ -25,6 +27,20 @@ public:
     bool operator==(const GridId &rhs) const;
     bool operator!=(const GridId &rhs) const;
     bool operator<(const GridId &rhs) const;
+
+    friend std::ostream& operator<<(std::ostream& os, const GridId& id);
+};
+
+template<>
+struct fmt::formatter<GridId> {
+    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+        return ctx.end();
+    }
+
+    template <typename FormatContext>
+    auto format(const GridId& input, FormatContext& ctx) -> decltype(ctx.out()) {
+        return fmt::format_to(ctx.out(), "({}, {})", input.x, input.y);
+    }
 };
 
 class ESFile;
