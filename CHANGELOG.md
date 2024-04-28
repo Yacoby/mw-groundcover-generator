@@ -5,6 +5,9 @@
 ### Added
 - A guide on how to use the software
 
+### Fixed
+- Allowed exclusion offsets to be unset (previously an unset offset would crash the program)
+
 ## 0.5 - 2024-04-27
 
 ### Changed
