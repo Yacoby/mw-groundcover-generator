@@ -138,14 +138,16 @@ iGap=150 ; Required
 
 Each section can have different grass objects placed with differing probabilities. 
 
-These configuration keys are suffixed by a index (a `#` placeholder is used below) starting from zero.
+These configuration keys are suffixed by a index (a `X` placeholder is used below) starting from zero.
 ```ini
-sChance#=100 ; Required
-sMesh#=v7_GS_Grass_01.nif ; one of sID# or sMesh# is required
-sID#= ; one of sID# or sMesh# is required
+sChanceX=100 ; Required
+sMeshX=v7_GS_Grass_01.nif ; one of sIDX or sMeshX is required
+sIDX= ; one of sIDX or sMeshX is required
 ```
 
-`sChance#` represents a weight, and the chances don't have to sum to 100
+- `sChanceX` represents a weight, and the chances don't have to sum to 100
+- `sMeshX` (mutually exclusive with `sIDX`) represents the mesh file to use for the placed object instance. If this is set a Static object will be created
+- `sIDX` (mutually exclusive with `sMeshX`) represents the object id to use for the placed object instance. This will not be created automatically 
 
 So for example
 
@@ -155,6 +157,9 @@ sMesh0=v7_GS_Grass_leaf.nif
 
 sChance1=10
 sMesh1=v7_GS_Grass_fern.nif
+
+sChance2=5
+sID2=my_id
 ```
 
 ### Exclusions
@@ -163,12 +168,12 @@ The randomization of the position of the groundcover can result it it spilling o
 
 Don't place grass on `GL_Dirtroad`, even if random distribution puts it there
 ```ini
-sBan#=GL_Dirtroad
+sBanX=GL_Dirtroad
 ```
 
 The offset (default `0`) can be used to ensure that it isn't placed within some number of units of `GL_Dirtroad`
 ```ini
-iBanOff#=128
+iBanOffX= ; Optional, default: 0
 ```
 
 ## Troubleshooting

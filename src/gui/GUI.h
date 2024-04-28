@@ -31,6 +31,8 @@
 /** Implementing GrassGen */
 class GUI : public GrassGen {
 private:
+    constexpr static const char* SETTINGS_FILE = "MWGroundcoverGenSettings.ini";
+
     std::shared_ptr<spdlog::logger> logger;
 
     std::filesystem::path morrowindDirectory;

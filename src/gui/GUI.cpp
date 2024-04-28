@@ -58,7 +58,7 @@ GUI::GUI(wxWindow *parent, std::shared_ptr<spdlog::logger> logger) : GrassGen(pa
 
     boost::property_tree::ptree settings;
     try {
-        boost::property_tree::ini_parser::read_ini("MWMeshGeneratorSettings.ini", settings);
+        boost::property_tree::ini_parser::read_ini(SETTINGS_FILE, settings);
     } catch (boost::property_tree::ini_parser_error& e) {
         logger->error("Failed to read ini, got error: {}", e.what());
     }
@@ -86,7 +86,7 @@ void GUI::OnClose(wxCloseEvent& event) {
     settings.add("Regenerate.Configuration", regenerateConfigurationPicker->GetPath().utf8_string());
 
     try {
-        boost::property_tree::ini_parser::write_ini("MWMeshGeneratorSettings.ini", settings);
+        boost::property_tree::ini_parser::write_ini(SETTINGS_FILE, settings);
     } catch (boost::property_tree::ini_parser_error& e) {
         logger->error("Failed to write ini, got error: {}", e.what());
     }

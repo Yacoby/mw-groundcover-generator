@@ -14,7 +14,7 @@ public:
     virtual bool OnInit() {
         spdlog::set_pattern("[%H:%M:%S.%e %L] %v");
         try {
-            logger = spdlog::basic_logger_mt<spdlog::async_factory>("async_file_logger", "MWMeshGenLog.txt", true);
+            logger = spdlog::basic_logger_mt<spdlog::async_factory>("async_file_logger", "MWGroundcoverGenLog.txt", true);
         } catch (const spdlog::spdlog_ex& ex) {
             logger = spdlog::stdout_color_mt("console");
             logger->warn("Using fallback logger because: " + std::string(ex.what()));
