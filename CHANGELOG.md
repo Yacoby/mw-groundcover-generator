@@ -1,5 +1,10 @@
 # Changelog
 
+## [unreleased]
+
+### Added
+- A guide on how to use the software
+
 ## 0.5 - 2024-04-27
 
 ### Changed

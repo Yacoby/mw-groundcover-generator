@@ -32,19 +32,22 @@ jobs:
       - name: Make release directory, copy common artifacts
         run: |
           mkdir release
-          cp README.md release/README.md.txt
           cp LICENCE.txt release/LICENCE.txt
           cp CHANGELOG.md release/CHANGELOG.md.txt
 
           mkdir -p release/docs/examples
 
-          cp docs/grass_cell_ref.ini release/docs/grass_cell_ref.ini
-          cp docs/grass_general_info.ini release/docs/grass_general_info.ini
+          cp docs/documented_configuration_example.ini release/docs/documented_configuration_example.ini
 
           cp tst/generation_snapshots/any_named_cell_exclusion/configuration.ini release/docs/examples/any_named_cell_exclusion.ini
           cp tst/generation_snapshots/bans/configuration.ini release/docs/examples/bans.ini
           cp tst/generation_snapshots/cell_name_exclusion/configuration.ini release/docs/examples/cell_name_exclusion.ini
           cp tst/generation_snapshots/region_exclusion/configuration.ini release/docs/examples/region_exclusion.ini
+
+      - run: npm i markdown-to-html-cli -g
+      - run: markdown-to-html --source README.md --output release/README.html --github-corners https://github.com/Yacoby/mw-groundcover-generator
+      - run: markdown-to-html --source docs/UserGuide.md --output release/docs/UserGuide.html --img-base64 --github-corners https://github.com/Yacoby/mw-groundcover-generator
+
       - name: Copy windows artifacts to the release directory
         if: ${{ matrix.os.runner == 'windows-latest' }}
         run: |
