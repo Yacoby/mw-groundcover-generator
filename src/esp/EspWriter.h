@@ -57,16 +57,6 @@ public:
         ofStream->write((char*)&data, SubRecordWriter::getLength(data));
     }
 
-    template<>
-    inline void write<std::string>(const std::string& data) {
-        auto strLen  = SubRecordWriter::getLength(data);
-        assert(strLen == data.length() + 1);
-        writtenLength += strLen;
-        ofStream->write(data.c_str(), strLen);
-        char null = '\0';
-        ofStream->write(&null, 0);
-    }
-
     template<class T, int SIZE>
     void writeFixedArray(const std::array<T, SIZE>& data) {
         writtenLength += sizeof(T)*SIZE;
@@ -76,11 +66,6 @@ public:
     template<class T>
     static size_t getLength(const T& data) {
         return sizeof(T);
-    }
-
-    template<>
-    inline size_t getLength<std::string>(const std::string& data) {
-        return data.length() + 1;
     }
 
     void close();
@@ -122,5 +107,20 @@ public:
 
     void close();
 };
+
+template<>
+inline size_t SubRecordWriter::getLength<std::string>(const std::string& data) {
+    return data.length() + 1;
+}
+
+template<>
+inline void SubRecordWriter::write<std::string>(const std::string& data) {
+    auto strLen  = SubRecordWriter::getLength(data);
+    assert(strLen == data.length() + 1);
+    writtenLength += strLen;
+    ofStream->write(data.c_str(), strLen);
+    char null = '\0';
+    ofStream->write(&null, 0);
+}
 
 #endif //MW_MESH_GEN_ESPWRITER_H

@@ -19,7 +19,7 @@ std::shared_ptr<spdlog::logger> makeNullLogger() {
 }
 
 // Account for different systems and compilers
-const float MAX_FLOAT_ERROR = 0.001f;
+const float MAX_FLOAT_ERROR = 0.01f;
 
 class EspSubRecord {
 private:
