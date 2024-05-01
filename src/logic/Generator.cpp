@@ -232,7 +232,7 @@ void Generator::generateFromExisting(const fs::path& existingPlugin, const Regen
     try {
         MutableEsp esp;
 
-        sendStatusUpdate(0, std::format("Loading plugin: {}", existingPlugin.filename().string()));
+        sendStatusUpdate(0, fmt::format("Loading plugin: {}", existingPlugin.filename().string()));
         try {
             esp.load(existingPlugin);
         } catch (std::exception& e) {
@@ -487,7 +487,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
         esp.addOrReplaceCell(cell);
     }
 
-    sendStatusUpdate(0, std::format("Saving plugin file to: {}", mOut.filename().string()));
+    sendStatusUpdate(0, fmt::format("Saving plugin file to: {}", mOut.filename().string()));
     logger->info("Saving plugin file to: {}", mOut.string());
     esp.save(mOut);
 
@@ -497,7 +497,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
     logger->info("Generation complete in {} seconds", seconds);
     logger->flush();
 
-    sendSuccess(std::format("Generation complete in {} seconds", seconds));
+    sendSuccess(fmt::format("Generation complete in {} seconds", seconds));
 }
 
 Generator::Generator(std::shared_ptr<spdlog::logger> logger,

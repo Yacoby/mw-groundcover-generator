@@ -19,7 +19,7 @@ jobs:
       - name: Install mac dependencies
         if: ${{ matrix.os.type == 'macos' }}
         run: |
-          brew install wxwidgets boost spdlog
+          brew install wxwidgets boost spdlog fmt
       - name: Build windows dependencies
         if: ${{ matrix.os.type == 'windows' }}
         uses: johnwason/vcpkg-action@v6

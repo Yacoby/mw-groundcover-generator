@@ -15,13 +15,13 @@ jobs:
       - name: Install mac dependencies
         if: ${{ matrix.os.type == 'macos' }}
         run: |
-          brew install wxwidgets boost spdlog
+          brew install wxwidgets boost spdlog fmt
       - name: Build windows dependencies
         if: ${{ matrix.os.type == 'windows' }}
         uses: johnwason/vcpkg-action@v6
         id: vcpkg
         with:
-          pkgs: wxwidgets boost-algorithm boost-random boost-test boost-multi-array boost-property-tree spdlog
+          pkgs: wxwidgets boost-algorithm boost-random boost-test boost-multi-array boost-property-tree spdlog fmt
           triplet: x64-windows-static
           token: ${{ github.token }}
           github-binarycache: true

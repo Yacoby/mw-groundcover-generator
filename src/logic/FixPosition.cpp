@@ -37,7 +37,7 @@ void PositionUpdater::doFix(bool operationIsDelete) {
     }
 
     logger->info("Loading file to update: {}", exitingPlugin.filename().string());
-    sendStatusUpdate(0, std::format("Loading file to update: {}", exitingPlugin.filename().string()));
+    sendStatusUpdate(0, fmt::format("Loading file to update: {}", exitingPlugin.filename().string()));
 
     MutableEsp esp;
     try {
@@ -89,7 +89,7 @@ void PositionUpdater::doFix(bool operationIsDelete) {
     }
 
     logger->info("Saving output file to {}", outputPath.string());
-    sendStatusUpdate(0, std::format("Saving file to: {}", outputPath.filename().string()));
+    sendStatusUpdate(0, fmt::format("Saving file to: {}", outputPath.filename().string()));
 
     try {
         esp.save(outputPath);
@@ -99,5 +99,5 @@ void PositionUpdater::doFix(bool operationIsDelete) {
     logger->info("Save complete");
 
     logger->flush();
-    sendSuccess(std::format("Update complete. Wrote output to {}", outputPath.filename().string()));
+    sendSuccess(fmt::format("Update complete. Wrote output to {}", outputPath.filename().string()));
 }

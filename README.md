@@ -22,12 +22,12 @@ See the User Guide (in the docs directory) for a user guide.
 
 ## Building from source
 
-This requires [Boost](https://www.boost.org/), [wxWidgets](https://www.wxwidgets.org/) and [spdlog](https://github.com/gabime/spdlog). The UI is built using wxFormBuilder.
+This requires [Boost](https://www.boost.org/), [wxWidgets](https://www.wxwidgets.org/), [spdlog](https://github.com/gabime/spdlog) and [fmt](https://github.com/fmtlib/fmt). The UI is built using wxFormBuilder.
 
 ### Mac
 
 ```shell
-brew install boost wxwidgets spdlog
+brew install boost wxwidgets spdlog fmt
 cmake .
 make
 ```

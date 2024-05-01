@@ -98,7 +98,7 @@ void MutableCell::load(const EspReader::Record& record) {
             auto& ref = references.emplace_back();
             ref.load(record, iter);
         } else {
-            throw std::runtime_error(std::format("Unhandled CELL subrecord type: {}", subRecord.type.string()));
+            throw std::runtime_error(fmt::format("Unhandled CELL subrecord type: {}", subRecord.type.string()));
         }
     }
 }
@@ -185,7 +185,7 @@ void Static::load(const EspReader::Record& record) {
                 model = item.readEntireSubRecord<std::string>();
                 break;
             default:
-                throw std::runtime_error(std::format("Unexpected static subrecord type: {}", item.type.string()));
+                throw std::runtime_error(fmt::format("Unexpected static subrecord type: {}", item.type.string()));
         }
     }
 }

@@ -308,7 +308,7 @@ void GUI::OnRegenerateStart(wxCommandEvent &event) {
     }
 
     if (!fs::exists(fs::path(regenerateTargetPicker->GetPath().utf8_string()))) {
-        wxMessageBox(std::format("Target file ({}) does not exist", regenerateTargetPicker->GetPath().utf8_string()), wxT("Something went wrong"), wxICON_ERROR);
+        wxMessageBox(fmt::format("Target file ({}) does not exist", regenerateTargetPicker->GetPath().utf8_string()), wxT("Something went wrong"), wxICON_ERROR);
         return;
     }
 
@@ -368,7 +368,7 @@ void GUI::OnFixStart( wxCommandEvent& event ) {
     }
 
     if (!fs::exists(fs::path(fixTargetPicker->GetPath().utf8_string()))) {
-        wxMessageBox(std::format("Target file ({}) does not exist", fixTargetPicker->GetPath().utf8_string()), wxT("Something went wrong"), wxICON_ERROR);
+        wxMessageBox(fmt::format("Target file ({}) does not exist", fixTargetPicker->GetPath().utf8_string()), wxT("Something went wrong"), wxICON_ERROR);
         return;
     }
 

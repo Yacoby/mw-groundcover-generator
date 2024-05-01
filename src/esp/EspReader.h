@@ -9,7 +9,8 @@
 #include <set>
 #include <filesystem>
 #include <sstream>
-#include <format>
+
+#include <fmt/core.h>
 
 #include "EspWriter.h"
 
@@ -37,7 +38,7 @@ public:
         template<class T>
         T readEntireSubRecord() {
             if (sizeof(T) != length) {
-                throw std::runtime_error(std::format(
+                throw std::runtime_error(fmt::format(
                         "Unexpected record length. sizeof(T) == {}, but length == {}", sizeof(T), length
                 ));
             }

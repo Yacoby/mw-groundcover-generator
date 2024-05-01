@@ -1,6 +1,6 @@
 #include "EspReader.h"
 
-#include <format>
+#include <fmt/core.h>
 
 const std::set<std::string> VAlID_RECORD_TYPES = {
         "ACTI", "ALCH", "APPA", "ARMO", "BODY", "BOOK", "BSGN", "CELL", "CLAS", "CLOT", "CONT", "CREA", "DIAL", "DOOR",
@@ -31,7 +31,7 @@ void EspReader::RecordIterator::next() {
     ifStream->read((char*)&flags, sizeof(uint32_t));
     nextRecordStart = ifStream->tellg() + std::streampos(length);
     if (nextRecordStart > fileSize) {
-        throw std::runtime_error(std::format(
+        throw std::runtime_error(fmt::format(
                 "Start of next record ({}) exceeds file size ({}). Read length was {}",
                 (long) nextRecordStart,  (long) fileSize, length
         ));
@@ -53,7 +53,7 @@ void EspReader::SubRecordIterator::next() {
 
     nextSubRecordStart = ifStream->tellg() + std::streampos(length);
     if (nextSubRecordStart > fileSize) {
-        throw std::runtime_error(std::format(
+        throw std::runtime_error(fmt::format(
                 "Start of next sub record ({}) exceeds file size ({}). Read length was {}",
                 (long) nextSubRecordStart,  (long) fileSize, length
         ));
