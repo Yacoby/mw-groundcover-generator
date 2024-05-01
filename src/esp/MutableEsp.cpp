@@ -146,7 +146,7 @@ void Header::load(const EspReader::Record& record) {
 void Header::save(EspWriter& writer, std::optional<uint32_t> providedRecordCount) const {
     auto recordWriter = writer.writeRecord("TES3", 0, 0);
     auto hedrWriter = recordWriter.writeSubRecord("HEDR");
-    hedrWriter.write<float>(1.3);
+    hedrWriter.write<float>(version);
     hedrWriter.write<uint32_t>(flags);
     hedrWriter.writeFixedArray<char, 32>(companyName);
     hedrWriter.writeFixedArray<char, 256>(description);

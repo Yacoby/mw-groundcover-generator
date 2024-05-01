@@ -399,6 +399,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
 
     }//	for
 
+    esp.header.version = 1.3;
     esp.header.dependencies.clear();
     for (const auto& inputPath: mFiles) {
         std::string extension = inputPath.filename().extension().string();
