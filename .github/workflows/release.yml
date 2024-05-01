@@ -1,0 +1,70 @@
+name: release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        os: [
+          { runner: 'windows-latest', type: 'windows', architecture: 'x64' },
+          { runner: 'macos-13', type: 'macos', architecture: 'x64' },
+          { runner: 'macos-latest', type: 'macos', architecture: 'arm64' },
+        ]
+    runs-on: ${{ matrix.os.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install mac dependencies
+        if: ${{ matrix.os.type == 'macos' }}
+        run: |
+          brew install wxwidgets boost spdlog
+      - name: Build windows dependencies
+        if: ${{ matrix.os.type == 'windows' }}
+        uses: johnwason/vcpkg-action@v6
+        id: vcpkg
+        with:
+          pkgs: wxwidgets boost-algorithm boost-random boost-test boost-multi-array boost-property-tree spdlog
+          triplet: x64-windows-static
+          token: ${{ github.token }}
+          github-binarycache: true
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} ..
+          cmake --build . --config Release --target MWGroundcoverGenerator
+      - name: Make release directory, copy common artifacts
+        run: |
+          mkdir release
+          cp LICENCE.txt release/LICENCE.txt
+          cp CHANGELOG.md release/CHANGELOG.md.txt
+
+          mkdir -p release/docs/examples
+
+          cp docs/documented_configuration_example.ini release/docs/documented_configuration_example.ini
+
+          cp tst/generation_snapshots/any_named_cell_exclusion/configuration.ini release/docs/examples/any_named_cell_exclusion.ini
+          cp tst/generation_snapshots/bans/configuration.ini release/docs/examples/bans.ini
+          cp tst/generation_snapshots/cell_name_exclusion/configuration.ini release/docs/examples/cell_name_exclusion.ini
+          cp tst/generation_snapshots/region_exclusion/configuration.ini release/docs/examples/region_exclusion.ini
+
+      - run: npm i markdown-to-html-cli -g
+      - run: markdown-to-html --source README.md --output release/README.html --github-corners https://github.com/Yacoby/mw-groundcover-generator
+      - run: markdown-to-html --source docs/UserGuide.md --output release/docs/UserGuide.html --img-base64 --github-corners https://github.com/Yacoby/mw-groundcover-generator
+
+      - name: Copy windows artifacts to the release directory
+        if: ${{ matrix.os.type == 'windows' }}
+        run: |
+          cp build/Release/MWGroundcoverGenerator.exe release/MWGroundcoverGenerator.exe
+      - name: Copy macos artifacts to the release directory
+        if: ${{ matrix.os.type == 'macos' }}
+        run: |
+          cp build/MWGroundcoverGenerator release/MWGroundcoverGenerator
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'mw-groundcover-generator-${{ matrix.os.type }}-${{ matrix.os.architecture }}'
+          path: release/
+          if-no-files-found: error
