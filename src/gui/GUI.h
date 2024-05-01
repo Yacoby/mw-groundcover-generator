@@ -136,6 +136,34 @@ protected:
         regenerateOutputPicker->SetPath(output.string());
     }
 
+    void OnRegenerateAddToList( wxCommandEvent& event ) override {
+        wxArrayInt selections;
+        mModList->GetSelections(selections);
+
+        for (const auto& idx: selections) {
+            auto plugin = mModList->GetString(idx);
+            if (regenerateBasePlugins->FindString(plugin) == -1) {
+                regenerateBasePlugins->Append(plugin);
+            }
+        }
+    }
+
+    void OnRegenerateRemoveFromList( wxCommandEvent& event ) override {
+        wxArrayInt selections;
+        regenerateBasePlugins->GetSelections(selections);
+
+        // sort by descending index
+        selections.Sort([](int* a, int* b) {
+            if (*a > *b) { return -1; }
+            else if (*a < *b) { return 1; }
+            else { return 0; }
+        });
+
+        for (const auto& idx: selections) {
+            regenerateBasePlugins->Delete(idx);
+        }
+    }
+
     void OnRegenerateStart( wxCommandEvent& event ) override;
 
     void OnFixSetTarget( wxCommandEvent& event ) override {

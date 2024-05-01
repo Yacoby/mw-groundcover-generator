@@ -135,8 +135,8 @@ bool Generator::isPlacedNearExcludedTexture(
         float maxY = posy + exclusionDistance;
 
         std::set<std::pair<int, int>> possiblyIntersectingLtexIndexes;
-        for (float x = minX; x <= maxX; x += static_cast<float>(LTEX_GRID_SIZE)) {
-            for (float y = minY; y <= maxY; y += static_cast<float>(LTEX_GRID_SIZE)) {
+        for (float x = minX; x < maxX; x += static_cast<float>(LTEX_GRID_SIZE)) {
+            for (float y = minY; y < maxY; y += static_cast<float>(LTEX_GRID_SIZE)) {
                 possiblyIntersectingLtexIndexes.insert({
                     static_cast<int>(floor(x / LTEX_GRID_SIZE)),
                     static_cast<int>(floor(y / LTEX_GRID_SIZE)),
@@ -185,36 +185,50 @@ void Generator::generate() {
     }
 }
 
-bool Generator::hasCellBeenChanged(ESFileContainer& fc, const MutableEsp& esp, const GridId& g) {
-    const auto& cellIter = esp.exteriorCells.find(g);
-    if (cellIter == esp.exteriorCells.end()) {
-        logger->info("Cell {} should be regenerated as the cell doesn't exist", g);
-        return true;
-    }
-
-    const auto& cell = cellIter->second;
-    for (const auto& reference: cell->references) {
-        auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + PositionUpdater::DEFAULT_GENERATION_OFFSET;
-        if (fabs(expectedZ - reference.position.z) > PositionUpdater::MAX_ALLOWED_Z_ERROR) {
-            logger->info("Cell {} should be regenerated as found object instance {} with a height of {}, but expected it to have a height of {}",
-                         g, reference.name, reference.position.z, expectedZ);
-            return true;
-        }
-
-        // this doesn't check if the objects are on the correct texture
-    }
-
-    bool isCellEmpty = cell->references.empty();
-    if (isCellEmpty) {
-        logger->info("Cell {} should be regenerated as it is empty", g);
-        return true;
-    } else {
-        logger->info("Cell {} isn't empty, and all object instances are in the correct place. Should skip regeneration", g);
+bool Generator::hasCellBeenChanged(ESFileContainer& fc, const MutableEsp& esp, const GridId& g, const RegenerateOptions& options) {
+    auto file = fc.getLandFile(g.x, g.y);
+    auto filename = file->getFilePath().filename().string();
+    if (options.basePlugins.find(filename) != options.basePlugins.end()) {
+        logger->info("Cell {} was last modified by {}, which is in the list of base plugins. Not regenerating", g, filename);
         return false;
     }
+    logger->info("Cell {} was last modified by {} and is a candidate for regeneration", g, filename);
+
+    const auto& cellIter = esp.exteriorCells.find(g);
+    if (cellIter == esp.exteriorCells.end()) {
+        if (options.regenerateWhenEmpty) {
+            logger->info("Cell {} should be regenerated as there are no groundcover records in the plugin to patch and regenerate when empty is set to true", g);
+            return true;
+        } else {
+            logger->info("Cell {} should be not be regenerated. Although it is empty, regenerate when empty is set to false", g);
+            return false;
+        }
+    }
+
+    bool hasFloatingGrass = false;
+    if (options.regenerateIfFloatingGroundcover) {
+        for (const auto& reference: cellIter->second->references) {
+            auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + PositionUpdater::DEFAULT_GENERATION_OFFSET;
+            auto delta = fabs(expectedZ - reference.position.z);
+            if (delta > PositionUpdater::MAX_ALLOWED_Z_ERROR) {
+                logger->info("Found object instance {} with a height of {}, but expected it to have a height of around {}. The delta {} was greater than {}",
+                             reference.name, reference.position.z, expectedZ, delta, PositionUpdater::MAX_ALLOWED_Z_ERROR);
+                hasFloatingGrass = true;
+                break;
+            }
+        }
+    }
+
+    if (options.regenerateIfFloatingGroundcover && !hasFloatingGrass) {
+        logger->info("Should skip regeneration of {}, as no floating groundcover was detected", g);
+        return false;
+    }
+
+    logger->info("Marking cell {} as needing regeneration", g);
+    return true;
 }
 
-void Generator::generateFromExisting(const fs::path& existingPlugin) {
+void Generator::generateFromExisting(const fs::path& existingPlugin, const RegenerateOptions& regenerateOptions) {
     try {
         MutableEsp esp;
 
@@ -225,7 +239,7 @@ void Generator::generateFromExisting(const fs::path& existingPlugin) {
             std::throw_with_nested(std::runtime_error("Failed to load plugin " + existingPlugin.string()));
         }
 
-        doGenerate(esp, [this] (ESFileContainer& fc, const MutableEsp& esp,const GridId& g) { return this->hasCellBeenChanged(fc, esp, g); });
+        doGenerate(esp, [this, regenerateOptions] (ESFileContainer& fc, const MutableEsp& esp,const GridId& g) { return this->hasCellBeenChanged(fc, esp, g, regenerateOptions); });
     } catch (std::exception& e) {
         sendFailure(e);
     }
@@ -442,6 +456,11 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
 
         sendStatusUpdate(static_cast<int>(progress++ * 100 / sortedCells.size()), "Constructing CELL records");
 
+        const auto& cellRecordsItr = placedInstances.find(GridId(cx, cy));
+        if (cellRecordsItr == placedInstances.end()) {
+            continue;
+        }
+
         if (!cellUpdatePredicate(fc, esp, GridId(cx, cy))) {
             logger->info("Skipped creating/updating cell {}, {}", cx, cy);
             continue;
@@ -450,10 +469,6 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
 
         auto cell = std::make_unique<MutableCell>(MutableCell(GridId(cx, cy)));
 
-        const auto& cellRecordsItr = placedInstances.find(GridId(cx, cy));
-        if (cellRecordsItr == placedInstances.end()) {
-            continue;
-        }
 
         ESFileContainer::CellInformation cellInformation = fc.getCellInformation(cx, cy);
         if (cellInformation.name.has_value()) {

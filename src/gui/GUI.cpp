@@ -321,6 +321,13 @@ void GUI::OnRegenerateStart(wxCommandEvent &event) {
         }
     }
 
+    RegenerateOptions regenerateOptions;
+    for (size_t i = 0; i < regenerateBasePlugins->GetCount(); ++i ){
+        regenerateOptions.basePlugins.insert(regenerateBasePlugins->GetString(i).utf8_string());
+    }
+    regenerateOptions.regenerateIfFloatingGroundcover = regenerateIfFloatingCheckbox->GetValue();
+    regenerateOptions.regenerateWhenEmpty = regenerateIfEmpty->GetValue();
+
     regenerateButton->Enable(false);
     std::thread thread([=, this] {
         Generator generator(
@@ -332,7 +339,7 @@ void GUI::OnRegenerateStart(wxCommandEvent &event) {
                 files,
                 output,
                 time(nullptr));
-        generator.generateFromExisting(plugin);
+        generator.generateFromExisting(plugin, regenerateOptions);
     });
     thread.detach();
 }

@@ -4,8 +4,8 @@
 
 ![](img/overview.png)
 
-1. The lefthand pane has the list of mods that the tools operate on
-2. The righthand pane has a set of tools which operate on the plugins in the lefthand pane (1)
+1. The left hand pane has the list of mods that the tools operate on
+2. The right hand pane has a set of tools which operate on the plugins in the left hand pane (1)
 
 ### Adding plugins
 Plugins can be added from your Morrowind.ini (path detected from the system registry on Windows), openmw.cfg ([found using the common paths](https://openmw.readthedocs.io/en/stable/reference/modding/paths.html)) or manually add them by pressing "Add plugin file".
@@ -48,17 +48,51 @@ If you want to regenerate the groundcover for cells that have changed, you can u
     * Select a mod on the left hand pane and press "Set target"
     * Press browse and manually select a mod file
 4. Select the save location for the updated mod
+5. Select files in the plugin list in (1) that the groundcover mod was generated. Landscape last touched by a mod in this list will never have the groundcover updated. *Note*: Take care with plugin versions - see note below.
+6. Select options of what to for landscape cells modified by a mod not in the above list.  
+   * When checked and there is no groundcover found in the cell, groundcover will be regenerated for that cell
+   * When checked, groundcover will only be regenerated if it has detected floating groundcover in that cell
 5. Press "Create updated esp"
 
-This will generate a copy of the plugin selected in step (2), but with any cell which looks to have groundcover in the wrong position regenerated. 
+This will generate a copy of the plugin selected in step (2), but with groundcover regenerated for any landscape cells that have been updated by other mods
 
-For ease of use detection of changed landscape is based on heuristics rather than any exact mechanism. The heuristics are:
-- Does the cell have any groundcover? If there is no groundcover the cell will be regenerated.
-- Does any of the groundcover look out of place? If so the cell will be regenerated. (An object is out of place if `|expected_z_position - actual_z_position| > 4`)
+#### Plugin versions
+
+As an example consider the case where there is a new version of Tamriel Rebuilt and we would like to update a groundcover mod.
+
+If we updated Tamriel Rebuilt, and added it to the list of mods to ignore (#5 in the image above), this tool would not generate the correct output because it assumes that the groundcover mod was generated with the new version of Tamriel Rebuilt.
+
+Instead, there are two options you could use with this tool
+- Simple: Omit Tamriel Rebuilt from the list of plugins to ignore (#5 in the image above)
+- Better: 
+  - Rename the Tamriel Rebuilt plugin to "Tamriel Rebuilt Old" 
+  - Put "Tamriel Rebuilt Old" before the new version of "Tamriel Rebuilt" in your load order (#1).
+  - Add "Tamriel Rebuilt Old" to the list of plugins that the groundcover was built with (#5).
+  - Regenerate the groundcover mod
+  - Remove "Tamriel Rebuilt Old" from your load order
+
+#### Limitations
+
+This tool aims to be "good enough", but still has plenty of edge cases. As an example consider the case where your groundcover mod has removed grass from Balmora to avoid clipping, but another mod has made landscape edits to Balmora. In this case the tool will regenerate Balmora putting groundcover everywhere
+
+In other words, if you want to make a perfect patch this tool is only a starting point. 
 
 ## Making a new groundcover mod
 
-This is a brief overview of creating a new groundcover mod. There is at least one other, slightly more practical guide on the [Project Tamriel website](https://www.project-tamriel.com/viewtopic.php?t=29)
+This is a brief overview of creating a new groundcover mod. There is at least one other, slightly more practical guide on the [Project Tamriel website](https://www.project-tamriel.com/viewtopic.php?t=29).
+
+
+#### Limitations
+
+A big limitation of this tool is that it doesn't take into account other objects
+when placing grass. This does result in clipping with rocks and other objects, and is especially bad in cities.
+
+This is a known limitation of this tool, and is unlikely to get fixed (it would require loading meshes and running collision detection. This is feasible to implement but in my opinion the better option is to build better groundcover support into OpenMW by generating groundcover in real time)
+
+One automated fix, not covered in this document, is [LawnMower](https://www.nexusmods.com/morrowind/mods/53034) tool which can trim the groundcover placed by this tool.
+
+### Using the UI
+
 
 ![](img/generate.png)
 

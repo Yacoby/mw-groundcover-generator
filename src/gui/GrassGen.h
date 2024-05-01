@@ -25,6 +25,7 @@
 #include <wx/filepicker.h>
 #include <wx/gauge.h>
 #include <wx/panel.h>
+#include <wx/checkbox.h>
 #include <wx/choice.h>
 #include <wx/notebook.h>
 #include <wx/statusbr.h>
@@ -72,7 +73,15 @@ class GrassGen : public wxFrame
 		wxStaticText* m_staticText14;
 		wxFilePickerCtrl* regenerateOutputPicker;
 		wxStaticLine* m_staticline1;
+		wxStaticText* m_staticText151;
+		wxButton* m_button11;
+		wxButton* m_button12;
+		wxListBox* regenerateBasePlugins;
 		wxStaticLine* m_staticline11;
+		wxStaticText* m_staticText161;
+		wxCheckBox* regenerateIfEmpty;
+		wxCheckBox* regenerateIfFloatingCheckbox;
+		wxStaticLine* m_staticline10;
 		wxStaticText* m_staticText13;
 		wxButton* regenerateButton;
 		wxGauge* regenerateProgressBar;
@@ -100,6 +109,8 @@ class GrassGen : public wxFrame
 		virtual void OnResetPress( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnGenPress( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRegenerateSetTarget( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnRegenerateAddToList( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnRegenerateRemoveFromList( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRegenerateStart( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnFixSetTarget( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnFixStart( wxCommandEvent& event ) { event.Skip(); }
@@ -107,7 +118,7 @@ class GrassGen : public wxFrame
 
 	public:
 
-		GrassGen( wxWindow* parent, wxWindowID id = WINDOW_ID, const wxString& title = wxT("Morrowind Groundcover Generator"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 763,582 ), long style = wxCAPTION|wxCLOSE_BOX|wxMAXIMIZE_BOX|wxMINIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLIP_CHILDREN|wxTAB_TRAVERSAL );
+		GrassGen( wxWindow* parent, wxWindowID id = WINDOW_ID, const wxString& title = wxT("Morrowind Groundcover Generator"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 870,655 ), long style = wxCAPTION|wxCLOSE_BOX|wxMAXIMIZE_BOX|wxMINIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLIP_CHILDREN|wxTAB_TRAVERSAL );
 
 		~GrassGen();
 

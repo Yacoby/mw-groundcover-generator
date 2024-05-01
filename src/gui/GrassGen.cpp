@@ -95,7 +95,7 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizer1->Add( fgSizer3, 1, wxALL|wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer9;
-	bSizer9 = new wxBoxSizer( wxHORIZONTAL );
+	bSizer9 = new wxBoxSizer( wxVERTICAL );
 
 	m_notebook1 = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_panel1 = new wxPanel( m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
@@ -227,19 +227,73 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_staticline1 = new wxStaticLine( m_panel2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
 	fgSizer41->Add( m_staticline1, 0, wxEXPAND | wxALL, 5 );
 
-	wxBoxSizer* bSizer16;
-	bSizer16 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizer23;
+	bSizer23 = new wxBoxSizer( wxVERTICAL );
+
+	m_staticText151 = new wxStaticText( m_panel2, wxID_ANY, wxT("Plugins the original groundcover mod was generated with\nAny landscape last updated by plugins in this list will not\nhave groundcover regenerated"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText151->Wrap( -1 );
+	bSizer23->Add( m_staticText151, 0, wxALL, 5 );
+
+	wxFlexGridSizer* fgSizer10;
+	fgSizer10 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer10->AddGrowableCol( 1 );
+	fgSizer10->AddGrowableRow( 0 );
+	fgSizer10->SetFlexibleDirection( wxBOTH );
+	fgSizer10->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_ALL );
+
+	wxBoxSizer* bSizer21;
+	bSizer21 = new wxBoxSizer( wxVERTICAL );
+
+	m_button11 = new wxButton( m_panel2, wxID_ANY, wxT(">> Add"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer21->Add( m_button11, 0, wxALIGN_CENTER|wxALL, 5 );
+
+	m_button12 = new wxButton( m_panel2, wxID_ANY, wxT("Remove"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer21->Add( m_button12, 0, wxALIGN_CENTER|wxALL, 5 );
 
 
-	bSizer16->Add( 0, 0, 1, wxEXPAND, 5 );
+	fgSizer10->Add( bSizer21, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer221;
+	bSizer221 = new wxBoxSizer( wxVERTICAL );
+
+	regenerateBasePlugins = new wxListBox( m_panel2, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE );
+	bSizer221->Add( regenerateBasePlugins, 1, wxALL|wxEXPAND, 5 );
 
 
-	fgSizer41->Add( bSizer16, 1, wxEXPAND, 5 );
+	fgSizer10->Add( bSizer221, 1, wxEXPAND, 5 );
+
+
+	bSizer23->Add( fgSizer10, 1, wxEXPAND, 5 );
+
+
+	fgSizer41->Add( bSizer23, 1, wxEXPAND, 5 );
 
 	m_staticline11 = new wxStaticLine( m_panel2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
 	fgSizer41->Add( m_staticline11, 0, wxEXPAND | wxALL, 5 );
 
-	m_staticText13 = new wxStaticText( m_panel2, wxID_ANY, wxT("This generates a copy of the plugin, \ndon't use the original"), wxDefaultPosition, wxDefaultSize, 0 );
+	wxBoxSizer* bSizer24;
+	bSizer24 = new wxBoxSizer( wxVERTICAL );
+
+	m_staticText161 = new wxStaticText( m_panel2, wxID_ANY, wxT("For landscape modifications by plugins not in the above list:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText161->Wrap( -1 );
+	bSizer24->Add( m_staticText161, 0, wxALL, 5 );
+
+	regenerateIfEmpty = new wxCheckBox( m_panel2, wxID_ANY, wxT("Regenerate cells where there is no existing groundcover"), wxDefaultPosition, wxDefaultSize, 0 );
+	regenerateIfEmpty->SetValue(true);
+	bSizer24->Add( regenerateIfEmpty, 0, wxALL, 5 );
+
+	regenerateIfFloatingCheckbox = new wxCheckBox( m_panel2, wxID_ANY, wxT("Only regenerate cell if there is floating groundcover"), wxDefaultPosition, wxDefaultSize, 0 );
+	regenerateIfFloatingCheckbox->SetToolTip( wxT("If there is existing groundcover in a cell, this regenerates the groundcover only if it is floating. This can skip updating cells if there are only changes to the textures.") );
+
+	bSizer24->Add( regenerateIfFloatingCheckbox, 0, wxALL, 5 );
+
+
+	fgSizer41->Add( bSizer24, 1, wxEXPAND, 5 );
+
+	m_staticline10 = new wxStaticLine( m_panel2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+	fgSizer41->Add( m_staticline10, 0, wxEXPAND | wxALL, 5 );
+
+	m_staticText13 = new wxStaticText( m_panel2, wxID_ANY, wxT("This generates an updated version of the plugin, \ndon't use the original"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText13->Wrap( -1 );
 	fgSizer41->Add( m_staticText13, 0, wxALL, 5 );
 
@@ -332,7 +386,7 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 
 	fgSizer8->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	m_staticText131 = new wxStaticText( m_panel3, wxID_ANY, wxT("This generates a copy of the plugin, \ndon't use the original"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText131 = new wxStaticText( m_panel3, wxID_ANY, wxT("This generates an updated version of the plugin, \ndon't use the original"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText131->Wrap( -1 );
 	fgSizer8->Add( m_staticText131, 0, wxALL, 5 );
 
@@ -383,6 +437,8 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	mReset->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnResetPress ), NULL, this );
 	mGenerate->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnGenPress ), NULL, this );
 	m_button7->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateSetTarget ), NULL, this );
+	m_button11->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateAddToList ), NULL, this );
+	m_button12->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateRemoveFromList ), NULL, this );
 	regenerateButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateStart ), NULL, this );
 	m_button71->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnFixSetTarget ), NULL, this );
 	fixButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnFixStart ), NULL, this );
@@ -399,6 +455,8 @@ GrassGen::~GrassGen()
 	mReset->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnResetPress ), NULL, this );
 	mGenerate->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnGenPress ), NULL, this );
 	m_button7->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateSetTarget ), NULL, this );
+	m_button11->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateAddToList ), NULL, this );
+	m_button12->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateRemoveFromList ), NULL, this );
 	regenerateButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateStart ), NULL, this );
 	m_button71->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnFixSetTarget ), NULL, this );
 	fixButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnFixStart ), NULL, this );

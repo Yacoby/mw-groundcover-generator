@@ -5,6 +5,9 @@
 ### Added
 - A guide on how to use the software
 
+### Updated
+- Updated how the "Regenerate" tool worked. It is now complex but should do a better job at regenerating the correct groundcover.
+
 ### Fixed
 - Allowed exclusion offsets to be unset (previously an unset offset would crash the program)
 

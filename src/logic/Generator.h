@@ -15,6 +15,12 @@
 
 namespace fs = std::filesystem;
 
+struct RegenerateOptions {
+    bool regenerateIfFloatingGroundcover = true;
+    bool regenerateWhenEmpty = true;
+    std::set<std::string> basePlugins;
+};
+
 struct CellTextureLog {
     bool operator==(const CellTextureLog& rhs) const {
         return textureId == rhs.textureId &&
@@ -70,7 +76,7 @@ class Generator {
     float getRandom(float min, float max);
 
     void logConfiguration(const Configuration&);
-    bool hasCellBeenChanged(ESFileContainer&, const MutableEsp&, const GridId&);
+    bool hasCellBeenChanged(ESFileContainer&, const MutableEsp&, const GridId&, const RegenerateOptions&);
     void doGenerate(MutableEsp& esp, const std::function<bool(ESFileContainer&,const MutableEsp&,const GridId&)>& cellUpdatePredicate);
 public:
 
@@ -84,5 +90,5 @@ public:
               unsigned randomSeed);
 
     void generate();
-    void generateFromExisting(const fs::path& existingPlugin);
+    void generateFromExisting(const fs::path& existingPlugin, const RegenerateOptions& regenerateOptions);
 };
