@@ -8,7 +8,7 @@ FILE(GLOB sources
         ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/esp/*.cpp
         ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/logic/*.cpp)
 
-FILE(GLOB test_sources ${MW_MESH_GEN_SOURCE_DIR}/tst/*.cpp)
+FILE(GLOB test_sources ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/tst/*.cpp)
 
 add_executable (MWGroundcoverGeneratorTests ${test_sources} ${sources})
 target_compile_features(MWGroundcoverGeneratorTests PRIVATE cxx_std_20)

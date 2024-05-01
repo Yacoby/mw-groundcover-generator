@@ -6,34 +6,95 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [
-          { runner: 'windows-latest', type: 'windows', architecture: 'x64' },
-        ]
+        os:
+          - { runner: 'windows-latest', type: 'windows', architecture: 'x64', triplet: 'x64-windows-static' }
+          - { runner: 'ubuntu-latest', type: 'ubuntu', architecture: 'x64', triplet: 'x64-linux' }
+          - { runner: 'macos-latest', type: 'macos', architecture: 'arm64', triplet: 'arm64-osx' }
     runs-on: ${{ matrix.os.runner }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install mac dependencies
+      - name: Install header only dependencies (Ubuntu)
+        if: ${{ matrix.os.type == 'ubuntu' }}
+        run: |
+          sudo apt-get install libboost-all-dev libfmt-dev libspdlog-dev
+          : # https://github.com/microsoft/vcpkg/issues/27516#issuecomment-1786151579
+          sudo apt install build-essential gcc g++ python3-distutils pkg-config cmake ninja-build bison gperf nasm libx11-dev libxft-dev libxext-dev libdbus-1-dev libxi-dev libxtst-dev libgl1-mesa-dev libgles2-mesa-dev libglu1-mesa-dev libtool libudev-dev libx11-xcb-dev libxcursor-dev libxdamage-dev libxinerama-dev libxrandr-dev
+      - name: Install header only dependencies (MacOS)
         if: ${{ matrix.os.type == 'macos' }}
         run: |
-          brew install wxwidgets boost spdlog fmt
+          brew install boost spdlog fmt
+      - name: Build statically linked dependencies
+        if: ${{ matrix.os.type == 'macos' || matrix.os.type == 'ubuntu'  }}
+        uses: johnwason/vcpkg-action@v6
+        id: vcpkg_static_only
+        with:
+          pkgs: wxwidgets
+          triplet: ${{ matrix.os.triplet }}
+          token: ${{ github.token }}
+          github-binarycache: true
       - name: Build windows dependencies
         if: ${{ matrix.os.type == 'windows' }}
         uses: johnwason/vcpkg-action@v6
-        id: vcpkg
+        id: vcpkg_all
         with:
           pkgs: wxwidgets boost-algorithm boost-random boost-test boost-multi-array boost-property-tree spdlog fmt
-          triplet: x64-windows-static
+          triplet: ${{ matrix.os.triplet }}
           token: ${{ github.token }}
           github-binarycache: true
       - name: Build
         run: |
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} ..
+          cmake -DCMAKE_BUILD_TYPE=Release ${{ steps.vcpkg_static_only.outputs.vcpkg-cmake-config }} ${{ steps.vcpkg_all.outputs.vcpkg-cmake-config }} ..
           cmake --build . --config Release --target MWGroundcoverGenerator
+      - name: Run tests
+        if: ${{ matrix.os.type == 'ubuntu' }}
+        run: |
+          mkdir test
+          cd test
+          cmake ${{ steps.vcpkg_static_only.outputs.vcpkg-cmake-config }} ${{ steps.vcpkg_all.outputs.vcpkg-cmake-config }} ../
+          make MWGroundcoverGeneratorTests
+          CTEST_OUTPUT_ON_FAILURE=1 make test
+      - name: Make release directory, copy common artifacts
+        run: |
+          mkdir release
+          cp LICENCE.txt release/LICENCE.txt
+          cp CHANGELOG.md release/CHANGELOG.md.txt
+
+          mkdir -p release/docs/examples
+
+          cp docs/documented_configuration_example.ini release/docs/documented_configuration_example.ini
+
+          cp tst/generation_snapshots/any_named_cell_exclusion/configuration.ini release/docs/examples/any_named_cell_exclusion.ini
+          cp tst/generation_snapshots/bans/configuration.ini release/docs/examples/bans.ini
+          cp tst/generation_snapshots/cell_name_exclusion/configuration.ini release/docs/examples/cell_name_exclusion.ini
+          cp tst/generation_snapshots/region_exclusion/configuration.ini release/docs/examples/region_exclusion.ini
+
+      - run: npm i markdown-to-html-cli -g
+      - run: markdown-to-html --source README.md --output release/README.html --github-corners https://github.com/Yacoby/mw-groundcover-generator
+      - run: markdown-to-html --source docs/UserGuide.md --output release/docs/UserGuide.html --img-base64 --github-corners https://github.com/Yacoby/mw-groundcover-generator
+
+      - name: Copy windows artifacts to the release directory
+        if: ${{ matrix.os.type == 'windows' }}
+        run: |
+          cp build/Release/MWGroundcoverGenerator.exe release/MWGroundcoverGenerator.exe
+      - name: Copy linux artifacts to the release directory
+        if: ${{ matrix.os.type == 'ubuntu' }}
+        run: |
+          cp build/MWGroundcoverGenerator release/MWGroundcoverGenerator
+      - name: Copy macos artifacts to the release directory
+        if: ${{ matrix.os.type == 'macos' }}
+        run: |
+          cp -r build/MWGroundcoverGenerator.app release
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: 'artifacts-${{ matrix.os.type }}-${{ matrix.os.architecture }}'
-          path: build
+          name: 'mw-groundcover-generator-${{ matrix.os.type }}-${{ matrix.os.architecture }}'
+          path: release/
           if-no-files-found: error
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'build-artifacts-${{ matrix.os.type }}-${{ matrix.os.architecture }}'
+          path: build/
+          retention-days: 1
