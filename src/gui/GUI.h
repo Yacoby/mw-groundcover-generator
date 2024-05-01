@@ -116,6 +116,19 @@ protected:
     void OnRemovePress(wxCommandEvent &event) override;
     void OnResetPress(wxCommandEvent &event) override;
 
+    void OnModListSelect(wxCommandEvent &event) override {
+        wxArrayInt selections;
+        mModList->GetSelections(selections);
+        bool hasSelection = !selections.empty();
+
+        mRemove->Enable(hasSelection);
+
+        regenerateSetTargetButton->Enable(hasSelection);
+        regenerateAddBasePluginButton->Enable(hasSelection);
+
+        fixSetTargetButton->Enable(hasSelection);
+    }
+
     void OnGenPress(wxCommandEvent &event) override;
 
     void OnRegenerateSetTarget( wxCommandEvent& event ) override {
@@ -134,6 +147,14 @@ protected:
 
         regenerateTargetPicker->SetPath(path.string());
         regenerateOutputPicker->SetPath(output.string());
+    }
+
+    void OnRegenerateBasePluginSelect(wxCommandEvent &event) override {
+        wxArrayInt selections;
+        regenerateBasePlugins->GetSelections(selections);
+        bool hasSelection = !selections.empty();
+
+        regenerateRemoveBaseButton->Enable(hasSelection);
     }
 
     void OnRegenerateAddToList( wxCommandEvent& event ) override {
@@ -162,6 +183,9 @@ protected:
         for (const auto& idx: selections) {
             regenerateBasePlugins->Delete(idx);
         }
+
+        // an empty list or removing a selected item (and hence deselecting) doesn't trigger this event handler
+        OnRegenerateBasePluginSelect(event);
     }
 
     void OnRegenerateStart( wxCommandEvent& event ) override;

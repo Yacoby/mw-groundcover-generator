@@ -68,14 +68,14 @@ class GrassGen : public wxFrame
 		wxFilePickerCtrl* regenerateConfigurationPicker;
 		wxStaticLine* m_staticline12;
 		wxStaticText* m_staticText9;
-		wxButton* m_button7;
+		wxButton* regenerateSetTargetButton;
 		wxFilePickerCtrl* regenerateTargetPicker;
 		wxStaticText* m_staticText14;
 		wxFilePickerCtrl* regenerateOutputPicker;
 		wxStaticLine* m_staticline1;
 		wxStaticText* m_staticText151;
-		wxButton* m_button11;
-		wxButton* m_button12;
+		wxButton* regenerateAddBasePluginButton;
+		wxButton* regenerateRemoveBaseButton;
 		wxListBox* regenerateBasePlugins;
 		wxStaticLine* m_staticline11;
 		wxStaticText* m_staticText161;
@@ -89,7 +89,7 @@ class GrassGen : public wxFrame
 		wxStaticText* m_staticText121;
 		wxStaticLine* m_staticline7;
 		wxStaticText* m_staticText91;
-		wxButton* m_button71;
+		wxButton* fixSetTargetButton;
 		wxFilePickerCtrl* fixTargetPicker;
 		wxStaticText* m_staticText15;
 		wxFilePickerCtrl* fixOutputPicker;
@@ -107,10 +107,12 @@ class GrassGen : public wxFrame
 		virtual void OnAddPress( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRemovePress( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnResetPress( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnModListSelect( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnGenPress( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRegenerateSetTarget( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRegenerateAddToList( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRegenerateRemoveFromList( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnRegenerateBasePluginSelect( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRegenerateStart( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnFixSetTarget( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnFixStart( wxCommandEvent& event ) { event.Skip(); }

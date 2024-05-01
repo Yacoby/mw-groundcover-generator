@@ -227,6 +227,9 @@ void GUI::OnRemovePress(wxCommandEvent &event) {
         mModList->Delete(sel);
     }
     assert(mModList->GetCount() == loadOrder->get().size());
+
+    // an empty list or removing a selected item (and hence deselecting) doesn't trigger this event handler
+    OnModListSelect(event);
 }
 
 void GUI::OnResetPress(wxCommandEvent &event) {
@@ -234,6 +237,9 @@ void GUI::OnResetPress(wxCommandEvent &event) {
     mAddPluginFromFile->Enable();
     mModList->Clear();
     assert(mModList->GetCount() == loadOrder->get().size());
+
+    // clearing the mod list (and hence deselecting) doesn't trigger this event handler
+    OnModListSelect(event);
 }
 
 

@@ -74,6 +74,8 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizer6->Add( mAddPluginFromFile, 0, wxALIGN_CENTER|wxALL, 5 );
 
 	mRemove = new wxButton( this, wxID_ANY, wxT("Remove selected"), wxDefaultPosition, wxDefaultSize, 0 );
+	mRemove->Enable( false );
+
 	bSizer6->Add( mRemove, 0, wxALIGN_CENTER|wxALL, 5 );
 
 	mReset = new wxButton( this, wxID_ANY, wxT("Clear list"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -205,8 +207,10 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	fgSizer81->SetFlexibleDirection( wxBOTH );
 	fgSizer81->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
-	m_button7 = new wxButton( m_panel2, wxID_ANY, wxT(">> Set target"), wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer81->Add( m_button7, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
+	regenerateSetTargetButton = new wxButton( m_panel2, wxID_ANY, wxT(">> Set target"), wxDefaultPosition, wxDefaultSize, 0 );
+	regenerateSetTargetButton->Enable( false );
+
+	fgSizer81->Add( regenerateSetTargetButton, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
 
 	regenerateTargetPicker = new wxFilePickerCtrl( m_panel2, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
 	fgSizer81->Add( regenerateTargetPicker, 0, wxALL|wxEXPAND, 5 );
@@ -244,11 +248,15 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxBoxSizer* bSizer21;
 	bSizer21 = new wxBoxSizer( wxVERTICAL );
 
-	m_button11 = new wxButton( m_panel2, wxID_ANY, wxT(">> Add"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer21->Add( m_button11, 0, wxALIGN_CENTER|wxALL, 5 );
+	regenerateAddBasePluginButton = new wxButton( m_panel2, wxID_ANY, wxT(">> Add"), wxDefaultPosition, wxDefaultSize, 0 );
+	regenerateAddBasePluginButton->Enable( false );
 
-	m_button12 = new wxButton( m_panel2, wxID_ANY, wxT("Remove"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer21->Add( m_button12, 0, wxALIGN_CENTER|wxALL, 5 );
+	bSizer21->Add( regenerateAddBasePluginButton, 0, wxALIGN_CENTER|wxALL, 5 );
+
+	regenerateRemoveBaseButton = new wxButton( m_panel2, wxID_ANY, wxT("Remove"), wxDefaultPosition, wxDefaultSize, 0 );
+	regenerateRemoveBaseButton->Enable( false );
+
+	bSizer21->Add( regenerateRemoveBaseButton, 0, wxALIGN_CENTER|wxALL, 5 );
 
 
 	fgSizer10->Add( bSizer21, 1, wxEXPAND, 5 );
@@ -355,8 +363,10 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	fgSizer9->SetFlexibleDirection( wxBOTH );
 	fgSizer9->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
-	m_button71 = new wxButton( m_panel3, wxID_ANY, wxT(">> Set target"), wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer9->Add( m_button71, 0, wxALIGN_CENTER|wxALL, 5 );
+	fixSetTargetButton = new wxButton( m_panel3, wxID_ANY, wxT(">> Set target"), wxDefaultPosition, wxDefaultSize, 0 );
+	fixSetTargetButton->Enable( false );
+
+	fgSizer9->Add( fixSetTargetButton, 0, wxALIGN_CENTER|wxALL, 5 );
 
 	fixTargetPicker = new wxFilePickerCtrl( m_panel3, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
 	fgSizer9->Add( fixTargetPicker, 0, wxALL|wxEXPAND, 5 );
@@ -435,12 +445,14 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	mAddPluginFromFile->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnAddPress ), NULL, this );
 	mRemove->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRemovePress ), NULL, this );
 	mReset->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnResetPress ), NULL, this );
+	mModList->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GrassGen::OnModListSelect ), NULL, this );
 	mGenerate->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnGenPress ), NULL, this );
-	m_button7->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateSetTarget ), NULL, this );
-	m_button11->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateAddToList ), NULL, this );
-	m_button12->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateRemoveFromList ), NULL, this );
+	regenerateSetTargetButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateSetTarget ), NULL, this );
+	regenerateAddBasePluginButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateAddToList ), NULL, this );
+	regenerateRemoveBaseButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateRemoveFromList ), NULL, this );
+	regenerateBasePlugins->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GrassGen::OnRegenerateBasePluginSelect ), NULL, this );
 	regenerateButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateStart ), NULL, this );
-	m_button71->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnFixSetTarget ), NULL, this );
+	fixSetTargetButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnFixSetTarget ), NULL, this );
 	fixButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnFixStart ), NULL, this );
 }
 
@@ -453,12 +465,14 @@ GrassGen::~GrassGen()
 	mAddPluginFromFile->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnAddPress ), NULL, this );
 	mRemove->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRemovePress ), NULL, this );
 	mReset->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnResetPress ), NULL, this );
+	mModList->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GrassGen::OnModListSelect ), NULL, this );
 	mGenerate->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnGenPress ), NULL, this );
-	m_button7->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateSetTarget ), NULL, this );
-	m_button11->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateAddToList ), NULL, this );
-	m_button12->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateRemoveFromList ), NULL, this );
+	regenerateSetTargetButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateSetTarget ), NULL, this );
+	regenerateAddBasePluginButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateAddToList ), NULL, this );
+	regenerateRemoveBaseButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateRemoveFromList ), NULL, this );
+	regenerateBasePlugins->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GrassGen::OnRegenerateBasePluginSelect ), NULL, this );
 	regenerateButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateStart ), NULL, this );
-	m_button71->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnFixSetTarget ), NULL, this );
+	fixSetTargetButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnFixSetTarget ), NULL, this );
 	fixButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnFixStart ), NULL, this );
 
 }
