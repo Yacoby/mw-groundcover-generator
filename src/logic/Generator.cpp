@@ -19,16 +19,16 @@ struct ObjectInstance {
     const float scale;
 };
 
-void Generator::logCellStart(int squX, int squY, const ESFileRef& landRecordFile, const std::optional<std::string>& cellName, const std::optional<std::string>& cellRegion) {
+void Generator::logCellStart(const GridId& grid, const ESFileRef& landRecordFile, const std::optional<std::string>& cellName, const std::optional<std::string>& cellRegion) {
     auto fileName = landRecordFile->getFilePath().filename().string();
     if (cellName.has_value() && cellRegion.has_value()) {
-        logger->info(R"(Processing cell {}, {}, cell name="{}, region="{}", using LAND record from="{}")", squX, squY, cellName.value(), cellRegion.value(), fileName);
+        logger->info(R"(Processing cell {}, cell name="{}, region="{}", using LAND record from="{}")", grid, cellName.value(), cellRegion.value(), fileName);
     } else if (cellName.has_value()) {
-        logger->info(R"(Processing cell {}, {}, cell name="{}", using LAND record from="{}")", squX, squY, cellName.value(), fileName);
+        logger->info(R"(Processing cell {}, cell name="{}", using LAND record from="{}")", grid, cellName.value(), fileName);
     } else if (cellRegion.has_value()) {
-        logger->info(R"(Processing cell {}, {}, region="{}", using LAND record from="{}")", squX, squY, cellRegion.value(), fileName);
+        logger->info(R"(Processing cell {}, region="{}", using LAND record from="{}")", grid, cellRegion.value(), fileName);
     } else {
-        logger->info("Processing cell {}, {}, using LAND record from=\"{}\"", squX, squY, fileName);
+        logger->info("Processing cell {}, using LAND record from=\"{}\"", grid, fileName);
     }
 }
 
@@ -275,13 +275,13 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
     std::map<GridId, std::vector<ObjectInstance>> placedInstances;
 
     const auto& cells = fc.getExteriorCellCoordinates();
-    auto sortedCells = std::vector<std::pair<int32_t, int32_t >>(cells.begin(), cells.end());
+    auto sortedCells = std::vector<GridId>(cells.begin(), cells.end());
     std::sort(sortedCells.begin(), sortedCells.end());
 
     int cellsProcessed = 0;
     for (const auto &cellCoord: sortedCells) {
-        auto cx = cellCoord.first;
-        auto cy = cellCoord.second;
+        auto cx = cellCoord.x;
+        auto cy = cellCoord.y;
         cellsProcessed++;
         int perCellPlacedMeshesCount = 0;
         int excludedDueToHeightBounds = 0;
@@ -290,7 +290,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
         ESLandRef land = fc.getLand(cx, cy);
         assert(land);
 
-        sendStatusUpdate(cellsProcessed / float(cells.size()) * 100, "Processing cell: " + std::to_string(cx) + ", " + std::to_string(cy));
+        sendStatusUpdate(cellsProcessed / float(cells.size()) * 100, "Processing cell: " + std::to_string(cellCoord.x) + ", " + std::to_string(cellCoord.y));
 
 
         ESFileRef file = fc.getLandFile(cx, cy);
@@ -298,7 +298,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
 
         ESFileContainer::CellInformation cellInformation = fc.getCellInformation(cx, cy);
 
-        logCellStart(cx, cy, file, cellInformation.name, cellInformation.region);
+        logCellStart(cellCoord, file, cellInformation.name, cellInformation.region);
 
         std::vector<CellTextureLog> textureLogs;
         textureLogs.reserve(16*16);
@@ -451,26 +451,23 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
 
     int progress = 0;
     for (const auto &cellCoord: sortedCells) {
-        int cx = cellCoord.first;
-        int cy = cellCoord.second;
-
         sendStatusUpdate(static_cast<int>(progress++ * 100 / sortedCells.size()), "Constructing CELL records");
 
-        const auto& cellRecordsItr = placedInstances.find(GridId(cx, cy));
+        const auto& cellRecordsItr = placedInstances.find(cellCoord);
         if (cellRecordsItr == placedInstances.end()) {
             continue;
         }
 
-        if (!cellUpdatePredicate(fc, esp, GridId(cx, cy))) {
-            logger->info("Skipped creating/updating cell {}, {}", cx, cy);
+        if (!cellUpdatePredicate(fc, esp, cellCoord)) {
+            logger->info("Skipped creating/updating cell {}", cellCoord);
             continue;
         }
-        logger->info("Creating new cell record for {}, {}", cx, cy);
+        logger->info("Creating new cell record for {}", cellCoord);
 
-        auto cell = std::make_unique<MutableCell>(MutableCell(GridId(cx, cy)));
+        auto cell = std::make_unique<MutableCell>(MutableCell(cellCoord));
 
 
-        ESFileContainer::CellInformation cellInformation = fc.getCellInformation(cx, cy);
+        ESFileContainer::CellInformation cellInformation = fc.getCellInformation(cellCoord.x, cellCoord.y);
         if (cellInformation.name.has_value()) {
             cell->setName(cellInformation.name.value());
         }

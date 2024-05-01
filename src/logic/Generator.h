@@ -66,7 +66,7 @@ class Generator {
 
     boost::mt19937 randomNumberSequence;
 
-    void logCellStart(int squX, int squY, const ESFileRef& landRecordFile, const std::optional<std::string>& cellName, const std::optional<std::string>& cellRegion);
+    void logCellStart(const GridId& grid, const ESFileRef& landRecordFile, const std::optional<std::string>& cellName, const std::optional<std::string>& cellRegion);
     void logCellInformation(const std::vector<CellTextureLog>& cellTextureLogs);
 
     std::string getMesh(const std::vector<ObjectPlacementPossibility>& placements, const std::string &objectPrefix, const std::string &cat);

@@ -72,8 +72,8 @@ ESFileRef ESFileContainer::getLandFile(int squX, int squY) {
     return file;
 }
 
-std::set<std::pair<int32_t, int32_t >> ESFileContainer::getExteriorCellCoordinates() {
-    std::set<std::pair<int32_t, int32_t> > result;
+std::set<GridId> ESFileContainer::getExteriorCellCoordinates() {
+    std::set<GridId> result;
     for (unsigned i = 0; i < mFile.size(); i++) {
         const auto& coordinates = mFile[i]->getExteriorCellCoordinates();
         result.insert(coordinates.begin(), coordinates.end());

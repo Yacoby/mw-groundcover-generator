@@ -17,8 +17,8 @@
 
 class GridId {
 public:
-    const int x;
-    const int y;
+    int x;
+    int y;
 
     GridId(const int x, const int y);
 
@@ -95,10 +95,10 @@ public:
         return mLandTex[index]->getPath();
     }
 
-    std::set<std::pair<int32_t, int32_t >> getExteriorCellCoordinates() {
-        std::set<std::pair<int32_t, int32_t> > result;
+    std::set<GridId> getExteriorCellCoordinates() {
+        std::set<GridId> result;
         for (const auto &xCordAndCells: mpLand) {
-            result.insert(std::pair(xCordAndCells.first.x, xCordAndCells.first.y));
+            result.insert(xCordAndCells.first);
         }
         return result;
     }

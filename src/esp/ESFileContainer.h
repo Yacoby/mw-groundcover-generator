@@ -48,7 +48,7 @@ public:
 
     ESLTexRef getLandTexture(float posX, float posY);
 
-    std::set<std::pair<int32_t, int32_t >> getExteriorCellCoordinates();
+    std::set<GridId> getExteriorCellCoordinates();
 
     int getHeightAtVertex(int vertexX, int vertexY);
 
