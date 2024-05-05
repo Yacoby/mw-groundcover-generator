@@ -135,8 +135,8 @@ bool Generator::isPlacedNearExcludedTexture(
         float maxY = posy + exclusionDistance;
 
         std::set<std::pair<int, int>> possiblyIntersectingLtexIndexes;
-        for (float x = minX; x < maxX; x += static_cast<float>(LTEX_GRID_SIZE)) {
-            for (float y = minY; y < maxY; y += static_cast<float>(LTEX_GRID_SIZE)) {
+        for (float x = minX; x <= maxX; x += static_cast<float>(LTEX_GRID_SIZE)) {
+            for (float y = minY; y <= maxY; y += static_cast<float>(LTEX_GRID_SIZE)) {
                 possiblyIntersectingLtexIndexes.insert({
                     static_cast<int>(floor(x / LTEX_GRID_SIZE)),
                     static_cast<int>(floor(y / LTEX_GRID_SIZE)),

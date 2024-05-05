@@ -1,5 +1,10 @@
 # Changelog
 
+## [unreleased]
+
+### Fixed
+- Bugfix to texture banning
+
 ## 0.5.1 - 2024-05-01
 
 ### Added
