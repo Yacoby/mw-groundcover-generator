@@ -20,8 +20,19 @@ struct CellReferencePosition {
     float zrot = NAN;
 };
 
+struct MoveReferenceGridId {
+    int32_t x;
+    int32_t y;
+};
+
+struct MoveReference {
+    uint32_t moveReference;
+    std::variant<std::string, MoveReferenceGridId> targetCell;
+};
+
 struct CellReference {
     uint32_t reference;
+    std::optional<MoveReference> moveReference;
     std::string name;
     std::optional<float> scale;
     CellReferencePosition position;

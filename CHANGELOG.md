@@ -4,6 +4,7 @@
 
 ### Fixed
 - Bugfix to texture banning
+- Support for existing grass mods that have MVRF subrecords
 
 ## 0.5.1 - 2024-05-01
 

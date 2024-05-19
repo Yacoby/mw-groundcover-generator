@@ -8,7 +8,32 @@ std::optional<std::string> emptyStringToEmptyOptional2(const std::string& s) {
 }
 
 void CellReference::load(const EspReader::Record& record, EspReader::SubRecordIterator& iter) {
+    if ((*iter).type == toRecordTypeInt("MVRF")) {
+        auto mvrf = (*iter).readEntireSubRecord<uint32_t>();
+
+        std::variant<std::string, MoveReferenceGridId> targetCell;
+        auto subRecord = *(++iter);
+        switch ((*iter).type.toInt()) {
+            case toRecordTypeInt("CNAM"):
+                targetCell = subRecord.readEntireSubRecord<std::string>();
+                break;
+            case toRecordTypeInt("CNDT"):
+                targetCell = subRecord.readEntireSubRecord<MoveReferenceGridId>();
+                break;
+        }
+
+        moveReference = {
+                .moveReference = mvrf,
+                .targetCell = targetCell,
+        };
+
+        ++iter;
+    }
+
     auto frmrRecord = *iter;
+    if (frmrRecord.type != toRecordTypeInt("FRMR")) {
+        throw std::runtime_error("Unexpected type " +frmrRecord.type.string() + " expecting FRMR");
+    }
     reference = frmrRecord.read<uint32_t>();
 
     bool exit = false;
@@ -30,11 +55,19 @@ void CellReference::load(const EspReader::Record& record, EspReader::SubRecordIt
             case toRecordTypeInt("DATA"):
                 position = subRecord.readEntireSubRecord<CellReferencePosition>();
                 break;
+            default:
+                // we just ignore the other fields that could be set...
+                break;
         }
     }
 }
 
 void CellReference::save(RecordWriter& writer, int frmr) const {
+    if (moveReference.has_value()) {
+        // We probably don't read enough to make any move reference worth writing back out
+        return;
+    }
+
     writer.writeSubRecordAndData<uint32_t>("FRMR", frmr);
     writer.writeSubRecordAndData("NAME", name);
     if (scale.has_value() && scale.value() != 1) {
@@ -94,7 +127,7 @@ void MutableCell::load(const EspReader::Record& record) {
             waterHeight = subRecord.readEntireSubRecord<float>();
         } else if (subRecord.type == "AMBI") {
             ambientLight = subRecord.readFixedArray<uint8_t, 4>();
-        } else if (subRecord.type == "FRMR") {
+        } else if (subRecord.type == "FRMR" || subRecord.type == "MVRF") {
             auto& ref = references.emplace_back();
             ref.load(record, iter);
         } else {
