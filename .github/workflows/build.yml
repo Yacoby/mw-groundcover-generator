@@ -48,7 +48,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release ${{ steps.vcpkg_static_only.outputs.vcpkg-cmake-config }} ${{ steps.vcpkg_all.outputs.vcpkg-cmake-config }} ..
           cmake --build . --config Release --target MWGroundcoverGenerator
       - name: Run tests
-        if: ${{ matrix.os.type == 'ubuntu' }}
+        if: ${{ matrix.os.type == 'ubuntu' || matrix.os.type == 'macos'  }}
         run: |
           mkdir test
           cd test
