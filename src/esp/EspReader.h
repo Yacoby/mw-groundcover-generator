@@ -174,6 +174,7 @@ public:
     std::ifstream ifStream;
     uintmax_t fileSize;
     EspReader(const std::filesystem::path& path) {
+        assert(std::filesystem::exists(path));
         fileSize = std::filesystem::file_size(path);
         ifStream = std::ifstream(path, std::ios::in | std::ios::binary);
         if (ifStream.fail()) {

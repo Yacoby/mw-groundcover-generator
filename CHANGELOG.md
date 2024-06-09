@@ -2,6 +2,9 @@
 
 ## [unreleased]
 
+### Added
+- Basic CLI (only supports generation) [[#1](https://github.com/Yacoby/mw-groundcover-generator/issues/1)]
+
 ### Fixed
 - Bugfix to texture banning
 - Support for existing grass mods that have MVRF subrecords

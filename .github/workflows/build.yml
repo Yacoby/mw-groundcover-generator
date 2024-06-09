@@ -13,31 +13,11 @@ jobs:
     runs-on: ${{ matrix.os.runner }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install header only dependencies (Ubuntu)
-        if: ${{ matrix.os.type == 'ubuntu' }}
-        run: |
-          sudo apt-get install libboost-all-dev libfmt-dev libspdlog-dev
-          : # https://github.com/microsoft/vcpkg/issues/27516#issuecomment-1786151579
-          sudo apt install build-essential gcc g++ python3-distutils pkg-config cmake ninja-build bison gperf nasm libx11-dev libxft-dev libxext-dev libdbus-1-dev libxi-dev libxtst-dev libgl1-mesa-dev libgles2-mesa-dev libglu1-mesa-dev libtool libudev-dev libx11-xcb-dev libxcursor-dev libxdamage-dev libxinerama-dev libxrandr-dev
-      - name: Install header only dependencies (MacOS)
-        if: ${{ matrix.os.type == 'macos' }}
-        run: |
-          brew install boost spdlog fmt
-      - name: Build statically linked dependencies
-        if: ${{ matrix.os.type == 'macos' || matrix.os.type == 'ubuntu'  }}
+      - name: Build dependencies
         uses: johnwason/vcpkg-action@v6
-        id: vcpkg_static_only
+        id: vcpkg
         with:
-          pkgs: wxwidgets
-          triplet: ${{ matrix.os.triplet }}
-          token: ${{ github.token }}
-          github-binarycache: true
-      - name: Build windows dependencies
-        if: ${{ matrix.os.type == 'windows' }}
-        uses: johnwason/vcpkg-action@v6
-        id: vcpkg_all
-        with:
-          pkgs: wxwidgets boost-algorithm boost-random boost-test boost-multi-array boost-property-tree spdlog fmt
+          pkgs: wxwidgets boost-algorithm boost-random boost-test boost-multi-array boost-property-tree boost-program-options spdlog fmt
           triplet: ${{ matrix.os.triplet }}
           token: ${{ github.token }}
           github-binarycache: true
@@ -45,21 +25,27 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release ${{ steps.vcpkg_static_only.outputs.vcpkg-cmake-config }} ${{ steps.vcpkg_all.outputs.vcpkg-cmake-config }} ..
+          cmake -DCMAKE_BUILD_TYPE=Release ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} ..
           cmake --build . --config Release --target MWGroundcoverGenerator
+          cmake --build . --config Release --target MWGroundcoverGeneratorCLI
       - name: Run tests
         if: ${{ matrix.os.type == 'ubuntu' || matrix.os.type == 'macos'  }}
         run: |
           mkdir test
           cd test
-          cmake ${{ steps.vcpkg_static_only.outputs.vcpkg-cmake-config }} ${{ steps.vcpkg_all.outputs.vcpkg-cmake-config }} ../
+          cmake ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} ../
           make MWGroundcoverGeneratorTests
           CTEST_OUTPUT_ON_FAILURE=1 make test
+
       - name: Make release directory, copy common artifacts
         run: |
           mkdir release
+          mkdir release/cli
+
           cp LICENCE.txt release/LICENCE.txt
           cp CHANGELOG.md release/CHANGELOG.md.txt
+          
+          cp docs/CLI.md release/cli/
 
           mkdir -p release/docs/examples
 
@@ -78,14 +64,18 @@ jobs:
         if: ${{ matrix.os.type == 'windows' }}
         run: |
           cp build/Release/MWGroundcoverGenerator.exe release/MWGroundcoverGenerator.exe
+          cp build/Release/MWGroundcoverGeneratorCLI.exe release/cli/MWGroundcoverGeneratorCLI.exe
       - name: Copy linux artifacts to the release directory
         if: ${{ matrix.os.type == 'ubuntu' }}
         run: |
-          cp build/MWGroundcoverGenerator release/MWGroundcoverGenerator
+          cp build/MWGroundcoverGenerator release/
+          cp build/MWGroundcoverGeneratorCLI release/cli/
       - name: Copy macos artifacts to the release directory
         if: ${{ matrix.os.type == 'macos' }}
         run: |
           cp -r build/MWGroundcoverGenerator.app release
+          cp -r release_cli/MWGroundcoverGeneratorCLI release/cli
+
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
