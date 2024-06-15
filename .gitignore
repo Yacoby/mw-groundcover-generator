@@ -29,3 +29,11 @@ tst/output/*.esp
 
 *.DS_Store
 .idea
+
+# vcpkg
+vcpkg_installed
+
+# build
+CMakeFiles
+cmake-build-*
+build

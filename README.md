@@ -22,15 +22,25 @@ See the User Guide (in the docs directory) for a user guide.
 
 ## Building from source
 
-This requires [Boost](https://www.boost.org/), [wxWidgets](https://www.wxwidgets.org/), [spdlog](https://github.com/gabime/spdlog) and [fmt](https://github.com/fmtlib/fmt). The UI is built using wxFormBuilder.
+This uses [vcpkg](https://vcpkg.io/) for dependency management, vckpg is a submodule of this repository (so ensure the submodule is checked out prior to running the below commands)
 
-### Mac
-
+To build:
 ```shell
-brew install boost wxwidgets spdlog fmt
-cmake .
+mkdir build
+cd build
+cmake -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..
 make
 ```
+
+To run the tests:
+```shell
+make MWGroundcoverGeneratorTests
+CTEST_OUTPUT_ON_FAILURE=1 make test
+```
+
+### UI
+
+The UI is built using wxFormBuilder. The project file is `src/gui/Grass.fbp`
 
 ## Thanks
 Feedback and testing:
