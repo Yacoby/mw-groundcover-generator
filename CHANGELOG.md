@@ -1,6 +1,6 @@
 # Changelog
 
-## [unreleased]
+## 0.5.2 - 2024-06-15
 
 ### Added
 - Basic CLI (only supports generation) [[#1](https://github.com/Yacoby/mw-groundcover-generator/issues/1)]
