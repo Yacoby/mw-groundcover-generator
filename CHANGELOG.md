@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.3 - 2024-08-02
+
+### Fixed
+- Removed use of static offsets when using the "Fix" tool to better support existing mods
+
 ## 0.5.2 - 2024-06-15
 
 ### Added

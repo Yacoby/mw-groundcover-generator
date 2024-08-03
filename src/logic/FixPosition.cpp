@@ -48,6 +48,34 @@ void PositionUpdater::doFix(bool operationIsDelete) {
 
     sendStatusUpdate(0, "Loaded all files");
 
+    int offsetProcess = 0;
+    std::map<std::string, std::map<int, int>> offsetCountsByObjId;
+    for (const auto& cellPair: esp.exteriorCells) {
+        auto& cell = cellPair.second;
+        logger->info("Getting offsets from cell: {}, {}", cell->getGridPosition().x, cell->getGridPosition().y);
+        sendStatusUpdate(static_cast<int>(offsetProcess++ / float(esp.exteriorCells.size()) * 100), "Getting offsets from cell: " + std::to_string(cell->getGridPosition().x) + ", " + std::to_string(cell->getGridPosition().y));
+
+        for (auto& reference: cell->references) {
+            auto landHeight = fc.getHeightAt(reference.position.x, reference.position.y);
+            auto offset = static_cast<int>(round(reference.position.z - landHeight));
+            offsetCountsByObjId[reference.name][offset]++;
+        }
+    }
+
+    logger->info("Calculating per object offsets");
+    sendStatusUpdate(0, "Calculating per object offsets");
+    std::map<std::string, int> offsetsByObjId;
+    for (const auto& offsetCountsForObj: offsetCountsByObjId) {
+        auto maxCount = std::max_element(
+                std::begin(offsetCountsForObj.second), std::end(offsetCountsForObj.second),
+                [](const auto& p1, const auto& p2) {
+                    return p1.second < p2.second;
+                }
+        );
+        logger->info("\tOffset for {} is {}", offsetCountsForObj.first, maxCount->first);
+        offsetsByObjId[offsetCountsForObj.first] = maxCount->first;
+    }
+
     int cellUpdateProgress = 0;
     for (const auto& cellPair: esp.exteriorCells) {
         auto& cell = cellPair.second;
@@ -60,7 +88,7 @@ void PositionUpdater::doFix(bool operationIsDelete) {
 
         if (operationIsDelete) {
             auto shouldDelete = [&](const CellReference& reference) {
-                auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + DEFAULT_GENERATION_OFFSET;
+                auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + offsetsByObjId[reference.name];
                 return fabs(expectedZ - reference.position.z) > MAX_ALLOWED_Z_ERROR;
             };
             auto removedEndIter = std::remove_if(cell->references.begin(), cell->references.end(), shouldDelete);
@@ -71,7 +99,7 @@ void PositionUpdater::doFix(bool operationIsDelete) {
             );
         } else {
             for (auto& reference : cell->references) {
-                auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + DEFAULT_GENERATION_OFFSET;
+                auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + offsetsByObjId[reference.name];
                 if (fabs(expectedZ - reference.position.z) > MAX_ALLOWED_Z_ERROR) {
                     auto angle = fc.getAngleAt(reference.position.x, reference.position.y);
                     reference.position.z = expectedZ;
