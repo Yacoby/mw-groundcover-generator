@@ -76,8 +76,8 @@ class Generator {
     float getRandom(float min, float max);
 
     void logConfiguration(const Configuration&);
-    bool hasCellBeenChanged(ESFileContainer&, const MutableEsp&, const GridId&, const RegenerateOptions&);
-    void doGenerate(MutableEsp& esp, const std::function<bool(ESFileContainer&,const MutableEsp&,const GridId&)>& cellUpdatePredicate);
+    bool hasCellBeenChanged(const Configuration& cfg, ESFileContainer&, const MutableEsp&, const GridId&, const RegenerateOptions&);
+    void doGenerate(MutableEsp& esp, const std::function<bool(const Configuration& cfg, ESFileContainer&,const MutableEsp&,const GridId&)>& cellUpdatePredicate);
 public:
 
     Generator(std::shared_ptr<spdlog::logger> logger,

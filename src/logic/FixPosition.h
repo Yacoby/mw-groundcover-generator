@@ -23,7 +23,6 @@ class PositionUpdater {
     std::filesystem::path outputPath;
 
 public:
-    constexpr static const float DEFAULT_GENERATION_OFFSET = 10;
     constexpr static const float MAX_ALLOWED_Z_ERROR = 4;
 
     PositionUpdater(std::shared_ptr<spdlog::logger> logger,

@@ -179,13 +179,13 @@ float Generator::getRandom(float min, float max) {
 void Generator::generate() {
     try {
         MutableEsp esp;
-        doGenerate(esp, [](ESFileContainer&, const MutableEsp&, const GridId&) { return true; });
+        doGenerate(esp, [](const Configuration& cfg, ESFileContainer&, const MutableEsp&, const GridId&) { return true; });
     } catch (std::exception& e) {
         sendFailure(e);
     }
 }
 
-bool Generator::hasCellBeenChanged(ESFileContainer& fc, const MutableEsp& esp, const GridId& g, const RegenerateOptions& options) {
+bool Generator::hasCellBeenChanged(const Configuration& cfg, ESFileContainer& fc, const MutableEsp& esp, const GridId& g, const RegenerateOptions& options) {
     auto file = fc.getLandFile(g.x, g.y);
     auto filename = file->getFilePath().filename().string();
     if (options.basePlugins.find(filename) != options.basePlugins.end()) {
@@ -208,7 +208,7 @@ bool Generator::hasCellBeenChanged(ESFileContainer& fc, const MutableEsp& esp, c
     bool hasFloatingGrass = false;
     if (options.regenerateIfFloatingGroundcover) {
         for (const auto& reference: cellIter->second->references) {
-            auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + PositionUpdater::DEFAULT_GENERATION_OFFSET;
+            auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + cfg.globalOffset;
             auto delta = fabs(expectedZ - reference.position.z);
             if (delta > PositionUpdater::MAX_ALLOWED_Z_ERROR) {
                 logger->info("Found object instance {} with a height of {}, but expected it to have a height of around {}. The delta {} was greater than {}",
@@ -239,13 +239,13 @@ void Generator::generateFromExisting(const fs::path& existingPlugin, const Regen
             std::throw_with_nested(std::runtime_error("Failed to load plugin " + existingPlugin.string()));
         }
 
-        doGenerate(esp, [this, regenerateOptions] (ESFileContainer& fc, const MutableEsp& esp,const GridId& g) { return this->hasCellBeenChanged(fc, esp, g, regenerateOptions); });
+        doGenerate(esp, [this, regenerateOptions] (const Configuration& cfg, ESFileContainer& fc, const MutableEsp& esp,const GridId& g) { return this->hasCellBeenChanged(cfg, fc, esp, g, regenerateOptions); });
     } catch (std::exception& e) {
         sendFailure(e);
     }
 }
 
-void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileContainer&,const MutableEsp&,const GridId&)>& cellUpdatePredicate) {
+void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Configuration& cfg, ESFileContainer&,const MutableEsp&,const GridId&)>& cellUpdatePredicate) {
     if (mFiles.size() == 0) {
         throw std::runtime_error("No files to process");
     }
@@ -458,7 +458,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(ESFileConta
             continue;
         }
 
-        if (!cellUpdatePredicate(fc, esp, cellCoord)) {
+        if (!cellUpdatePredicate(configuration, fc, esp, cellCoord)) {
             logger->info("Skipped creating/updating cell {}", cellCoord);
             continue;
         }
