@@ -210,6 +210,19 @@ The offset (default `0`) can be used to ensure that it isn't placed within some 
 iBanOffX= ; Optional, default: 0
 ```
 
+### Global behaviours
+
+The section `[global]` contains settings which are applied to all placed objects.
+
+```ini
+[global]
+iZPositionModifier=10; Optional, default 10
+sObjectPrefix=GRS_ ; Optional, deprecated, default GRS_
+```
+
+- `iZPositionModifier` Applies a fixed delta to the z (vertical) position of all placed objects
+- `sObjectPrefix` The prefix of any created Static objects.  This setting may be removed in a future version of this program
+
 ## Troubleshooting
 
 Logs are written to MwGroundcoverGenLog.txt. This includes details of
