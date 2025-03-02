@@ -18,7 +18,12 @@ void ESFile::loadFile(const std::filesystem::path &pFile) {
         } else if (record.type == "LTEX") {
             ESLTexRef tex = ESLTexRef(new ESLTex(ESLTex::load(record)));
             mLandTex[tex->getIndex()] = tex;
-            assert(tex->getIndex() == mLandTexVec.size());
+            if (tex->getIndex() != mLandTexVec.size()) {
+                throw std::runtime_error(fmt::format(
+                        "Non contiguous index in LTEX record. Expected LTEX index to be {} but was {}",
+                        mLandTexVec.size(), tex->getIndex()
+                ));
+            }
             mLandTexVec.push_back(tex);
         }
     }
