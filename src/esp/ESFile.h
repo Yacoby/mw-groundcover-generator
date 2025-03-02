@@ -33,12 +33,12 @@ public:
 
 template<>
 struct fmt::formatter<GridId> {
-    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
-        return ctx.end();
+    constexpr auto parse(format_parse_context& ctx) {
+        return ctx.begin();
     }
 
     template <typename FormatContext>
-    auto format(const GridId& input, FormatContext& ctx) -> decltype(ctx.out()) {
+    auto format(const GridId& input, FormatContext& ctx) const {
         return fmt::format_to(ctx.out(), "({}, {})", input.x, input.y);
     }
 };

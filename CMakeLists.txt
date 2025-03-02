@@ -4,6 +4,11 @@ project(MW_GROUNDCOVER_GENERATOR VERSION 0.5.1)
 set(Boost_USE_STATIC_LIBS ON)
 set(wxWidgets_USE_STATIC ON)
 
+# Remove CMAKE warnings: https://stackoverflow.com/questions/79146083/finding-boost-without-cmake-find-module-cmp0167
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW)
+endif()
+
 find_package(wxWidgets COMPONENTS core base REQUIRED)
 include("${wxWidgets_USE_FILE}")
 
