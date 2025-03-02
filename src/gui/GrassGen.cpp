@@ -82,6 +82,12 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizer6->Add( mReset, 0, wxALIGN_CENTER|wxALL, 5 );
 
 
+	bSizer6->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	mMorrowindLocation = new wxButton( this, wxID_ANY, wxT("Set Morrowind location"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer6->Add( mMorrowindLocation, 0, wxALIGN_CENTER|wxALL, 5 );
+
+
 	fgSizer4->Add( bSizer6, 1, wxEXPAND, 5 );
 
 	mModList = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxSize( -1,200 ), 0, NULL, wxLB_MULTIPLE );
@@ -445,6 +451,7 @@ GrassGen::GrassGen( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	mAddPluginFromFile->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnAddPress ), NULL, this );
 	mRemove->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRemovePress ), NULL, this );
 	mReset->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnResetPress ), NULL, this );
+	mMorrowindLocation->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnSetMorrowindLocationPress ), NULL, this );
 	mModList->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GrassGen::OnModListSelect ), NULL, this );
 	mGenerate->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnGenPress ), NULL, this );
 	regenerateSetTargetButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateSetTarget ), NULL, this );
@@ -465,6 +472,7 @@ GrassGen::~GrassGen()
 	mAddPluginFromFile->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnAddPress ), NULL, this );
 	mRemove->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRemovePress ), NULL, this );
 	mReset->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnResetPress ), NULL, this );
+	mMorrowindLocation->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnSetMorrowindLocationPress ), NULL, this );
 	mModList->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GrassGen::OnModListSelect ), NULL, this );
 	mGenerate->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnGenPress ), NULL, this );
 	regenerateSetTargetButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GrassGen::OnRegenerateSetTarget ), NULL, this );

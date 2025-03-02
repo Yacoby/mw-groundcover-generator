@@ -108,6 +108,7 @@ protected:
     }
 
     // Handlers for GrassGen events.
+    void OnSetMorrowindLocationPress( wxCommandEvent& event ) override;
     void OnImportPress(wxCommandEvent &event) override;
     void OnImportOpenMwPress(wxCommandEvent &event) override;
 

@@ -50,6 +50,7 @@ class GrassGen : public wxFrame
 		wxButton* mAddPluginFromFile;
 		wxButton* mRemove;
 		wxButton* mReset;
+		wxButton* mMorrowindLocation;
 		wxListBox* mModList;
 		wxNotebook* m_notebook1;
 		wxPanel* m_panel1;
@@ -107,6 +108,7 @@ class GrassGen : public wxFrame
 		virtual void OnAddPress( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRemovePress( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnResetPress( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSetMorrowindLocationPress( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnModListSelect( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnGenPress( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRegenerateSetTarget( wxCommandEvent& event ) { event.Skip(); }

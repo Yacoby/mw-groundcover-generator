@@ -34,33 +34,38 @@ BEGIN_EVENT_TABLE(GUI, wxFrame)
 END_EVENT_TABLE()
 
 GUI::GUI(wxWindow *parent, std::shared_ptr<spdlog::logger> logger) : GrassGen(parent), logger(logger), loadOrder(std::unique_ptr<LastModifiedLoadOrder>(new LastModifiedLoadOrder())) {
-    const std::pair<const char*, const char *> registryPaths[] = {
-            std::pair(R"(Software\Bethesda Softworks\Morrowind)", "Installed Path"),
-            std::pair(R"(Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 22320)", "InstallLocation"),
-            std::pair(R"(Software\GOG.com\Games\1440163901)", "path"),
-            std::pair(R"(Software\GOG.com\Games\1435828767)", "path"),
-    };
-    for (const auto &registryPath: registryPaths) {
-        const auto standardKey = getRegKey(registryPath.first, registryPath.second);
-        if (standardKey.has_value()) {
-            const auto gamePath = fs::path(standardKey.value());
-            if (fs::exists(gamePath) && fs::is_directory(gamePath)) {
-                logger->info(R"(Found Morrowind at "{}" from ini "{}")", gamePath.string(), standardKey.value());
-                morrowindDirectory = gamePath;
-                break;
+    boost::property_tree::ptree settings;
+    try {
+        boost::property_tree::ini_parser::read_ini(SETTINGS_FILE, settings);
+    } catch (boost::property_tree::ini_parser_error& e) {
+        logger->error("Failed to read ini, got error: {}", e.what());
+    }
+
+    auto morrowindDirFromSettings = settings.get_optional<std::string>("General.MorrowindDirectory");
+    if (morrowindDirFromSettings.has_value() && !morrowindDirFromSettings.get().empty() && fs::exists(fs::path(morrowindDirFromSettings.value()))) {
+        morrowindDirectory = fs::path(morrowindDirFromSettings.value());
+    } else {
+        const std::pair<const char*, const char*> registryPaths[] = {
+                std::pair(R"(Software\Bethesda Softworks\Morrowind)", "Installed Path"),
+                std::pair(R"(Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 22320)", "InstallLocation"),
+                std::pair(R"(Software\GOG.com\Games\1440163901)", "path"),
+                std::pair(R"(Software\GOG.com\Games\1435828767)", "path"),
+        };
+        for (const auto& registryPath: registryPaths) {
+            const auto standardKey = getRegKey(registryPath.first, registryPath.second);
+            if (standardKey.has_value()) {
+                const auto gamePath = fs::path(standardKey.value());
+                if (fs::exists(gamePath) && fs::is_directory(gamePath)) {
+                    logger->info(R"(Found Morrowind at "{}" from ini "{}")", gamePath.string(), standardKey.value());
+                    morrowindDirectory = gamePath;
+                    break;
+                }
             }
         }
     }
 
     if (!morrowindDirectory.empty()) {
         mOutputFile->SetPath((morrowindDirectory / "Data Files" / "Grass.esp").string());
-    }
-
-    boost::property_tree::ptree settings;
-    try {
-        boost::property_tree::ini_parser::read_ini(SETTINGS_FILE, settings);
-    } catch (boost::property_tree::ini_parser_error& e) {
-        logger->error("Failed to read ini, got error: {}", e.what());
     }
 
     auto genConfigLocation = settings.get_optional<std::string>("Generate.Configuration");
@@ -84,6 +89,9 @@ void GUI::OnClose(wxCloseEvent& event) {
     settings.add("Generate.Configuration", mIniLoc->GetPath().utf8_string());
     settings.add("Generate.Output", mOutputFile->GetPath().utf8_string());
     settings.add("Regenerate.Configuration", regenerateConfigurationPicker->GetPath().utf8_string());
+    if (!morrowindDirectory.string().empty()) {
+        settings.add("General.MorrowindDirectory", morrowindDirectory.string());
+    }
 
     try {
         boost::property_tree::ini_parser::write_ini(SETTINGS_FILE, settings);
@@ -100,25 +108,27 @@ void GUI::OnClose(wxCloseEvent& event) {
     event.Skip();
 }
 
-void GUI::OnImportPress(wxCommandEvent &event) {
-    fs::path iniPath;
-    if (fs::exists(morrowindDirectory)) {
-        iniPath = morrowindDirectory / "Morrowind.ini";
-    } else {
-        auto dialog = wxFileDialog(
-                this,
-                "Select your Morrowind ini file",
-                wxEmptyString,
-                wxEmptyString,
-                _("Morrowind ini file (*.ini)|*.ini|"),
-                wxFD_OPEN
-        );
-        if (dialog.ShowModal() != wxID_OK) {
-            return;
-        }
-        iniPath = dialog.GetPath().utf8_string();
-        morrowindDirectory = iniPath.parent_path();
+void GUI::OnSetMorrowindLocationPress(wxCommandEvent &event) {
+    auto dialog = wxFileDialog(
+            this,
+            "Select your Morrowind ini file",
+            wxEmptyString,
+            wxEmptyString,
+            _("Morrowind ini file (*.ini)|*.ini|"),
+            wxFD_OPEN
+    );
+    if (dialog.ShowModal() != wxID_OK) {
+        return;
     }
+    morrowindDirectory = fs::path(dialog.GetPath().utf8_string()).parent_path();
+    logger->info("Set Morrowind directory to {}", morrowindDirectory.string());
+}
+
+void GUI::OnImportPress(wxCommandEvent &event) {
+    if (!fs::exists(morrowindDirectory)) {
+        OnSetMorrowindLocationPress(event);
+    }
+    fs::path iniPath = morrowindDirectory / "Morrowind.ini";
 
     std::vector<std::string> plugins;
     try {
