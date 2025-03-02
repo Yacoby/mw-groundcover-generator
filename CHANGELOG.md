@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.4 - 2025-03-02
+
+### Fixed
+- Removed usages of static offsets when using the Regenerate tool
+- Various fixes for underwater groundcover
+   - Support for LAND records which have no height or texture data
+   - Correct default land height when there is no height data or LAND record
+
 ## 0.5.3 - 2024-08-02
 
 ### Fixed
