@@ -92,7 +92,7 @@ void PositionUpdater::doFix(bool operationIsDelete) {
                 return fabs(expectedZ - reference.position.z) > MAX_ALLOWED_Z_ERROR;
             };
             auto removedEndIter = std::remove_if(cell->references.begin(), cell->references.end(), shouldDelete);
-            deleted += std::distance(cell->references.begin(), removedEndIter);;
+            deleted += std::distance(removedEndIter, cell->references.end());;
             cell->references.erase(
                     removedEndIter,
                     cell->references.end()
@@ -102,6 +102,7 @@ void PositionUpdater::doFix(bool operationIsDelete) {
                 auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + offsetsByObjId[reference.name];
                 if (fabs(expectedZ - reference.position.z) > MAX_ALLOWED_Z_ERROR) {
                     auto angle = fc.getAngleAt(reference.position.x, reference.position.y);
+                    fc.getHeightAt(reference.position.x, reference.position.y);
                     reference.position.z = expectedZ;
                     reference.position.xrot = angle.x;
                     reference.position.yrot = angle.y;

@@ -103,7 +103,10 @@ ESLTexRef ESFileContainer::getLandTexture(float posX, float posY) {
     }
 
     const auto& ltex = land->getLandTextures();
-    const auto ltexIdx = ltex[squx][squy];
+    if (!ltex.has_value()) {
+        return nullptr;
+    }
+    const auto ltexIdx = ltex.value()[squx][squy];
     if (ltexIdx == 0) {
         return nullptr;
     }
@@ -119,12 +122,15 @@ int ESFileContainer::getHeightAtVertex(int vertexX, int vertexY) {
     int cellY = floor(vertexY / 64.0);
     auto land = getLand(cellX, cellY);
     if (land == nullptr) {
-        return DEFAULT_LAND_HEIGHT;
+        return DEFAULT_LAND_HEIGHT / 8;
+    }
+    if (!land->getHeightData().has_value()) {
+        return DEFAULT_LAND_HEIGHT / 8;
     }
 
     int vertexOffsetX = vertexX - cellX * 64;
     int vertexOffsetY = vertexY - cellY * 64;
-    return land->getHeightData()[vertexOffsetX][vertexOffsetY];
+    return land->getHeightData().value()[vertexOffsetX][vertexOffsetY];
 }
 
 float ESFileContainer::getHeightAt(float positionX, float positionY) {

@@ -2,8 +2,8 @@
 
 #include <cassert>
 
-ESLand::ESLand() : mHeightData(boost::multi_array<int, 2>(boost::extents[65][65])),
-                   mLandTextures(boost::multi_array<uint16_t, 2>(boost::extents[16][16])) {
+ESLand::ESLand() : mHeightData(std::nullopt),
+                   mLandTextures(std::nullopt) {
 }
 
 void ESLand::loadVtexRecord(boost::multi_array<uint16_t, 2>& textures, EspReader::SubRecord& record) {
@@ -43,9 +43,11 @@ ESLand ESLand::load(EspReader::Record& record) {
         if (subRecord.type == "INTV") {
             land.mLandSquare = subRecord.read<LandSquare>();
         } else if (subRecord.type == "VHGT") {
-            loadVhgtRecord(land.mHeightData, subRecord);
+            land.mHeightData = boost::multi_array<int, 2>(boost::extents[65][65]);
+            loadVhgtRecord(land.mHeightData.value(), subRecord);
         } else if (subRecord.type == "VTEX") {
-            loadVtexRecord(land.mLandTextures, subRecord);
+            land.mLandTextures = boost::multi_array<uint16_t, 2>(boost::extents[16][16]);
+            loadVtexRecord(land.mLandTextures.value(), subRecord);
         }
     }
 

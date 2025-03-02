@@ -292,12 +292,16 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
 
         sendStatusUpdate(cellsProcessed / float(cells.size()) * 100, "Processing cell: " + std::to_string(cellCoord.x) + ", " + std::to_string(cellCoord.y));
 
+        if (!land->getLandTextures().has_value()) {
+            logger->info("Cell {} didn't have any textures", cellCoord);
+            continue;
+        }
 
-        ESFileRef file = fc.getLandFile(cx, cy);
-        const auto& landTex = land->getLandTextures();
+        const auto& landTex = land->getLandTextures().value();
 
         ESFileContainer::CellInformation cellInformation = fc.getCellInformation(cx, cy);
 
+        ESFileRef file = fc.getLandFile(cx, cy);
         logCellStart(cellCoord, file, cellInformation.name, cellInformation.region);
 
         std::vector<CellTextureLog> textureLogs;

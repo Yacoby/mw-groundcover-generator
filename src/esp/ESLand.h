@@ -41,15 +41,15 @@ typedef std::shared_ptr<ESLand> ESLandRef;
 
 class ESLand {
 
+    std::optional<boost::multi_array<uint16_t, 2>> mLandTextures;
 
-    boost::multi_array<uint16_t, 2> mLandTextures;
     /**
     * height data
     * The height data is not absolute values but uses differences between adjacent pixels.
     * Thus a pixel value of 0 means it has the same height as the last pixel. Note that
     * the y-direction of the data is from the bottom up.
     */
-    boost::multi_array<int, 2> mHeightData;
+    std::optional<boost::multi_array<int, 2>> mHeightData;
 
     /**
     * The data on where in the world the cell is
@@ -63,8 +63,8 @@ public:
 
     ESLand();
 
-    const boost::multi_array<int, 2>& getHeightData() const { return mHeightData; }
-    const boost::multi_array<uint16_t, 2>& getLandTextures() const { return mLandTextures; }
+    const std::optional<boost::multi_array<int, 2>>& getHeightData() const { return mHeightData; }
+    const std::optional<boost::multi_array<uint16_t, 2>>& getLandTextures() const { return mLandTextures; }
 
 
     /**
