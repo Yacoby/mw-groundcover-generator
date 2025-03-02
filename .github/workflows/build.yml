@@ -8,7 +8,7 @@ jobs:
       matrix:
         os:
           - { runner: 'windows-latest', type: 'windows', architecture: 'x64', triplet: 'x64-windows-static' }
-          - { runner: 'ubuntu-latest', type: 'ubuntu', architecture: 'x64', triplet: 'x64-linux' }
+          - { runner: 'ubuntu-22.04', type: 'ubuntu', architecture: 'x64', triplet: 'x64-linux' }
           - { runner: 'macos-latest', type: 'macos', architecture: 'arm64', triplet: 'arm64-osx' }
     runs-on: ${{ matrix.os.runner }}
     steps:
