@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.5 - 2025-03-03
+
+### Added
+- Support for setting the Morrowind location (rather than only inferring from the Windows registry)
+
+### Fixed
+- Improved error messages when loading corrupt/invalid mods
+
 ## 0.5.4 - 2025-03-02
 
 ### Fixed
