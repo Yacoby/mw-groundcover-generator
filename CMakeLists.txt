@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(MW_GROUNDCOVER_GENERATOR VERSION 0.5.5)
+project(MW_GROUNDCOVER_GENERATOR VERSION 0.5.6)
 
 set(Boost_USE_STATIC_LIBS ON)
 set(wxWidgets_USE_STATIC ON)

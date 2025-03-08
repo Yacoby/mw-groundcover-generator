@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.6 - 2025-03-08
+### Fixed
+- Fixed error when loading .omwaddon that contain OpenMW specific record types
+
 ## 0.5.5 - 2025-03-03
 
 ### Added
