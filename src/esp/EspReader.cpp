@@ -2,13 +2,6 @@
 
 #include <fmt/core.h>
 
-const std::set<std::string> VAlID_RECORD_TYPES = {
-        "ACTI", "ALCH", "APPA", "ARMO", "BODY", "BOOK", "BSGN", "CELL", "CLAS", "CLOT", "CONT", "CREA", "DIAL", "DOOR",
-        "ENCH", "FACT", "FRMR", "GLOB", "GMST", "INFO", "INGR", "LAND", "LEVC", "LEVI", "LIGH", "LOCK", "LTEX", "MGEF",
-        "MISC", "NPC_", "PGRD", "PROB", "RACE", "REGN", "REPA", "SCPT", "SKIL", "SNDG", "SOUN", "SPEL", "SSCR", "STAT",
-        "TES3", "WEAP"
-};
-
 void EspReader::RecordIterator::next() {
     std::string type;
     type.resize(4);
@@ -20,9 +13,14 @@ void EspReader::RecordIterator::next() {
         return;
     }
 
-    // Intended as a sanity check - are we actually reading an ESP/ESM?
-    if (VAlID_RECORD_TYPES.find(type) == VAlID_RECORD_TYPES.end()) {
-        throw std::runtime_error("Unexpected record type in file: " + type);
+    // Intended as a sanity check - are we actually reading something that looks like an ESP/ESM?
+    // Originally this verified against a list of valid records - but OpenMW have added more so this check is relaxed to
+    // check that this looks somewhat valid.
+    // - isdigit allows for TES3
+    // - c == '_' allows for NPC_
+    if (!std::all_of(type.begin(), type.end(),[](unsigned char c){ return std::isupper(c) || std::isdigit(c) || c == '_'; })) {
+        throw std::runtime_error("Unexpected style of record format in file: '" + type + "'" +
+                                 " expected string to contain only case char, digit or underscore");
     }
 
     uint32_t length, header, flags;
