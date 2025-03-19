@@ -6,7 +6,6 @@
 #include <boost/algorithm/string/case_conv.hpp>
 
 #include "esp/ESFileContainer.h"
-#include "esp/EspWriter.h"
 #include "esp/MutableEsp.h"
 
 #include "Configuration.h"
@@ -88,6 +87,12 @@ std::optional<Selector> getConfigurationSelector(
 }
 
 std::string Generator::getMesh(const std::vector<ObjectPlacementPossibility>& placements, const std::string& objectPrefix, const std::string &cat) {
+    if (placements.empty()) {
+        throw std::runtime_error(fmt::format(
+                "Attempted to get mesh for placements, but no placements existed (category was '{}')", cat
+        ));
+    }
+
     std::vector<float> weights;
     for (const auto& placement: placements) {
         weights.push_back(placement.chance);
@@ -254,7 +259,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
 
     sendStatusUpdate(0, "Loading configuration (ini) file");
 
-    const auto configuration = loadConfigurationFromIni(mIniLoc);
+    const auto configuration = loadConfigurationFromIni(logger, mIniLoc);
     logConfiguration(configuration);
 
     int pluginProgress = 0;

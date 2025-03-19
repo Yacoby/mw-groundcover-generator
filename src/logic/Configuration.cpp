@@ -104,7 +104,7 @@ static Bounds getOptBounds(
     }
 }
 
-Configuration loadConfigurationFromIni(const std::filesystem::path& path) {
+Configuration loadConfigurationFromIni(const std::shared_ptr<spdlog::logger> logger, const std::filesystem::path& path) {
     std::map<Selector, Behaviour> configuration;
 
     boost::property_tree::ptree pt;
@@ -144,7 +144,11 @@ Configuration loadConfigurationFromIni(const std::filesystem::path& path) {
                 .exclusions = getExclusions(section.first, sectionProperties),
         };
 
-        configuration.emplace(selector, Behaviour {.placeMeshesBehaviour = std::make_optional(behavior)});
+        if (behavior.placements.empty()) {
+            logger->warn("No placements found for section {} in {}. This will be ignored", section.first, path.string());
+        } else {
+            configuration.emplace(selector, Behaviour{.placeMeshesBehaviour = std::make_optional(behavior)});
+        }
     }
 
     return Configuration(

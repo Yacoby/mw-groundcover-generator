@@ -9,6 +9,8 @@
 #include <variant>
 #include <ostream>
 
+#include "spdlog/spdlog.h"
+
 class ObjectId {
     const std::string value;
 public:
@@ -144,6 +146,6 @@ public:
 };
 
 
-Configuration loadConfigurationFromIni(const std::filesystem::path& path);
+Configuration loadConfigurationFromIni(const std::shared_ptr<spdlog::logger> logger, const std::filesystem::path& path);
 
 #endif //MW_MESH_GEN_CONFIGURATION_H
