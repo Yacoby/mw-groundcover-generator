@@ -7,6 +7,7 @@
 #include <cassert>
 #include <filesystem>
 #include <optional>
+#include <vector>
 
 class RecordType {
     uint32_t type;
@@ -61,6 +62,12 @@ public:
     void writeFixedArray(const std::array<T, SIZE>& data) {
         writtenLength += sizeof(T)*SIZE;
         ofStream->write(data.data(), sizeof(T)*SIZE);
+    }
+
+    template<class T>
+    void writeVector(const std::vector<T>& data) {
+        writtenLength += sizeof(T)*data.size();
+        ofStream->write((const char*)data.data(), sizeof(T)*data.size());
     }
 
     template<class T>

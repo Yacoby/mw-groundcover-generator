@@ -71,4 +71,26 @@ BOOST_AUTO_TEST_SUITE(fix_tests);
         }
     }
 
+    BOOST_AUTO_TEST_CASE(
+            ExistingRecords
+    ) {
+        PositionUpdater updater(
+                makeNullLogger(),
+                [](int, const std::string&) {},
+                [](const std::string&) {},
+                [](const std::exception& err) { throw err; },
+                std::vector<fs::path>(),
+                fs::path("existing_mods") / "GMST.esp",
+                fs::path("output") / "GMST.fix.output.esp"
+        );
+        updater.fix(true);
+
+        BOOST_TEST_CONTEXT("Snapshot test") {
+            verifyEspsMatch(
+                    fs::path("existing_mods") / "GMST.esp",
+                    fs::path("output") / "GMST.fix.output.esp"
+            );
+        }
+    }
+
 BOOST_AUTO_TEST_SUITE_END();

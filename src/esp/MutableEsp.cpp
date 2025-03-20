@@ -224,8 +224,9 @@ void Static::load(const EspReader::Record& record) {
 }
 
 void UnhandledRecord::load(const EspReader::Record& record) {
+    type = record.type;
     for (auto& subReader: record) {
-        auto subRecord = subrecords.emplace_back();
+        auto& subRecord = subrecords.emplace_back();
         subRecord.type = subReader.type;
         subRecord.data = subReader.readEntireSubRecordAsArray<uint8_t>();
     }
@@ -234,7 +235,9 @@ void UnhandledRecord::load(const EspReader::Record& record) {
 void UnhandledRecord::save(EspWriter& writer) const {
     auto subWriter = writer.writeRecord(type.string(), 0, 0);
     for (const auto& item: subrecords) {
-        subWriter.writeSubRecordAndData(item.type, item.data);
+        auto subRecordWriter = subWriter.writeSubRecord(item.type, item.data.size());
+        subRecordWriter.writeVector(item.data);
+        subRecordWriter.close();
     }
     subWriter.close();
 }
