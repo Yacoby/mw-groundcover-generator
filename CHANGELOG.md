@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.7 - 2025-03-20
+### Fixed
+- Fixed writing of unrelated record types (e.g. GMST) when using the Fix tool
+- Fixed a crash caused by a configuration entry not having any placements. These configuration entries are now silently ignored when loading the configuration
+
 ## 0.5.6 - 2025-03-08
 ### Fixed
 - Fixed error when loading .omwaddon that contain OpenMW specific record types
