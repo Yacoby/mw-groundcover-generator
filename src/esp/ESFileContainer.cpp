@@ -1,6 +1,5 @@
 #include "ESFileContainer.h"
 
-#include <ranges>
 #include <optional>
 
 void ESFileContainer::loadDataFile(const std::filesystem::path &file) {
@@ -11,8 +10,8 @@ void ESFileContainer::loadDataFile(const std::filesystem::path &file) {
 
 ESFileContainer::CellInformation ESFileContainer::getCellInformation(int x, int y) {
     CellInformation info;
-    for (const auto& it : std::ranges::reverse_view(mFile)) {
-        const auto cell = it->getCell(x, y);
+    for (auto it = mFile.rbegin(); it != mFile.rend(); ++it) {
+        const auto cell = (*it)->getCell(x, y);
         if (!cell) {
             continue;
         }
@@ -37,9 +36,9 @@ ESLandRef ESFileContainer::getLand(int squX, int squY) {
     }
 
     ESLandRef land = nullptr;
-    for (const auto& it : std::ranges::reverse_view(mFile)) {
-        if (it->landExists(squX, squY)) {
-            land = it->getLand(squX, squY);
+    for (auto it = mFile.rbegin(); it != mFile.rend(); ++it) {
+        if ((*it)->landExists(squX, squY)) {
+            land = (*it)->getLand(squX, squY);
             break;
         }
     }
@@ -58,9 +57,9 @@ ESFileRef ESFileContainer::getLandFile(int squX, int squY) {
     }
 
     ESFileRef file = nullptr;
-    for (const auto& it : std::ranges::reverse_view(mFile)) {
-        if (it->landExists(squX, squY)) {
-            file = it;
+    for (auto it = mFile.rbegin(); it != mFile.rend(); ++it) {
+        if ((*it)->landExists(squX, squY)) {
+            file = *it;
             break;
         }
     }

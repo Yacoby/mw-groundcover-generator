@@ -1,5 +1,7 @@
 #include "EspReader.h"
 
+#include <algorithm>
+
 #include <fmt/core.h>
 
 void EspReader::RecordIterator::next() {

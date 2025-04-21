@@ -4,7 +4,6 @@
 #include <vector>
 #include <fstream>
 #include <optional>
-#include <ranges>
 #include <set>
 
 #include <boost/property_tree/ptree.hpp>
@@ -115,9 +114,10 @@ std::vector<std::filesystem::path> resolveOpenMwPluginPaths(const OpenMwConfig& 
 
     std::vector<fs::path> paths;
     for (const auto &pluginName: plugins) {
-        for (const auto &dataPath: std::ranges::reverse_view(cfg.data)) {
-            if (fs::exists(dataPath / pluginName)) {
-                paths.push_back(dataPath / pluginName);
+
+        for (auto dataPath = cfg.data.rbegin(); dataPath != cfg.data.rend(); ++dataPath) {
+            if (fs::exists(*dataPath / pluginName)) {
+                paths.push_back(*dataPath / pluginName);
                 break;
             }
         }
