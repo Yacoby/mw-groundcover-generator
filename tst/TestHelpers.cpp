@@ -46,6 +46,10 @@ class EspCellSubXscl : public EspSubRecord {
     }
 public:
     float data;
+
+    virtual void print(std::ostream& os) const override {
+        os << "[SubRecord (EspCellSubXscl) type=" << type.string() << ", data=(" << data << ")]";
+    }
 };
 
 class EspCellSubData : public EspSubRecord {
@@ -66,7 +70,7 @@ public:
         for (auto i: data) output.push_back(std::to_string(i));
 
         auto dataStr = boost::algorithm::join(output, ", ");
-        os << "[SubRecord type=" << type.string() << ", data=(" << dataStr << ")]";
+        os << "[SubRecord (EspCellSubData) type=" << type.string() << ", data=(" << dataStr << ")]";
     }
 };
 
@@ -77,6 +81,15 @@ class EspGenericSubRecord : public EspSubRecord {
     }
 public:
     std::vector<uint8_t> data;
+
+    virtual void print(std::ostream& os) const override {
+        std::vector<std::string> output;
+        output.reserve(data.size());
+        for (auto i: data) output.push_back(std::to_string(i));
+
+        auto dataStr = boost::algorithm::join(output, ", ");
+        os << "[SubRecord (EspGenericSubRecord) type=" << type.string() << ", data=(" << dataStr << ")]";
+    }
 };
 
 class EspRecord {

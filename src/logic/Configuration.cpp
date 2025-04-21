@@ -47,7 +47,6 @@ std::vector<ObjectPlacementPossibility> getPlacements(const std::string& section
                 // Technically dividing by the sum of chances is not required, but might make it more obvious what is
                 // going on in the logged configuration
                 .chance = static_cast<float>(chance.value()) / sumOfChances,
-                .deprecatedId = i,
         });
     }
     return placements;
@@ -181,7 +180,7 @@ std::ostream& operator<<(std::ostream& os, const ObjectPlacementPossibility& pos
     } else {
         os << std::get<Mesh>(possibility.idOrMesh);
     }
-    os << " chance: " << possibility.chance << " deprecatedId: " << possibility.deprecatedId << "}";
+    os << " chance: " << possibility.chance << "}";
     return os;
 }
 

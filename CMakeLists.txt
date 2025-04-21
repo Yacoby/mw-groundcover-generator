@@ -16,6 +16,7 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(spdlog REQUIRED)
+find_package(xxHash CONFIG REQUIRED)
 
 include_directories(${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src)
 
@@ -50,8 +51,8 @@ add_executable(MWGroundcoverGeneratorCLI ${sources} ${cli_sources})
 target_compile_features(MWGroundcoverGenerator PRIVATE cxx_std_20)
 target_compile_features(MWGroundcoverGeneratorCLI PRIVATE cxx_std_20)
 
-target_link_libraries(MWGroundcoverGenerator ${wxWidgets_LIBRARIES} spdlog::spdlog_header_only)
-target_link_libraries(MWGroundcoverGeneratorCLI spdlog::spdlog_header_only ${Boost_LIBRARIES})
+target_link_libraries(MWGroundcoverGenerator ${wxWidgets_LIBRARIES} spdlog::spdlog_header_only xxHash::xxhash)
+target_link_libraries(MWGroundcoverGeneratorCLI spdlog::spdlog_header_only ${Boost_LIBRARIES} xxHash::xxhash)
 
 enable_testing()
 add_subdirectory(tst)

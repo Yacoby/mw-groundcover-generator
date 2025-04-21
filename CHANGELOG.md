@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6 - ?
+
+### Updated
+- Generated STAT ids are now based on the mesh id to ensure no conflicts between mods
+
 ## 0.5.7 - 2025-03-20
 ### Fixed
 - Fixed writing of unrelated record types (e.g. GMST) when using the Fix tool

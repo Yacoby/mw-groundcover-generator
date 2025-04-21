@@ -1,15 +1,53 @@
 #include "Generator.h"
 
 #include <cassert>
+#include <stdexcept>
+
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/discrete_distribution.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
+
+#include "xxhash.h"
 
 #include "esp/ESFileContainer.h"
 #include "esp/MutableEsp.h"
 
 #include "Configuration.h"
 #include "FixPosition.h"
+
+std::string toBase36(uint64_t value) {
+    const char* digits = "0123456789abcdefghijklmnopqrstuvwxyz";
+    std::string result;
+
+    if (value == 0) return "0";
+
+    while (value > 0) {
+        result = digits[value % 36] + result;
+        value /= 36;
+    }
+
+    return result;
+}
+
+std::string toMeshId(std::map<std::string, std::string>& cache, const std::string& prefix, const std::string& value) {
+    // This is not really for performance, but rather correctness. We can use this to ensure that we don't get a
+    // collision
+    if (cache.contains(value)) {
+        return cache[value];
+    }
+
+    // 128 bit hash would be better, but there isn't a cross platform 128 bit type
+    uint64_t hash = XXH3_64bits(value.data(), value.size());
+    std::string hashBase36 = toBase36(hash);
+    for (auto it = cache.begin(); it != cache.end(); ++it) {
+        if (it->second == hashBase36) {
+            throw std::runtime_error("Found conflicting hash " + hashBase36 + " . One of the input was: " + value +
+                                     " and the other was " + it->first);
+        }
+    }
+    cache[value] = prefix + hashBase36;
+    return cache[value];
+}
 
 struct ObjectInstance {
     const ObjectId objectId;
@@ -86,7 +124,7 @@ std::optional<Selector> getConfigurationSelector(
     return std::nullopt;
 }
 
-std::string Generator::getMesh(const std::vector<ObjectPlacementPossibility>& placements, const std::string& objectPrefix, const std::string &cat) {
+std::string Generator::getMesh(std::map<std::string, std::string> meshIdCache, const std::vector<ObjectPlacementPossibility>& placements, const std::string& objectPrefix, const std::string &cat) {
     if (placements.empty()) {
         throw std::runtime_error(fmt::format(
                 "Attempted to get mesh for placements, but no placements existed (category was '{}')", cat
@@ -104,7 +142,8 @@ std::string Generator::getMesh(const std::vector<ObjectPlacementPossibility>& pl
     if (std::holds_alternative<ObjectId>(placement.idOrMesh)) {
         return std::get<ObjectId>(placement.idOrMesh).get();
     } else {
-        return objectPrefix + cat + std::to_string(placement.deprecatedId);
+        auto& mesh = std::get<Mesh>(placement.idOrMesh);
+        return toMeshId(meshIdCache, objectPrefix, mesh.get());
     }
 }
 
@@ -277,6 +316,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
     }
     sendStatusUpdate(100, "Loaded all files");
 
+    std::map<std::string, std::string> meshIdCache;
     std::map<GridId, std::vector<ObjectInstance>> placedInstances;
 
     const auto& cells = fc.getExteriorCellCoordinates();
@@ -341,7 +381,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
                 std::string grassID;
                 auto &meshList = placeBehaviour.placements;
                 if (placeBehaviour.clump) {
-                    grassID = getMesh(meshList, configuration.objectPrefix, deprecatedIniCat);
+                    grassID = getMesh(meshIdCache, meshList, configuration.objectPrefix, deprecatedIniCat);
                 }
 
                 //allow a max gap of more than 512
@@ -356,7 +396,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
                     for (int gy = 0; gy < 512; gy += placeBehaviour.gap) {
 
                         if (!placeBehaviour.clump) {
-                            grassID = getMesh(meshList, configuration.objectPrefix, deprecatedIniCat);
+                            grassID = getMesh(meshIdCache, meshList, configuration.objectPrefix, deprecatedIniCat);
                         }
 
                         //calc the morrowind pos of the
@@ -448,9 +488,11 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
                 if (!std::holds_alternative<Mesh>(item2.idOrMesh)) {
                     continue;
                 }
-                auto id = configuration.objectPrefix + item.first.toLegacyCategory() + std::to_string(item2.deprecatedId);
                 auto& mesh = std::get<Mesh>(item2.idOrMesh).get();
-                esp.addOrReplaceStatic(std::make_unique<Static>(Static(id, mesh)));
+                auto id = toMeshId(meshIdCache, configuration.objectPrefix, mesh);
+                if (!esp.statics.contains(id)) {
+                    esp.addOrReplaceStatic(std::make_unique<Static>(Static(id, mesh)));
+                }
             }
         }
     }

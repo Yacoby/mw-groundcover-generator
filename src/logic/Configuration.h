@@ -55,7 +55,6 @@ struct ObjectPlacementPossibility {
 
     const std::variant<ObjectId, Mesh> idOrMesh;
     const float chance;
-    const int deprecatedId;
 };
 
 class Selector {
