@@ -15,6 +15,22 @@
 #include "Configuration.h"
 #include "FixPosition.h"
 
+template <typename T>
+class Lazy {
+private:
+    std::function<T()> initializer;
+    std::unique_ptr<T> instance;
+public:
+    Lazy(std::function<T()> initializer) : initializer(std::move(initializer)) {}
+
+    T& get() {
+        if (instance == nullptr) {
+            instance = std::make_unique<T>(initializer());
+        }
+        return *instance;
+    }
+};
+
 std::string toBase36(uint64_t value) {
     const char* digits = "0123456789abcdefghijklmnopqrstuvwxyz";
     std::string result;
@@ -124,7 +140,17 @@ std::optional<Selector> getConfigurationSelector(
     return std::nullopt;
 }
 
-std::string Generator::getMesh(std::map<std::string, std::string> meshIdCache, const std::vector<ObjectPlacementPossibility>& placements, const std::string& objectPrefix, const std::string &cat) {
+std::string getObjectId(std::map<std::string, std::string> meshIdCache, const std::string& objectPrefix, const ObjectPlacementPossibility& placement) {
+    if (std::holds_alternative<ObjectId>(placement.idOrMesh)) {
+        return std::get<ObjectId>(placement.idOrMesh).get();
+    } else {
+        auto& mesh = std::get<Mesh>(placement.idOrMesh);
+        return toMeshId(meshIdCache, objectPrefix, mesh.get());
+    }
+}
+
+const ObjectPlacementPossibility& Generator::getPlacement(const std::vector<ObjectPlacementPossibility>& placements,
+                                                          const std::string& cat) {
     if (placements.empty()) {
         throw std::runtime_error(fmt::format(
                 "Attempted to get mesh for placements, but no placements existed (category was '{}')", cat
@@ -138,13 +164,7 @@ std::string Generator::getMesh(std::map<std::string, std::string> meshIdCache, c
 
     boost::random::discrete_distribution<> dist(weights.begin(), weights.end());
 
-    auto& placement = placements.at(dist(randomNumberSequence));
-    if (std::holds_alternative<ObjectId>(placement.idOrMesh)) {
-        return std::get<ObjectId>(placement.idOrMesh).get();
-    } else {
-        auto& mesh = std::get<Mesh>(placement.idOrMesh);
-        return toMeshId(meshIdCache, objectPrefix, mesh.get());
-    }
+    return placements.at(dist(randomNumberSequence));
 }
 
 bool Generator::isIntersecting(float circleX, float circleY, float radius, float squareCenterX, float squareCenterY, float squareWidth) {
@@ -376,13 +396,9 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
                 }
                 auto placeBehaviour = behaviour.placeMeshesBehaviour.value();
 
-
-                //find the grass mesh
-                std::string grassID;
-                auto &meshList = placeBehaviour.placements;
-                if (placeBehaviour.clump) {
-                    grassID = getMesh(meshIdCache, meshList, configuration.objectPrefix, deprecatedIniCat);
-                }
+                // find the grass mesh if clumped
+                auto& placements = placeBehaviour.placements;
+                auto clumpedPlacement = Lazy<ObjectPlacementPossibility>([this, placements, deprecatedIniCat] { return getPlacement(placements, deprecatedIniCat); });
 
                 //allow a max gap of more than 512
                 if (placeBehaviour.gap > 512) {
@@ -395,9 +411,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
                 for (int gx = 0; gx < 512; gx += placeBehaviour.gap) {
                     for (int gy = 0; gy < 512; gy += placeBehaviour.gap) {
 
-                        if (!placeBehaviour.clump) {
-                            grassID = getMesh(meshIdCache, meshList, configuration.objectPrefix, deprecatedIniCat);
-                        }
+                        auto& placement = placeBehaviour.clump ? clumpedPlacement.get() : getPlacement(placements, deprecatedIniCat);
 
                         //calc the morrowind pos of the
                         float posx = tx * 512 + cx * 8192 + gx;
@@ -445,7 +459,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
 
                         // Might be a different cell
                         placedInstances[GridId::fromPosition(pos.x, pos.y)].push_back(
-                                ObjectInstance{.objectId = ObjectId(grassID), .position = pos, .rotation = rot, .scale = scale}
+                                ObjectInstance{.objectId = ObjectId(getObjectId(meshIdCache, configuration.objectPrefix, placement)), .position = pos, .rotation = rot, .scale = scale}
                         );
                         perCellPlacedMeshesCount++;
                     }
@@ -484,11 +498,11 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
                 continue;
             }
 
-            for (const auto &item2: item.second.placeMeshesBehaviour.value().placements) {
-                if (!std::holds_alternative<Mesh>(item2.idOrMesh)) {
+            for (const auto& placement: item.second.placeMeshesBehaviour.value().placements) {
+                if (!std::holds_alternative<Mesh>(placement.idOrMesh)) {
                     continue;
                 }
-                auto& mesh = std::get<Mesh>(item2.idOrMesh).get();
+                auto& mesh = std::get<Mesh>(placement.idOrMesh).get();
                 auto id = toMeshId(meshIdCache, configuration.objectPrefix, mesh);
                 if (!esp.statics.contains(id)) {
                     esp.addOrReplaceStatic(std::make_unique<Static>(Static(id, mesh)));
