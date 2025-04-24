@@ -2,6 +2,12 @@
 
 ## 0.6 - ?
 
+### Removed
+- Removed the deprecated bSclRand and bPosRand configuration options
+
+### Added
+- Per placement properties for scale, rotation etc
+
 ### Updated
 - Generated STAT ids are now based on the mesh id to ensure no conflicts between mods
 

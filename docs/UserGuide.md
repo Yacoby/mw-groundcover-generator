@@ -196,6 +196,37 @@ sChance2=5
 sID2=my_id
 ```
 
+Additionally, the following properties can also be set per placement (and will override the value in the behaviours)
+
+- fMinHeight
+- fMaxHeight
+- fPosMin
+- fPosMax
+- fSclMin
+- fSclMax
+
+Both min/max values must be set (e.g. it will not work if just fPosMin is set but not fPosMax)
+
+
+So for example
+
+```ini
+fSclMin=1
+fSclMax=2
+
+fMinHeight=0
+fMaxHeight=100
+
+
+sChance0=50
+sMesh0=v7_GS_Grass_leaf.nif
+
+fSclMin0=0.5
+fSclMax0=2
+
+fMaxHeight0=200 ; this will not do anything as fMinHeight0 is not defined
+```
+
 ### Exclusions
 
 The randomization of the position of the groundcover can result it it spilling onto other textures. In some cases you don't want this to happen - for example with roads. Exclusions (or bans) can be used to stop this behaviour.

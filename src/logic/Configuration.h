@@ -55,6 +55,11 @@ struct ObjectPlacementPossibility {
 
     const std::variant<ObjectId, Mesh> idOrMesh;
     const float chance;
+
+    const bool alignToNormal;
+    const Bounds heights;
+    const Bounds positionRandomization;
+    const Bounds scaleRandomization;
 };
 
 class Selector {
@@ -97,14 +102,7 @@ struct PlaceMeshesBehaviour {
     friend std::ostream& operator<<(std::ostream& os, const PlaceMeshesBehaviour& behaviour);
 
     const bool clump;
-
     const int gap;
-    const bool alignToNormal;
-
-    const Bounds heights;
-
-    const Bounds positionRandomization;
-    const Bounds scaleRandomization;
 
     const std::vector<ObjectPlacementPossibility> placements;
     const std::vector<PlacementExclusions> exclusions;

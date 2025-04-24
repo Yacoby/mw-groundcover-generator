@@ -418,7 +418,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
                         float posy = ty * 512 + cy * 8192 + gy;
 
                         //add a random element
-                        auto posRand = placeBehaviour.positionRandomization;
+                        auto posRand = placement.positionRandomization;
                         if (!(posRand.max == posRand.min && posRand.max == 0)) {
                             posx += getRandom(posRand.min, posRand.max);
                             posy += getRandom(posRand.min, posRand.max);
@@ -435,19 +435,19 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
                         float posZ = height + configuration.globalOffset;
 
                         Vector3 rot;
-                        if (placeBehaviour.alignToNormal) {
+                        if (placement.alignToNormal) {
                             rot = rotation;
                         }
                         rot.z = getRandom(0, 2 * PI);
 
-                        if (posZ <= placeBehaviour.heights.min || posZ >= placeBehaviour.heights.max) {
+                        if (posZ <= placement.heights.min || posZ >= placement.heights.max) {
                             excludedDueToHeightBounds++;
                             continue;
                         }
 
                         //get the scale of tthe object
                         float scale = 1;
-                        auto scaleRand = placeBehaviour.scaleRandomization;
+                        auto scaleRand = placement.scaleRandomization;
                         if (!(scaleRand.max == scaleRand.min && scaleRand.max == 1)) {
                             scale = getRandom(scaleRand.min, scaleRand.max);
                         }

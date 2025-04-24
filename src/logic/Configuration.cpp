@@ -14,6 +14,37 @@ Selector parseSelector(const std::string& sectionName) {
     }
 }
 
+static Bounds getBounds(
+        const std::string& minKey,
+        const std::string& maxKey,
+        const StringPropertyTree& sectionProperties,
+        float defaultMin,
+        float defaultMax
+) {
+    return Bounds {
+            .min = sectionProperties.get<float>(minKey, defaultMin),
+            .max = sectionProperties.get<float>(maxKey, defaultMax),
+    };
+}
+
+
+static boost::optional<Bounds> getOptBounds(
+        const std::string& minKey,
+        const std::string& maxKey,
+        const StringPropertyTree& sectionProperties
+) {
+    auto min = sectionProperties.get_optional<float>(minKey);
+    auto max = sectionProperties.get_optional<float>(maxKey);
+
+    if (min.has_value() && max.has_value()) {
+        return Bounds {
+                .min = min.get(),
+                .max = max.get(),
+        };
+    }
+    return boost::none;
+}
+
 std::vector<ObjectPlacementPossibility> getPlacements(const std::string& sectionName, const StringPropertyTree& sectionProperties) {
     float sumOfChances = 0;
     for(int i = 0;; ++i) {
@@ -26,13 +57,15 @@ std::vector<ObjectPlacementPossibility> getPlacements(const std::string& section
 
     std::vector<ObjectPlacementPossibility> placements;
     for(int i = 0;; ++i) {
-        auto chance = sectionProperties.get_optional<int>("sChance" + std::to_string(i));
+        std::string strI = std::to_string(i);
+        auto chance = sectionProperties.get_optional<int>("sChance" + strI);
         if (!chance.has_value()) {
             break;
         }
 
-        auto mesh = sectionProperties.get_optional<std::string>("sMesh" + std::to_string(i));
-        auto id = sectionProperties.get_optional<std::string>("sId" + std::to_string(i));
+        auto mesh = sectionProperties.get_optional<std::string>("sMesh" + strI);
+        auto id = sectionProperties.get_optional<std::string>("sId" + strI);
+        auto maximumAngle = sectionProperties.get_optional<float>("fMaximumAngle" + strI);
 
         if (!mesh.has_value() && !id.has_value()) {
             throw std::runtime_error("Invalid configuration in section " + sectionName + ". sMesh or sId must be defined");
@@ -47,6 +80,15 @@ std::vector<ObjectPlacementPossibility> getPlacements(const std::string& section
                 // Technically dividing by the sum of chances is not required, but might make it more obvious what is
                 // going on in the logged configuration
                 .chance = static_cast<float>(chance.value()) / sumOfChances,
+
+                .alignToNormal = sectionProperties.get_optional<bool>("bAlignObjectNormalToGround" + strI)
+                        .value_or_eval([sectionProperties] { return sectionProperties.get<bool>("bAlignObjectNormalToGround", true); }),
+                .heights = getOptBounds("fMinHeight" + strI, "fMaxHeight" + strI, sectionProperties)
+                        .value_or_eval([sectionProperties] { return getBounds("fMinHeight", "fMaxHeight", sectionProperties, -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity()); }),
+                .positionRandomization = getOptBounds("fPosMin" + strI, "fPosMax" + strI, sectionProperties)
+                        .value_or_eval([sectionProperties] { return getBounds("fPosMin", "fPosMax", sectionProperties, 0, 0); }),
+                .scaleRandomization = getOptBounds("fSclMin" + strI, "fSclMax" + strI, sectionProperties)
+                        .value_or_eval([sectionProperties] { return getBounds("fSclMin", "fSclMax", sectionProperties, 1, 1); }),
         });
     }
     return placements;
@@ -71,36 +113,6 @@ std::vector<PlacementExclusions> getExclusions(const std::string& sectionName, c
         });
     }
     return exclusions;
-}
-
-static Bounds getBounds(
-        const std::string& minKey,
-        const std::string& maxKey,
-        const StringPropertyTree& sectionProperties,
-        float defaultMin,
-        float defaultMax
-) {
-    return Bounds {
-            .min = sectionProperties.get<float>(minKey, defaultMin),
-            .max = sectionProperties.get<float>(maxKey, defaultMax),
-    };
-}
-
-
-static Bounds getOptBounds(
-        const std::string& key,
-        const std::string& minKey,
-        const std::string& maxKey,
-        const StringPropertyTree& sectionProperties,
-        float defaultMin,
-        float defaultMax
-) {
-    bool enabled = sectionProperties.get<bool>(key, true);
-    if (enabled) {
-        return getBounds(minKey, maxKey, sectionProperties, defaultMin, defaultMax);
-    } else {
-        return Bounds {.min = defaultMin,.max = defaultMax,};
-    }
 }
 
 Configuration loadConfigurationFromIni(const std::shared_ptr<spdlog::logger> logger, const std::filesystem::path& path) {
@@ -135,10 +147,6 @@ Configuration loadConfigurationFromIni(const std::shared_ptr<spdlog::logger> log
         PlaceMeshesBehaviour behavior = {
                 .clump = sectionProperties.get<bool>("bRandClump", false),
                 .gap = gap,
-                .alignToNormal = sectionProperties.get<bool>("bAlignObjectNormalToGround", true),
-                .heights = getBounds("fMinHeight", "fMaxHeight", sectionProperties, -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity()),
-                .positionRandomization = getOptBounds("bPosRand", "fPosMin", "fPosMax", sectionProperties, 0, 0),
-                .scaleRandomization = getOptBounds("bSclRand", "fSclMin", "fSclMax", sectionProperties, 1, 1),
                 .placements = getPlacements(section.first, sectionProperties),
                 .exclusions = getExclusions(section.first, sectionProperties),
         };
@@ -180,6 +188,12 @@ std::ostream& operator<<(std::ostream& os, const ObjectPlacementPossibility& pos
     } else {
         os << std::get<Mesh>(possibility.idOrMesh);
     }
+
+    os << " alignToNormal: " << possibility.alignToNormal
+       << " heights: " << possibility.heights
+       << " positionRandomization: " << possibility.positionRandomization
+       << " scaleRandomization: " << possibility.scaleRandomization;
+
     os << " chance: " << possibility.chance << "}";
     return os;
 }
@@ -227,9 +241,8 @@ std::ostream& operator<<(std::ostream& os, const std::map<Selector, Behaviour>& 
 
 
 std::ostream& operator<<(std::ostream& os, const PlaceMeshesBehaviour& behaviour) {
-    os << "{PlaceMeshesBehaviour clump: " << behaviour.clump << " gap: " << behaviour.gap << " alignToNormal: " << behaviour.alignToNormal
-       << " heights: " << behaviour.heights << " positionRandomization: " << behaviour.positionRandomization
-       << " scaleRandomization: " << behaviour.scaleRandomization << " placements: " << behaviour.placements
+    os << "{PlaceMeshesBehaviour clump: " << behaviour.clump << " gap: " << behaviour.gap
+       << " placements: " << behaviour.placements
        << " exclusions: " << behaviour.exclusions << "}";
     return os;
 }
