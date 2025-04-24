@@ -429,27 +429,31 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
                             continue;
                         }
 
-                        auto height = fc.getHeightAt(posx, posy);
-                        auto rotation = fc.getAngleAt(posx, posy);
-
-                        float posZ = height + configuration.globalOffset;
-
                         Vector3 rot;
                         if (placement.alignToNormal) {
-                            rot = rotation;
+                            rot = fc.getAngleAt(posx, posy);
                         }
                         rot.z = getRandom(0, 2 * PI);
 
+                        auto height = fc.getHeightAt(posx, posy);
+                        float posZ = height + configuration.globalOffset;
                         if (posZ <= placement.heights.min || posZ >= placement.heights.max) {
                             excludedDueToHeightBounds++;
                             continue;
                         }
 
-                        //get the scale of tthe object
-                        float scale = 1;
+                        //get the scale of the object
+                        float scale;
                         auto scaleRand = placement.scaleRandomization;
-                        if (!(scaleRand.max == scaleRand.min && scaleRand.max == 1)) {
+                        if (scaleRand.min == scaleRand.max) {
+                            scale = scaleRand.max;
+                        } else if (scaleRand.min < scaleRand.max) {
                             scale = getRandom(scaleRand.min, scaleRand.max);
+                        } else {
+                            throw std::runtime_error(
+                                    "Invalid scale. Min (" + std::to_string(scaleRand.min) +
+                                    ") was greater than the Max (" + std::to_string(scaleRand.max) + ")"
+                            );
                         }
 
                         Vector3 pos;
