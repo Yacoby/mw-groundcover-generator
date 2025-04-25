@@ -7,9 +7,10 @@
 
 ### Added
 - Per placement properties for scale, rotation etc
+- A setting for a maximum allowed rotation from the vertical axis
 
 ### Updated
-- Generated STAT ids are now based on the mesh id to ensure no conflicts between mods
+- Generated STAT gids are now based on the mesh id to ensure no conflicts between mods
 
 ## 0.5.7 - 2025-03-20
 ### Fixed

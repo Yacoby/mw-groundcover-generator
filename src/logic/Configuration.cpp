@@ -89,6 +89,8 @@ std::vector<ObjectPlacementPossibility> getPlacements(const std::string& section
                         .value_or_eval([sectionProperties] { return getBounds("fPosMin", "fPosMax", sectionProperties, 0, 0); }),
                 .scaleRandomization = getOptBounds("fSclMin" + strI, "fSclMax" + strI, sectionProperties)
                         .value_or_eval([sectionProperties] { return getBounds("fSclMin", "fSclMax", sectionProperties, 1, 1); }),
+                .maximumAngle = Angle::fromDegrees(sectionProperties.get_optional<float>("fMaximumAngle" + strI)
+                        .value_or_eval([sectionProperties] { return sectionProperties.get("fMaximumAngle", 180); })),
         });
     }
     return placements;
@@ -192,7 +194,8 @@ std::ostream& operator<<(std::ostream& os, const ObjectPlacementPossibility& pos
     os << " alignToNormal: " << possibility.alignToNormal
        << " heights: " << possibility.heights
        << " positionRandomization: " << possibility.positionRandomization
-       << " scaleRandomization: " << possibility.scaleRandomization;
+       << " scaleRandomization: " << possibility.scaleRandomization
+       << " maximumAngle: " << possibility.maximumAngle.asDegrees();
 
     os << " chance: " << possibility.chance << "}";
     return os;

@@ -11,6 +11,8 @@
 
 #include "spdlog/spdlog.h"
 
+#include "math/Angle.h"
+
 class ObjectId {
     const std::string value;
 public:
@@ -60,6 +62,7 @@ struct ObjectPlacementPossibility {
     const Bounds heights;
     const Bounds positionRandomization;
     const Bounds scaleRandomization;
+    const Angle maximumAngle;
 };
 
 class Selector {

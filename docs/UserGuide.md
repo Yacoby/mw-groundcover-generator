@@ -162,6 +162,11 @@ When set to true, aligns objects normal to the ground (good for groundcover, not
 bAlignObjectNormalToGround=true ; Optional, default true
 ```
 
+Assigns a maximum rotation from the z axis (in degrees), if this is exceeded the object will not be placed
+```ini
+fMaximumAngle=35 ; Optional, default 180
+```
+
 Controls how often grass objects are placed, in this case, this places a grass object every 150 units. This is only known to work if it is < 512 units.
 
 ```ini
@@ -204,11 +209,12 @@ Additionally, the following properties can also be set per placement (and will o
 - fPosMax
 - fSclMin
 - fSclMax
+- fMaximumAngle
 
-Both min/max values must be set (e.g. it will not work if just fPosMin is set but not fPosMax)
+For properties with a min and max value, both must be set (e.g. it will not work if just fPosMin is set but not fPosMax)
 
 
-So for example
+As an example
 
 ```ini
 fSclMin=1
