@@ -8,6 +8,7 @@
 #include <string>
 #include <cassert>
 
+#include "math/Vector3.h"
 #include "ESFile.h"
 
 

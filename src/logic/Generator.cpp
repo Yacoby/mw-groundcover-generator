@@ -15,6 +15,8 @@
 #include "Configuration.h"
 #include "FixPosition.h"
 
+#include "math/Util.h"
+
 template <typename T>
 class Lazy {
 private:
@@ -351,6 +353,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
         int perCellPlacedMeshesCount = 0;
         int excludedDueToHeightBounds = 0;
         int excludedDueToTexture = 0;
+        int excludedDueToAngle = 0;
 
         ESLandRef land = fc.getLand(cx, cy);
         assert(land);
@@ -429,11 +432,18 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
                             continue;
                         }
 
-                        Vector3 rot;
-                        if (placement.alignToNormal) {
-                            rot = fc.getAngleAt(posx, posy);
+                        const Vector3 terrainAngle = fc.getAngleAt(posx, posy);
+                        auto angle = getAngleFromVertical(Angle::fromRadians(terrainAngle.x), Angle::fromRadians(terrainAngle.y));
+                        if (angle > placement.maximumAngle) {
+                            excludedDueToAngle++;
+                            continue;
                         }
-                        rot.z = getRandom(0, 2 * PI);
+
+                        Vector3 objectRotation{0, 0, 0};
+                        if (placement.alignToNormal) {
+                            objectRotation = terrainAngle;
+                        }
+                        objectRotation.z = getRandom(0, 2 * PI);
 
                         auto height = fc.getHeightAt(posx, posy);
                         float posZ = height + configuration.globalOffset;
@@ -463,7 +473,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
 
                         // Might be a different cell
                         placedInstances[GridId::fromPosition(pos.x, pos.y)].push_back(
-                                ObjectInstance{.objectId = ObjectId(getObjectId(meshIdCache, configuration.objectPrefix, placement)), .position = pos, .rotation = rot, .scale = scale}
+                                ObjectInstance{.objectId = ObjectId(getObjectId(meshIdCache, configuration.objectPrefix, placement)), .position = pos, .rotation = objectRotation, .scale = scale}
                         );
                         perCellPlacedMeshesCount++;
                     }
@@ -474,8 +484,8 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
 
         logCellInformation(textureLogs);
         logger->info(
-                "Placed {} objects in this and possibly surrounding cells. {} were excluded due to height bounds, {} because of banned textures",
-                perCellPlacedMeshesCount, excludedDueToHeightBounds, excludedDueToTexture
+                "Placed {} objects in this and possibly surrounding cells. {} were excluded due to height bounds, {} because of banned textures and {} because of terrain angle",
+                perCellPlacedMeshesCount, excludedDueToHeightBounds, excludedDueToTexture, excludedDueToAngle
         );
 
     }//	for

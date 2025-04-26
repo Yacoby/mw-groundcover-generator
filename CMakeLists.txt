@@ -22,6 +22,7 @@ include_directories(${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src)
 
 FILE(GLOB sources
         ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/logic/*.cpp
+        ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/math/*.cpp
         ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/esp/*.cpp)
 
 FILE(GLOB gui_sources ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/gui/*.cpp)

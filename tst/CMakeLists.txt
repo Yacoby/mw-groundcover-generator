@@ -8,6 +8,7 @@ find_package(xxHash CONFIG REQUIRED)
 FILE(GLOB sources
         ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/esp/*.cpp
         ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/logic/*.cpp
+        ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/math/*.cpp
         ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/cli/*.cpp)
 LIST(REMOVE_ITEM sources ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/cli/main.cpp)
 

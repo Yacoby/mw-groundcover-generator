@@ -21,16 +21,6 @@ struct LandSquare {
     uint32_t cellY;
 };
 
-
-/**
-*	Simple vector3 implementation. This removes the depandance on any other library that implements this (Ogre, Niflib)
-*/
-struct Vector3 {
-    float x;
-    float y;
-    float z;
-};
-
 class ESLand;
 
 typedef std::shared_ptr<ESLand> ESLandRef;

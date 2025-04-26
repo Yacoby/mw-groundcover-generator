@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 #include "Constants.h"
 
 class Angle {
@@ -21,5 +23,22 @@ public:
 
     double asDegrees() const {
         return angleInRadians * 180 / M_PI;
+    }
+
+    bool operator <(const Angle& rhs) const {
+        return (angleInRadians < rhs.angleInRadians);
+    }
+
+    bool operator >(const Angle& rhs) const {
+        return (angleInRadians > rhs.angleInRadians);
+    }
+
+    bool operator ==(const Angle& rhs) const {
+        return (angleInRadians == rhs.angleInRadians);
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Angle& angle) {
+        os << "{Angle:" << angle.angleInRadians << "}";
+        return os;
     }
 };
