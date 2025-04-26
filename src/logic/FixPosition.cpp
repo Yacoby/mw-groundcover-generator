@@ -67,7 +67,7 @@ void PositionUpdater::doFix(bool operationIsDelete) {
     std::map<std::string, int> offsetsByObjId;
     for (const auto& offsetCountsForObj: offsetCountsByObjId) {
         auto maxCount = std::max_element(
-                std::begin(offsetCountsForObj.second), std::end(offsetCountsForObj.second),
+                offsetCountsForObj.second.begin(), offsetCountsForObj.second.end(),
                 [](const auto& p1, const auto& p2) {
                     return p1.second < p2.second;
                 }
@@ -88,7 +88,7 @@ void PositionUpdater::doFix(bool operationIsDelete) {
 
         if (operationIsDelete) {
             auto shouldDelete = [&](const CellReference& reference) {
-                auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + offsetsByObjId[reference.name];
+                auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + offsetsByObjId.at(reference.name);
                 return fabs(expectedZ - reference.position.z) > MAX_ALLOWED_Z_ERROR;
             };
             auto removedEndIter = std::remove_if(cell->references.begin(), cell->references.end(), shouldDelete);
@@ -99,10 +99,9 @@ void PositionUpdater::doFix(bool operationIsDelete) {
             );
         } else {
             for (auto& reference : cell->references) {
-                auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + offsetsByObjId[reference.name];
+                auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + offsetsByObjId.at(reference.name);
                 if (fabs(expectedZ - reference.position.z) > MAX_ALLOWED_Z_ERROR) {
                     auto angle = fc.getAngleAt(reference.position.x, reference.position.y);
-                    fc.getHeightAt(reference.position.x, reference.position.y);
                     reference.position.z = expectedZ;
                     reference.position.xrot = angle.x;
                     reference.position.yrot = angle.y;
