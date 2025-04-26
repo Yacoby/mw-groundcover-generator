@@ -8,6 +8,8 @@
 
 #include "GUI.h"
 
+#include "Version.h"
+
 class MWGrassApp : public wxApp {
     std::shared_ptr<spdlog::logger> logger = nullptr;
 public:
@@ -20,8 +22,13 @@ public:
             logger->warn("Using fallback logger because: " + std::string(ex.what()));
         }
 
+        logger->info("MW Groundcover Generator - {}", PROJECT_VERSION);
+
         GUI *ui = new GUI(nullptr, logger);
         ui->Show();
+
+        ui->SetTitle(ui->GetTitle() + " " + PROJECT_VERSION);
+
         return true;
     }
 

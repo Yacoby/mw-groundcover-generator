@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(MW_GROUNDCOVER_GENERATOR VERSION 0.5.7)
+project(MW_GROUNDCOVER_GENERATOR VERSION 0.6.0)
 
 set(Boost_USE_STATIC_LIBS ON)
 set(wxWidgets_USE_STATIC ON)
@@ -19,6 +19,12 @@ find_package(spdlog REQUIRED)
 find_package(xxHash CONFIG REQUIRED)
 
 include_directories(${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src)
+
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.h.in
+        ${CMAKE_CURRENT_BINARY_DIR}/Version.h
+)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 FILE(GLOB sources
         ${MW_GROUNDCOVER_GENERATOR_SOURCE_DIR}/src/logic/*.cpp
