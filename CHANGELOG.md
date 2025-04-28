@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6 - ?
+## 0.6 - 2025-04-28
 
 ### Removed
 - Removed the deprecated bSclRand and bPosRand configuration options
