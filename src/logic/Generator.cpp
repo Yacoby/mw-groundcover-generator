@@ -434,7 +434,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
 
                         const Vector3 terrainAngle = fc.getAngleAt(posx, posy);
                         auto angle = getAngleFromVertical(Angle::fromRadians(terrainAngle.x), Angle::fromRadians(terrainAngle.y));
-                        if (angle > placement.maximumAngle) {
+                        if (angle > placement.maximumAngle || angle < placement.minimumAngle) {
                             excludedDueToAngle++;
                             continue;
                         }

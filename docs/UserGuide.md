@@ -162,6 +162,11 @@ When set to true, aligns objects normal to the ground (good for groundcover, not
 bAlignObjectNormalToGround=true ; Optional, default true
 ```
 
+Assigns a minimum rotation from the z axis (in degrees), if this angle is not exceeded the object will not be placed
+```ini
+fMaximumAngle=20 ; Optional, default 0
+```
+
 Assigns a maximum rotation from the z axis (in degrees), if this is exceeded the object will not be placed
 ```ini
 fMaximumAngle=35 ; Optional, default 180
@@ -209,6 +214,7 @@ Additionally, the following properties can also be set per placement (and will o
 - fPosMax
 - fSclMin
 - fSclMax
+- fMinimumAngle
 - fMaximumAngle
 
 For properties with a min and max value, both must be set (e.g. it will not work if just fPosMin is set but not fPosMax)

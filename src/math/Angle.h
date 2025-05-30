@@ -29,8 +29,16 @@ public:
         return (angleInRadians < rhs.angleInRadians);
     }
 
+    bool operator <=(const Angle& rhs) const {
+        return (angleInRadians <= rhs.angleInRadians);
+    }
+
     bool operator >(const Angle& rhs) const {
         return (angleInRadians > rhs.angleInRadians);
+    }
+
+    bool operator >=(const Angle& rhs) const {
+        return (angleInRadians >= rhs.angleInRadians);
     }
 
     bool operator ==(const Angle& rhs) const {

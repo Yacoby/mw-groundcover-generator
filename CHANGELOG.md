@@ -1,6 +1,11 @@
 # Changelog
 
-## 0.6 - 2025-04-28
+## 0.6.1 - Unreleased
+
+# Added
+- A setting for minimum allowed rotation from the vertical axis
+
+## 0.6.0 - 2025-04-28
 
 ### Removed
 - Removed the deprecated bSclRand and bPosRand configuration options

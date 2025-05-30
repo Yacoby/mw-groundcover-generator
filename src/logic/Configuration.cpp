@@ -65,7 +65,6 @@ std::vector<ObjectPlacementPossibility> getPlacements(const std::string& section
 
         auto mesh = sectionProperties.get_optional<std::string>("sMesh" + strI);
         auto id = sectionProperties.get_optional<std::string>("sId" + strI);
-        auto maximumAngle = sectionProperties.get_optional<float>("fMaximumAngle" + strI);
 
         if (!mesh.has_value() && !id.has_value()) {
             throw std::runtime_error("Invalid configuration in section " + sectionName + ". sMesh or sId must be defined");
@@ -89,8 +88,11 @@ std::vector<ObjectPlacementPossibility> getPlacements(const std::string& section
                         .value_or_eval([sectionProperties] { return getBounds("fPosMin", "fPosMax", sectionProperties, 0, 0); }),
                 .scaleRandomization = getOptBounds("fSclMin" + strI, "fSclMax" + strI, sectionProperties)
                         .value_or_eval([sectionProperties] { return getBounds("fSclMin", "fSclMax", sectionProperties, 1, 1); }),
+                .minimumAngle = Angle::fromDegrees(sectionProperties.get_optional<float>("fMinimumAngle" + strI)
+                        .value_or_eval([sectionProperties] { return sectionProperties.get("fMinimumAngle", 0); })),
                 .maximumAngle = Angle::fromDegrees(sectionProperties.get_optional<float>("fMaximumAngle" + strI)
                         .value_or_eval([sectionProperties] { return sectionProperties.get("fMaximumAngle", 180); })),
+
         });
     }
     return placements;
@@ -195,6 +197,7 @@ std::ostream& operator<<(std::ostream& os, const ObjectPlacementPossibility& pos
        << " heights: " << possibility.heights
        << " positionRandomization: " << possibility.positionRandomization
        << " scaleRandomization: " << possibility.scaleRandomization
+       << " minimumAngle: " << possibility.minimumAngle.asDegrees()
        << " maximumAngle: " << possibility.maximumAngle.asDegrees();
 
     os << " chance: " << possibility.chance << "}";

@@ -62,6 +62,7 @@ struct ObjectPlacementPossibility {
     const Bounds heights;
     const Bounds positionRandomization;
     const Bounds scaleRandomization;
+    const Angle minimumAngle;
     const Angle maximumAngle;
 };
 
