@@ -2,7 +2,7 @@
 
 ## 0.6.1 - 2026-03-21
 
-# Added
+### Added
 - A setting for minimum allowed rotation from the vertical axis
 
 ### Fixed
