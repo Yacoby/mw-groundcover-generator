@@ -70,7 +70,13 @@ public:
     void loadFile(const std::filesystem::path &pFile);
 
     ESLTexRef getLTex(long id) const {
-        return mLandTexVec.at(id);
+        ESLTexRef ltx = mLandTexVec.at(id);
+        if (ltx == nullptr) {
+            throw std::runtime_error(
+                    fmt::format("Non existent LTEX record referenced, requested {} but LTEX was not defined", id)
+            );
+        }
+        return ltx;
     }
 
     ESCellRef getCell(int squX, int squY) {

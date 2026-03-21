@@ -5,6 +5,9 @@
 # Added
 - A setting for minimum allowed rotation from the vertical axis
 
+### Fixed
+- Allowed non-contiguous LTEX records to be defined
+
 ## 0.6.0 - 2025-04-28
 
 ### Removed
