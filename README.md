@@ -29,13 +29,13 @@ To build:
 mkdir build
 cd build
 cmake -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..
-make
+ninja
 ```
 
 To run the tests:
 ```shell
 make MWGroundcoverGeneratorTests
-CTEST_OUTPUT_ON_FAILURE=1 make test
+CTEST_OUTPUT_ON_FAILURE=1 ninja test
 ```
 
 ### UI

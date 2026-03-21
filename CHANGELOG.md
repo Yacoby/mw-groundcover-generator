@@ -1,9 +1,12 @@
 # Changelog
 
-## 0.6.1 - Unreleased
+## 0.6.1 - 2026-03-21
 
 # Added
 - A setting for minimum allowed rotation from the vertical axis
+
+### Fixed
+- Allowed non-contiguous LTEX records to be loaded
 
 ## 0.6.0 - 2025-04-28
 
