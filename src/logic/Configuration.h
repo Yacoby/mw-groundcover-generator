@@ -107,6 +107,7 @@ struct PlaceMeshesBehaviour {
 
     const bool clump;
     const int gap;
+    const std::optional<float> zOffset;
 
     const std::vector<ObjectPlacementPossibility> placements;
     const std::vector<PlacementExclusions> exclusions;
@@ -122,7 +123,7 @@ struct Behaviour {
 class Configuration {
     const std::map<Selector, Behaviour> behaviours;
 public:
-    const float globalOffset;
+    const float globalZOffset;
     const std::string objectPrefix;
 
     std::optional<std::reference_wrapper<const Behaviour>> get(const Selector& selector) const {
@@ -141,7 +142,7 @@ public:
         return behaviours.end();
     }
 
-    Configuration(const std::map<Selector, Behaviour>& map, int offset, const std::string& prefix) : behaviours(map), globalOffset(offset), objectPrefix(prefix) {}
+    Configuration(const std::map<Selector, Behaviour>& map, int offset, const std::string& prefix) : behaviours(map), globalZOffset(offset), objectPrefix(prefix) {}
 
     friend std::ostream& operator<<(std::ostream& os, const Configuration& configuration);
 };

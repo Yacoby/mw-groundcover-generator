@@ -274,7 +274,7 @@ bool Generator::hasCellBeenChanged(const Configuration& cfg, ESFileContainer& fc
     bool hasFloatingGrass = false;
     if (options.regenerateIfFloatingGroundcover) {
         for (const auto& reference: cellIter->second->references) {
-            auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + cfg.globalOffset;
+            auto expectedZ = fc.getHeightAt(reference.position.x, reference.position.y) + cfg.globalZOffset;
             auto delta = fabs(expectedZ - reference.position.z);
             if (delta > PositionUpdater::MAX_ALLOWED_Z_ERROR) {
                 logger->info("Found object instance {} with a height of {}, but expected it to have a height of around {}. The delta {} was greater than {}",
@@ -446,7 +446,7 @@ void Generator::doGenerate(MutableEsp& esp, const std::function<bool(const Confi
                         objectRotation.z = getRandom(0, 2 * PI);
 
                         auto height = fc.getHeightAt(posx, posy);
-                        float posZ = height + configuration.globalOffset;
+                        float posZ = height + placeBehaviour.zOffset.value_or(configuration.globalZOffset);
                         if (posZ <= placement.heights.min || posZ >= placement.heights.max) {
                             excludedDueToHeightBounds++;
                             continue;

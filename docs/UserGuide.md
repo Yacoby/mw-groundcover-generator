@@ -151,7 +151,13 @@ fPosMax=100 ; Optional, default: 0
 fPosMin=-100 ; Optional, default: 0
 ```
 
-Assigns a random scale to the object (note that the game engine caps the scale within some bounds)
+Assigns a random scale to the object.
+
+Note that the game engine caps the scale within some bounds (maybe 0.5 to 1.5?)
+This program will happily accept whatever scales outside these bounds, and MGE will render scales outside these bounds,
+but opening the generated ESP in the construction set (or possibly other programs) will reset this scale to be in these bounds,
+so if you want to scale further I suggest you re-scale the mesh.
+
 ```ini
 fSclMax=1.5 ; Optional, default: 1
 fSclMin=1 ; Optional, default: 1
@@ -170,6 +176,11 @@ fMaximumAngle=20 ; Optional, default 0
 Assigns a maximum rotation from the z axis (in degrees), if this is exceeded the object will not be placed
 ```ini
 fMaximumAngle=35 ; Optional, default 180
+```
+
+This allows the z position of the placed object to be varied based on the selector.
+```ini
+iZPositionModifier=15 ; Optional, defaults to the global iZPositionModifier
 ```
 
 Controls how often grass objects are placed, in this case, this places a grass object every 150 units. This is only known to work if it is < 512 units.

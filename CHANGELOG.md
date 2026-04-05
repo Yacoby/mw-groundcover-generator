@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.2 - 2026-04-05
+
+### Added
+- A setting for iZPositionModifier based on the selector (i.e. ground texture)
+
 ## 0.6.1 - 2026-03-21
 
 ### Added

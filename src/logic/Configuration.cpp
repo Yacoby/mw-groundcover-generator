@@ -5,6 +5,15 @@
 
 typedef boost::property_tree::basic_ptree<std::string, std::string> StringPropertyTree;
 
+template<class T>
+inline std::optional<T> boostOptionalToStdOptional(boost::optional<T>&& opt) {
+    if (opt) {
+        return std::move(opt.value());
+    } else {
+        return std::nullopt;
+    }
+}
+
 Selector parseSelector(const std::string& sectionName) {
     auto delim = sectionName.find(':');
     if (delim == std::string::npos) {
@@ -151,6 +160,7 @@ Configuration loadConfigurationFromIni(const std::shared_ptr<spdlog::logger> log
         PlaceMeshesBehaviour behavior = {
                 .clump = sectionProperties.get<bool>("bRandClump", false),
                 .gap = gap,
+                .zOffset = boostOptionalToStdOptional(sectionProperties.get_optional<float>("iZPositionModifier")),
                 .placements = getPlacements(section.first, sectionProperties),
                 .exclusions = getExclusions(section.first, sectionProperties),
         };
@@ -167,6 +177,16 @@ Configuration loadConfigurationFromIni(const std::shared_ptr<spdlog::logger> log
             pt.get<int>("global.iZPositionModifier", 10),
             pt.get<std::string>("global.sObjectPrefix", "GRS_")
     );
+}
+
+template<class T>
+std::ostream& operator<<(std::ostream& os, const std::optional<T>& value) {
+    if (value.has_value()) {
+        os << value.value();
+    } else {
+        os << "[optional empty]";
+    }
+    return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const Bounds& bounds) {
@@ -204,15 +224,6 @@ std::ostream& operator<<(std::ostream& os, const ObjectPlacementPossibility& pos
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const std::optional<PlaceMeshesBehaviour>& behaviour) {
-    if (behaviour.has_value()) {
-        os << behaviour.value();
-    } else {
-        os << "[optional empty]";
-    }
-    return os;
-}
-
 std::ostream& operator<<(std::ostream& os, const Behaviour& behaviour) {
     os << "{Behaviour placeMeshesBehaviour: " << behaviour.placeMeshesBehaviour << "}";
     return os;
@@ -245,16 +256,16 @@ std::ostream& operator<<(std::ostream& os, const std::map<Selector, Behaviour>& 
     return os;
 }
 
-
 std::ostream& operator<<(std::ostream& os, const PlaceMeshesBehaviour& behaviour) {
     os << "{PlaceMeshesBehaviour clump: " << behaviour.clump << " gap: " << behaviour.gap
+       << " zOffset: " << behaviour.zOffset
        << " placements: " << behaviour.placements
        << " exclusions: " << behaviour.exclusions << "}";
     return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const Configuration& configuration) {
-    os << "{Configuration behaviours: " << configuration.behaviours << " globalOffset: " << configuration.globalOffset
+    os << "{Configuration behaviours: " << configuration.behaviours << " globalZOffset: " << configuration.globalZOffset
        << " objectPrefix: " << configuration.objectPrefix << "}";
     return os;
 }
